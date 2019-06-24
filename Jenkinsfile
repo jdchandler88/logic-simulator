@@ -14,25 +14,15 @@ pipeline {
         stage('build') {
             steps {
 				script {
-				    executeGradleTask("clean build jacocotestreport")
+				    executeGradleTask("clean build")
 				}
             }
         }
-        stage('publish') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == 'master') {
-                    	sshagent (credentials: [ 'jenkins-ssh' ]) {
-    						sh 'useradd -rm -d /home/jenkins -s /bin/bash -G sudo -u 1004 jenkins'
-    						sh 'git fetch --tags --force'
-    						executeGradleTask('release -Prelease.useAutomaticVersion=true')
-					    }
-						executeGradleTask("release -Prelease.useAutomaticVersion=true --stacktrace")
-					} else {
-					    executeGradleTask("publish")
-				 	}
-                }
-            }
+    }
+    post {
+        always {
+            junit 'build/reports/tests/**/*.xml'
+            jacoco()
         }
     }
 }
