@@ -18,7 +18,6 @@ public class App {
     public static void main(String[] args) {
     	
     	//create high source
-//    	ISignal src = new SignalNameDecorator(new HighSource(), "SRC");
     	IClock src = new Clock();
     	IBus inputBus = new Bus(src);
     	

@@ -3,7 +3,8 @@ package com.darchan.elements.impl.comp;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.impl.Bus;
-import com.darchan.elements.impl.ReactiveSignal;
+import com.darchan.elements.impl.LogicSignal;
+import com.darchan.elements.impl.logic.InverterLogicUnit;
 
 public class Inverter implements IComponent {
 
@@ -13,12 +14,7 @@ public class Inverter implements IComponent {
 	
 	public Inverter(IBus input) {
 		this.inputBus = input;
-		this.outputBus = new Bus(new ReactiveSignal(input.getSignals().get(0)) {
-			@Override
-			protected void reactToChange(boolean oldValue, boolean newValue) {
-				setState(!newValue);
-			}
-		});
+		this.outputBus = new Bus(new LogicSignal(this.inputBus, new InverterLogicUnit()));
 	}
 	
 	@Override
@@ -32,3 +28,7 @@ public class Inverter implements IComponent {
 	}
 	
 }
+
+//listen to events instead of trying to connect listener objects. this sounds similar, but the difference is that
+//every component, always, will listen to events. It will be up to the component to make sure  that it cares about the
+//incoming event.
