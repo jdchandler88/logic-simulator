@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="79831fca-d05b-459f-acc8-0733ad8df360" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Jenkinsfile" beforeDir="false" afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -70,8 +70,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
+            <state relative-caret-position="210">
+              <caret line="16" selection-start-line="16" selection-end-line="16" />
               <folding>
                 <element signature="e#179#180#0" expanded="true" />
                 <element signature="e#211#212#0" expanded="true" />
@@ -81,10 +81,13 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Jenkinsfile">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="24" column="149" selection-start-line="24" selection-start-column="149" selection-end-line="24" selection-end-column="149" />
+            <state relative-caret-position="390">
+              <caret line="26" column="44" selection-start-line="26" selection-start-column="44" selection-end-line="26" selection-end-column="44" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -143,6 +146,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" />
         <option value="$PROJECT_DIR$/src/main/java/project/App.java" />
         <option value="$PROJECT_DIR$/Jenkinsfile" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java" />
       </list>
     </option>
   </component>
@@ -216,15 +220,31 @@
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
+              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="impl" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
+              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="impl" type="462c0819:PsiDirectoryNode" />
+              <item name="logic" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -265,7 +285,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.logic-simulator [javadoc]">
+  <component name="RunManager" selected="Gradle.logic-simulator [build]">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="project.App" />
       <module name="main" />
@@ -355,7 +375,7 @@
       <workItem from="1561326765138" duration="298000" />
       <workItem from="1561327088245" duration="149000" />
       <workItem from="1561327264676" duration="15104000" />
-      <workItem from="1561430904809" duration="2639000" />
+      <workItem from="1561430904809" duration="3011000" />
     </task>
     <task id="LOCAL-00001" summary="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase">
       <created>1561420401500</created>
@@ -406,17 +426,24 @@
       <option name="project" value="LOCAL" />
       <updated>1561433140824</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="index-all for javaodc">
+      <created>1561433554880</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1561433554880</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="18190000" />
+    <option name="totallyTimeSpent" value="18562000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26330376" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18791574" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -461,7 +488,8 @@
     <MESSAGE value="added jacoco exclusion to prevent tests from showing in test coverage" />
     <MESSAGE value="added javadoc to jenkinsifle" />
     <MESSAGE value="correcting javadoc publish error" />
-    <option name="LAST_COMMIT_MESSAGE" value="correcting javadoc publish error" />
+    <MESSAGE value="index-all for javaodc" />
+    <option name="LAST_COMMIT_MESSAGE" value="index-all for javaodc" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java" />
@@ -686,17 +714,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-          <folding>
-            <element signature="e#179#180#0" expanded="true" />
-            <element signature="e#211#212#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/project/App.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
@@ -708,6 +725,27 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="24" column="149" selection-start-line="24" selection-start-column="149" selection-end-line="24" selection-end-column="149" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+          <folding>
+            <element signature="e#179#180#0" expanded="true" />
+            <element signature="e#211#212#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" column="44" selection-start-line="26" selection-start-column="44" selection-end-line="26" selection-end-column="44" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
