@@ -22,7 +22,7 @@ pipeline {
     post {
         always {
             junit 'build/test-results/**/*.xml'
-            jacoco()
+            jacoco exclusionPattern: '**/*Test*.class'
         }
     }
 }
