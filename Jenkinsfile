@@ -22,7 +22,7 @@ pipeline {
     post {
         always {
 
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'build/docs/javadoc/', reportFiles: 'index.html', reportName: 'Javadoc'])
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'build/docs/javadoc/', reportFiles: 'index-all.html', reportName: 'Javadoc'])
             junit 'build/test-results/**/*.xml'
             jacoco exclusionPattern: '**/*Test*.class'
         }

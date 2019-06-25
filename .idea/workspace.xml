@@ -4,8 +4,6 @@
     <list default="true" id="79831fca-d05b-459f-acc8-0733ad8df360" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Jenkinsfile" beforeDir="false" afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/project/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/project/App.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -85,8 +83,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Jenkinsfile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" column="106" selection-start-line="23" selection-start-column="106" selection-end-line="23" selection-end-column="106" />
+            <state relative-caret-position="360">
+              <caret line="24" column="149" selection-start-line="24" selection-start-column="149" selection-end-line="24" selection-end-column="149" />
             </state>
           </provider>
         </entry>
@@ -357,7 +355,7 @@
       <workItem from="1561326765138" duration="298000" />
       <workItem from="1561327088245" duration="149000" />
       <workItem from="1561327264676" duration="15104000" />
-      <workItem from="1561430904809" duration="2087000" />
+      <workItem from="1561430904809" duration="2639000" />
     </task>
     <task id="LOCAL-00001" summary="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase">
       <created>1561420401500</created>
@@ -394,11 +392,25 @@
       <option name="project" value="LOCAL" />
       <updated>1561432099444</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="added javadoc to jenkinsifle">
+      <created>1561433013804</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1561433013804</updated>
+    </task>
+    <task id="LOCAL-00007" summary="correcting javadoc publish error">
+      <created>1561433140824</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1561433140824</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17638000" />
+    <option name="totallyTimeSpent" value="18190000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
@@ -447,7 +459,9 @@
     <MESSAGE value="adding test for bus class. still have work to do to make the bus capability more robust (signals must be &gt;=1 for example)" />
     <MESSAGE value="added test to ensure that signal positioning on the input and output are the same (input into the bus constructor, output for the getter)" />
     <MESSAGE value="added jacoco exclusion to prevent tests from showing in test coverage" />
-    <option name="LAST_COMMIT_MESSAGE" value="added jacoco exclusion to prevent tests from showing in test coverage" />
+    <MESSAGE value="added javadoc to jenkinsifle" />
+    <MESSAGE value="correcting javadoc publish error" />
+    <option name="LAST_COMMIT_MESSAGE" value="correcting javadoc publish error" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java" />
@@ -692,8 +706,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Jenkinsfile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="106" selection-start-line="23" selection-start-column="106" selection-end-line="23" selection-end-column="106" />
+        <state relative-caret-position="360">
+          <caret line="24" column="149" selection-start-line="24" selection-start-column="149" selection-end-line="24" selection-end-column="149" />
         </state>
       </provider>
     </entry>
