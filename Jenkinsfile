@@ -14,13 +14,14 @@ pipeline {
         stage('build') {
             steps {
 				script {
-				    executeGradleTask("clean build")
+				    executeGradleTask("clean build javadoc")
 				}
             }
         }
     }
     post {
         always {
+            publishHTML([reportDir: 'build/docs/javadoc/', reportFiles: 'index.html', reportName: 'Javadoc'])
             junit 'build/test-results/**/*.xml'
             jacoco exclusionPattern: '**/*Test*.class'
         }

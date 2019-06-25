@@ -18,7 +18,7 @@ public class App {
     public static void main(String[] args) {
     	
     	//create high source
-    	IClock src = new Clock();
+    	IClock src = new Clock(false);
     	IBus inputBus = new Bus(src);
     	
     	//create inverter
