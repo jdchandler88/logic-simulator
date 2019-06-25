@@ -2,32 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="79831fca-d05b-459f-acc8-0733ad8df360" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/ILogicUnit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ConstantSignal.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/InverterLogicUnit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/LogicalFalseLogicUnit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/LogicalTrueLogicUnit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/InverterTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalTrueLogicUnitTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IClock.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IClock.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/ISignal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/ISignal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/HighSource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Inverter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Inverter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/project/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/project/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/project/AppTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jenkinsfile" beforeDir="false" afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -184,8 +160,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Jenkinsfile">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="16" lean-forward="true" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
+            <state relative-caret-position="315">
+              <caret line="21" column="10" lean-forward="true" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -372,12 +348,20 @@
       <workItem from="1561168960417" duration="208000" />
       <workItem from="1561326765138" duration="298000" />
       <workItem from="1561327088245" duration="149000" />
-      <workItem from="1561327264676" duration="10655000" />
+      <workItem from="1561327264676" duration="12532000" />
     </task>
+    <task id="LOCAL-00001" summary="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase">
+      <created>1561420401500</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1561420401500</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11102000" />
+    <option name="totallyTimeSpent" value="12979000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
@@ -419,6 +403,10 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase" />
+    <option name="LAST_COMMIT_MESSAGE" value="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java">
@@ -694,8 +682,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Jenkinsfile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="16" lean-forward="true" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
+        <state relative-caret-position="315">
+          <caret line="21" column="10" lean-forward="true" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
         </state>
       </provider>
     </entry>
