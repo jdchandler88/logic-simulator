@@ -2,7 +2,6 @@ package com.darchan.elements.impl;
 
 import com.darchan.elements.iface.ISignal;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BusTest {
