@@ -4,6 +4,9 @@ pipeline {
     	MAVEN_CREDS = credentials('mavenCreds')
     	GIT_SSH = "${env.WORKSPACE}/custom_ssh"	//this points to a script that runs ssh. allows us to configure ssh
 	}
+	tools {
+	    gradle 'gradle-5.4.1'
+	}
     stages {
         stage('build') {
             steps {
