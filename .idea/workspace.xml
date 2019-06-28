@@ -2,37 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/gradle_wrapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/META-INF/main.kotlin_module" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/IBus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/IClock.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/IComponent.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/ILogicUnit.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/IObservableSignal.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/ISignal.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/iface/ISignalChangeListener.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/AbstractSignal.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/AbstractSignalDecorator.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/Bus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/Clock.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/HighSource.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/comp/Inverter.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/logic/InverterLogicUnit.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/logic/LogicalFalseLogicUnit.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/logic/LogicalTrueLogicUnit.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/com/darchan/elements/impl/logic/PassThroughLogicUnit.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/main/project/App.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/AbstractSignalDecoratorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/AbstractSignalDecoratorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -84,11 +56,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="23" selection-start-line="6" selection-start-column="23" selection-end-line="6" selection-end-column="23" />
+            <state relative-caret-position="210">
+              <caret line="17" column="5" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -151,6 +132,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" />
       </list>
     </option>
   </component>
@@ -231,10 +214,19 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit5" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.28815082" />
     <property name="settings.editor.selected.configurable" value="reference.settings.project.gradle.running" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="com.darchan.elements.impl" />
+    </key>
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -248,26 +240,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.All in logic-simulator.test">
-    <configuration name="logic-simulator [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="JUnit.SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue">
     <configuration name="All in logic-simulator (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator" />
       <option name="PACKAGE_NAME" value="" />
@@ -300,13 +273,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="logic-simulator.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.darchan.elements.impl.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.SignalNameDecoratorTest" />
+      <option name="METHOD_NAME" value="nameShouldReturnStringAndSignalValue" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" />
         <item itemvalue="JUnit.All in logic-simulator.test" />
         <item itemvalue="JUnit.All in logic-simulator (2)" />
         <item itemvalue="JUnit.All in logic-simulator (1)" />
         <item itemvalue="JUnit.All in logic-simulator" />
-        <item itemvalue="Gradle.logic-simulator [build]" />
       </list>
     </recent_temporary>
   </component>
@@ -321,17 +310,31 @@
       <option name="presentableId" value="Default" />
       <updated>1561760977585</updated>
       <workItem from="1561760981992" duration="1048000" />
-      <workItem from="1561762065316" duration="235000" />
+      <workItem from="1561762065316" duration="561000" />
     </task>
+    <task id="LOCAL-00001" summary="creating a test for signal name decorator">
+      <created>1561762414640</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1561762414640</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
+  <component name="TestHistory">
+    <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 18h 52m 35s.xml">
+      <configuration name="All in logic-simulator.test" configurationId="JUnit" />
+    </history-entry>
+  </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1311000" />
+    <option name="totallyTimeSpent" value="1609000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16297117" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -352,14 +355,14 @@
       <window_info anchor="bottom" id="Messages" order="11" weight="0.27262813" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
-      <window_info anchor="right" id="Coverage" side_tool="true" />
+      <window_info anchor="right" id="Coverage" sideWeight="0.500813" side_tool="true" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Maven" order="3" />
       <window_info anchor="right" id="Palette" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" visible="true" weight="0.32982263" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.499187" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
@@ -368,8 +371,15 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="creating a test for signal name decorator" />
+    <option name="LAST_COMMIT_MESSAGE" value="creating a test for signal name decorator" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561762350073" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue.ic" NAME="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue Coverage Results" MODIFIED="1561762633792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator.ic" NAME="All in logic-simulator Coverage Results" MODIFIED="1561762195889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator__2_.ic" NAME="All in logic-simulator (2) Coverage Results" MODIFIED="1561762334536" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$logic_simulator__build_.ic" NAME="logic-simulator [build] Coverage Results" MODIFIED="1561762166132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
@@ -411,6 +421,23 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="6" column="23" selection-start-line="6" selection-start-column="23" selection-end-line="6" selection-end-column="23" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="17" column="5" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -469,7 +496,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>test|logic-simulator</last-edited>
+          <last-edited>logic-simulator</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

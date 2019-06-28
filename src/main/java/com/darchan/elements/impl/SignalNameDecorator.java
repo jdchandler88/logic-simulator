@@ -16,15 +16,5 @@ public class SignalNameDecorator extends AbstractSignalDecorator {
 	public String toString() {
 		return this.name + "-" + this.isOn();
 	}
-
-	@Override
-	public void addSignalChangeListener(ISignalChangeListener listener) {
-		this.wrapped.addSignalChangeListener(listener);
-	}
-
-	@Override
-	public void removeSignalChangeListener(ISignalChangeListener listener) {
-		this.wrapped.removeSignalChangeListener(listener);
-	}
 	
 }
