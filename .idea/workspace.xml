@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -14,6 +13,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="232" />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
@@ -65,14 +67,32 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
+            <state relative-caret-position="15">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ConstantSignal.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="23" column="57" selection-start-line="23" selection-start-column="57" selection-end-line="23" selection-end-column="57" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="36" column="58" selection-start-line="36" selection-start-column="58" selection-end-line="36" selection-end-column="58" />
             </state>
           </provider>
         </entry>
@@ -134,6 +154,7 @@
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java" />
       </list>
     </option>
   </component>
@@ -240,7 +261,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue">
+  <component name="RunManager" selected="JUnit.ConstantSignalTest">
     <configuration name="All in logic-simulator (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator" />
       <option name="PACKAGE_NAME" value="" />
@@ -257,18 +278,25 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="All in logic-simulator" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="logic-simulator" />
+    <configuration name="All in logic-simulator.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="logic-simulator.test" />
       <option name="PACKAGE_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="All in logic-simulator.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ConstantSignalTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="TEST_OBJECT" value="package" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.darchan.elements.impl.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.ConstantSignalTest" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -291,11 +319,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.ConstantSignalTest" />
         <item itemvalue="JUnit.SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" />
         <item itemvalue="JUnit.All in logic-simulator.test" />
         <item itemvalue="JUnit.All in logic-simulator (2)" />
         <item itemvalue="JUnit.All in logic-simulator (1)" />
-        <item itemvalue="JUnit.All in logic-simulator" />
       </list>
     </recent_temporary>
   </component>
@@ -310,7 +338,7 @@
       <option name="presentableId" value="Default" />
       <updated>1561760977585</updated>
       <workItem from="1561760981992" duration="1048000" />
-      <workItem from="1561762065316" duration="561000" />
+      <workItem from="1561762065316" duration="761000" />
     </task>
     <task id="LOCAL-00001" summary="creating a test for signal name decorator">
       <created>1561762414640</created>
@@ -319,16 +347,33 @@
       <option name="project" value="LOCAL" />
       <updated>1561762414640</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added test for signal name decorator">
+      <created>1561762653021</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1561762653022</updated>
+    </task>
+    <task id="LOCAL-00003" summary="removed unused import in signal name decorator test">
+      <created>1561762726947</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1561762726947</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TestHistory">
     <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 18h 52m 35s.xml">
       <configuration name="All in logic-simulator.test" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue - 2019.06.28 at 18h 57m 15s.xml">
+      <configuration name="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1609000" />
+    <option name="totallyTimeSpent" value="1809000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
@@ -373,11 +418,16 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="creating a test for signal name decorator" />
-    <option name="LAST_COMMIT_MESSAGE" value="creating a test for signal name decorator" />
+    <MESSAGE value="added test for signal name decorator" />
+    <MESSAGE value="removed unused import in signal name decorator test" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed unused import in signal name decorator test" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561762350073" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue.ic" NAME="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue Coverage Results" MODIFIED="1561762633792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$ConstantSignalTest.ic" NAME="ConstantSignalTest Coverage Results" MODIFIED="1561762834214" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator.ic" NAME="All in logic-simulator Coverage Results" MODIFIED="1561762195889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
@@ -436,11 +486,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/SignalNameDecoratorTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ConstantSignal.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="23" column="57" selection-start-line="23" selection-start-column="57" selection-end-line="23" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="36" column="58" selection-start-line="36" selection-start-column="58" selection-end-line="36" selection-end-column="58" />
         </state>
       </provider>
     </entry>

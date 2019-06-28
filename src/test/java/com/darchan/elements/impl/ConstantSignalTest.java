@@ -27,4 +27,14 @@ public class ConstantSignalTest {
         assertFalse(ConstantSignal.OFF.isOn());
     }
 
+    @Test
+    public void shouldNotThrowErrorWhenAddSignalChangeListenerCalled() {
+        ConstantSignal.ON.addSignalChangeListener(null);
+    }
+
+    @Test
+    public void shouldNotThrowErrorWhenRemoveSignalChangeListenerCalled() {
+        ConstantSignal.OFF.removeSignalChangeListener(null);
+    }
+
 }
