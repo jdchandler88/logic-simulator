@@ -26,7 +26,7 @@ public class AbstractSignalTest {
         };
         TestListener testListener = new TestListener();
         cut.addSignalChangeListener(testListener);
-        cut.setState(true);
+        cut.setState(!state);
 
         assertAll(
                 () -> assertTrue(testListener.isCalled()),
@@ -37,17 +37,46 @@ public class AbstractSignalTest {
 
     @Test
     public void listenerShouldBeNotifiedOfStateChangeFromTrueToFalse() {
+        boolean state = true;
+        AbstractSignal cut = new AbstractSignal(state) {
+        };
+        TestListener testListener = new TestListener();
+        cut.addSignalChangeListener(testListener);
+        cut.setState(!state);
 
+        assertAll(
+                () -> assertTrue(testListener.isCalled()),
+                () -> assertTrue(testListener.getOldValue()),
+                () -> assertFalse(testListener.getNewValue())
+        );
     }
 
     @Test
     public void listenerShouldNotBeNotifiedIfStateDoesNotChange() {
-
+        boolean state = false;
+        AbstractSignal cut = new AbstractSignal(state) {
+        };
+        TestListener testListener = new TestListener();
+        cut.addSignalChangeListener(testListener);
+        cut.setState(state);
+        assertAll(
+                () -> assertFalse(testListener.isCalled())
+        );
     }
 
     @Test
     public void listenerShouldNotBeNotifiedOfStateChangeAfterItWasRemoved() {
+        boolean state = false;
+        AbstractSignal cut = new AbstractSignal(state) {
+        };
+        TestListener testListener = new TestListener();
+        cut.addSignalChangeListener(testListener);
+        cut.removeSignalChangeListener(testListener);
+        cut.setState(!state);
 
+        assertAll(
+                () -> assertFalse(testListener.isCalled())
+        );
     }
 
     private static class TestListener implements ISignalChangeListener {
