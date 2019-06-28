@@ -29,7 +29,7 @@ public class AbstractSignalTest {
         cut.setState(!state);
 
         assertAll(
-                () -> assertTrue(testListener.isCalled()),
+                () -> assertEquals(1, testListener.getNumInvokations()),
                 () -> assertFalse(testListener.getOldValue()),
                 () -> assertTrue(testListener.getNewValue())
         );
@@ -45,7 +45,7 @@ public class AbstractSignalTest {
         cut.setState(!state);
 
         assertAll(
-                () -> assertTrue(testListener.isCalled()),
+                () -> assertEquals(1, testListener.getNumInvokations()),
                 () -> assertTrue(testListener.getOldValue()),
                 () -> assertFalse(testListener.getNewValue())
         );
@@ -60,7 +60,7 @@ public class AbstractSignalTest {
         cut.addSignalChangeListener(testListener);
         cut.setState(state);
         assertAll(
-                () -> assertFalse(testListener.isCalled())
+                () -> assertEquals(0, testListener.getNumInvokations())
         );
     }
 
@@ -75,22 +75,39 @@ public class AbstractSignalTest {
         cut.setState(!state);
 
         assertAll(
-                () -> assertFalse(testListener.isCalled())
+                () -> assertEquals(0, testListener.getNumInvokations())
+        );
+    }
+
+    @Test
+    public void listenerShouldOnlyBeNotifiedOnceEvenIfAddedMultipleTimes() {
+        boolean state = false;
+        AbstractSignal cut = new AbstractSignal(state) {
+        };
+        TestListener testListener = new TestListener();
+        cut.addSignalChangeListener(testListener);
+        cut.addSignalChangeListener(testListener);
+        cut.setState(!state);
+
+        assertAll(
+                () -> assertEquals(1, testListener.getNumInvokations()),
+                () -> assertFalse(testListener.getOldValue()),
+                () -> assertTrue(testListener.getNewValue())
         );
     }
 
     private static class TestListener implements ISignalChangeListener {
-        boolean isCalled = false;
+        int numInvokations = 0;
         boolean oldValue;
         boolean newValue;
         @Override
         public void signalChanged(boolean oldValue, boolean newValue) {
-            this.isCalled = true;
+            this.numInvokations++;
             this.oldValue = oldValue;
             this.newValue = newValue;
         }
-        public boolean isCalled() {
-            return this.isCalled;
+        public int getNumInvokations() {
+            return this.numInvokations;
         }
         public boolean getOldValue() {
             return this.oldValue;
