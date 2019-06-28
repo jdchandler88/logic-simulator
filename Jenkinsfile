@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'gradle:5.4.1-jdk8'
-            args '--network="host" -u root'
-        }
-
-    }
+    agent any
 	environment {
     	MAVEN_CREDS = credentials('mavenCreds')
     	GIT_SSH = "${env.WORKSPACE}/custom_ssh"	//this points to a script that runs ssh. allows us to configure ssh
