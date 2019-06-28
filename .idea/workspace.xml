@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="79831fca-d05b-459f-acc8-0733ad8df360" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalFalseLogicUnitTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AbstractSignalTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -67,53 +71,48 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/LogicalTrueLogicUnit.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="8" column="20" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="20" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/InverterLogicUnit.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="52" selection-start-line="8" selection-start-column="52" selection-end-line="8" selection-end-column="52" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#241#242#0" expanded="true" />
-                <element signature="e#300#301#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/LogicalFalseLogicUnit.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="8" column="8" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="21" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalFalseLogicUnitTest.java">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AbstractSignalTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="19" column="20" selection-start-line="19" selection-start-column="20" selection-end-line="19" selection-end-column="20" />
+            <state relative-caret-position="180">
+              <caret line="12" column="56" selection-start-line="12" selection-start-column="56" selection-end-line="12" selection-end-column="56" />
               <folding>
-                <element signature="e#718#719#0" expanded="true" />
-                <element signature="e#789#790#0" expanded="true" />
+                <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="315">
+              <caret line="21" column="25" selection-start-line="21" selection-start-column="25" selection-end-line="21" selection-end-column="25" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="105">
+              <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+              <folding>
+                <element signature="e#178#179#0" expanded="true" />
+                <element signature="e#204#205#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -137,7 +136,6 @@
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/ILogicUnit.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/InverterLogicUnit.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Inverter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IEventQueue.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/sim/iface/IEventQueue.java" />
@@ -148,23 +146,25 @@
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IObservableSignal.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/ISignal.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/ConstantSignal.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IClock.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Bus.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IBus.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignalDecorator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SignalNameDecorator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalTrueLogicUnitTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ConstantSignalTest.java" />
         <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" />
         <option value="$PROJECT_DIR$/src/main/java/project/App.java" />
         <option value="$PROJECT_DIR$/Jenkinsfile" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/ClockTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalFalseLogicUnitTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AbstractSignalTest.java" />
       </list>
     </option>
   </component>
@@ -181,7 +181,6 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -238,17 +237,6 @@
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -279,6 +267,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -407,7 +396,8 @@
       <workItem from="1561326765138" duration="298000" />
       <workItem from="1561327088245" duration="149000" />
       <workItem from="1561327264676" duration="15104000" />
-      <workItem from="1561430904809" duration="3628000" />
+      <workItem from="1561430904809" duration="4692000" />
+      <workItem from="1561593237394" duration="1101000" />
     </task>
     <task id="LOCAL-00001" summary="updating Jenkinsfile to collect junit and jacoco information.&#10;&#10;no need to run 'jacocoTestReport' either; that is for generating HTML files; the jenkins JaCoCo plugin reads the .exec file which is always generated during the gradle test phase">
       <created>1561420401500</created>
@@ -479,17 +469,23 @@
       <option name="project" value="LOCAL" />
       <updated>1561434315811</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="added tests for logical false logic unit">
+      <created>1561434556039</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1561434556039</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19179000" />
+    <option name="totallyTimeSpent" value="21344000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24113081" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24390244" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -538,7 +534,8 @@
     <MESSAGE value="added tests for clock unit" />
     <MESSAGE value="                added tests for clock unit" />
     <MESSAGE value="added tests for inverter logic unit" />
-    <option name="LAST_COMMIT_MESSAGE" value="added tests for inverter logic unit" />
+    <MESSAGE value="added tests for logical false logic unit" />
+    <option name="LAST_COMMIT_MESSAGE" value="added tests for logical false logic unit" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/ReactiveSignal.java" />
@@ -546,18 +543,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="4" column="43" selection-start-line="4" selection-start-column="43" selection-end-line="4" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="51" selection-start-line="8" selection-start-column="51" selection-end-line="8" selection-end-column="51" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#244#245#0" expanded="true" />
-            <element signature="e#294#295#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -618,27 +603,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/build/reports/tests/test/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="152" column="6" lean-forward="true" selection-start-line="152" selection-start-column="6" selection-end-line="152" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="12" column="28" selection-start-line="12" selection-start-column="28" selection-end-line="12" selection-end-column="28" />
         </state>
       </provider>
     </entry>
@@ -736,17 +704,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
-          <folding>
-            <element signature="e#179#180#0" expanded="true" />
-            <element signature="e#211#212#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
@@ -798,11 +755,50 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/LogicalFalseLogicUnitTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="19" column="20" selection-start-line="19" selection-start-column="20" selection-end-line="19" selection-end-column="20" />
+        <state relative-caret-position="165">
+          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
           <folding>
             <element signature="e#718#719#0" expanded="true" />
             <element signature="e#789#790#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/PassThroughLogicUnit.java" />
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/AbstractSignal.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/Clock.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+          <folding>
+            <element signature="e#178#179#0" expanded="true" />
+            <element signature="e#204#205#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/LogicSignal.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="25" selection-start-line="21" selection-start-column="25" selection-end-line="21" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AbstractSignalTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="56" selection-start-line="12" selection-start-column="56" selection-end-line="12" selection-end-column="56" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

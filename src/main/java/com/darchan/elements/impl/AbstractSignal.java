@@ -11,6 +11,10 @@ public abstract class AbstractSignal implements ISignal {
 	private List<ISignalChangeListener> listeners = new ArrayList<>();
 	
 	protected boolean state;
+
+	protected AbstractSignal(boolean initialState) {
+		this.state = initialState;
+	}
 	
 	protected final void setState(boolean newState) {
 		if (newState != state) {

@@ -11,6 +11,7 @@ public class LogicSignal extends AbstractSignal {
     private ILogicUnit logicUnit;
 
     public LogicSignal(IBus inputBus, ILogicUnit logicUnit) {
+        super(logicUnit.evaluate(inputBus));
         this.inputBus = inputBus;
         this.logicUnit = logicUnit;
         for (ISignal inputSignal : this.inputBus.getSignals()) {
