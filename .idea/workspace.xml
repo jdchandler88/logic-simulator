@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="added">
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndLogicUnitTest.java" afterDir="false" />
+    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="implemented logic of and gate">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndLogicUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -15,7 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageViewManager">
-    <option name="myElementSize" value="319" />
+    <option name="myElementSize" value="330" />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
@@ -59,16 +61,27 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndLogicUnitTest.java">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="466">
-              <caret line="51" column="5" selection-start-line="51" selection-start-column="5" selection-end-line="51" selection-end-column="5" />
+            <state relative-caret-position="175">
+              <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
+              <folding>
+                <element signature="e#2185#2186#0" expanded="true" />
+                <element signature="e#2240#2241#0" expanded="true" />
+                <element signature="e#2306#2307#0" expanded="true" />
+                <element signature="e#2361#2362#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="16" column="9" lean-forward="true" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2088#2089#0" expanded="true" />
-                <element signature="e#2112#2113#0" expanded="true" />
-                <element signature="e#2254#2255#0" expanded="true" />
-                <element signature="e#2308#2309#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -102,7 +115,9 @@
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/LogicSignalTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Inverter.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/InverterTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndLogicUnitTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" />
       </list>
     </option>
   </component>
@@ -261,17 +276,25 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.InverterTest">
-    <configuration name="ConstantSignalTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.All in logic-simulator.test">
+    <configuration name="All in logic-simulator.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="logic-simulator.test" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AndGateTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.darchan.elements.impl.*" />
+          <option name="PATTERN" value="com.darchan.elements.impl.com.darchan.elements.impl.logic.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.ConstantSignalTest" />
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl.com.darchan.elements.impl.logic" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.com.darchan.elements.impl.logic.AndGateTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -323,29 +346,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="logic-simulator.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.darchan.elements.impl.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.SignalNameDecoratorTest" />
-      <option name="METHOD_NAME" value="nameShouldReturnStringAndSignalValue" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.All in logic-simulator.test" />
+        <item itemvalue="JUnit.AndGateTest" />
         <item itemvalue="JUnit.InverterTest" />
         <item itemvalue="JUnit.LogicSignalTest" />
         <item itemvalue="JUnit.LogicSignalTest.constructorShouldRegisterListenersForInputSignals" />
-        <item itemvalue="JUnit.ConstantSignalTest" />
-        <item itemvalue="JUnit.SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" />
       </list>
     </recent_temporary>
   </component>
@@ -360,7 +367,7 @@
       <option name="presentableId" value="Default" />
       <updated>1561760977585</updated>
       <workItem from="1561760981992" duration="1048000" />
-      <workItem from="1561762065316" duration="3786000" />
+      <workItem from="1561762065316" duration="4184000" />
     </task>
     <task id="LOCAL-00001" summary="creating a test for signal name decorator">
       <created>1561762414640</created>
@@ -411,16 +418,17 @@
       <option name="project" value="LOCAL" />
       <updated>1561767715225</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="set expectations of the and gate through tests">
+      <created>1561768516761</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1561768516761</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 18h 52m 35s.xml">
-      <configuration name="All in logic-simulator.test" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue - 2019.06.28 at 18h 57m 15s.xml">
-      <configuration name="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="ConstantSignalTest - 2019.06.28 at 19h 00m 35s.xml">
       <configuration name="ConstantSignalTest" configurationId="JUnit" />
     </history-entry>
@@ -439,15 +447,27 @@
     <history-entry file="InverterTest - 2019.06.28 at 20h 21m 02s.xml">
       <configuration name="InverterTest" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="AndLogicUnitTest - 2019.06.28 at 20h 38m 04s.xml">
+      <configuration name="AndLogicUnitTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="AndLogicUnitTest - 2019.06.28 at 20h 39m 10s.xml">
+      <configuration name="AndLogicUnitTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="AndGateTest - 2019.06.28 at 20h 40m 02s.xml">
+      <configuration name="AndGateTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 20h 40m 35s.xml">
+      <configuration name="All in logic-simulator.test" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4834000" />
+    <option name="totallyTimeSpent" value="5232000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -465,7 +485,7 @@
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
+      <window_info active="true" anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
       <window_info anchor="right" id="Coverage" sideWeight="0.50074965" side_tool="true" visible="true" weight="0.32982263" />
@@ -492,10 +512,12 @@
     <MESSAGE value="added tests for logic signal to make assertions on constructor" />
     <MESSAGE value="added tests for logic signal" />
     <MESSAGE value="added test for inverter unit" />
-    <option name="LAST_COMMIT_MESSAGE" value="added test for inverter unit" />
+    <MESSAGE value="set expectations of the and gate through tests" />
+    <MESSAGE value="implemented logic of and gate" />
+    <option name="LAST_COMMIT_MESSAGE" value="implemented logic of and gate" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561762350073" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561768830428" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue.ic" NAME="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue Coverage Results" MODIFIED="1561762633792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
@@ -503,6 +525,9 @@
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator.ic" NAME="All in logic-simulator Coverage Results" MODIFIED="1561762195889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$AndLogicUnitTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561768800653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.logic.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$InverterTest.ic" NAME="InverterTest Coverage Results" MODIFIED="1561767660410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
@@ -623,16 +648,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndLogicUnitTest.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="466">
-          <caret line="51" column="5" selection-start-line="51" selection-start-column="5" selection-end-line="51" selection-end-column="5" />
+        <state relative-caret-position="240">
+          <caret line="16" column="9" lean-forward="true" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2088#2089#0" expanded="true" />
-            <element signature="e#2112#2113#0" expanded="true" />
-            <element signature="e#2254#2255#0" expanded="true" />
-            <element signature="e#2308#2309#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
+          <folding>
+            <element signature="e#2185#2186#0" expanded="true" />
+            <element signature="e#2240#2241#0" expanded="true" />
+            <element signature="e#2306#2307#0" expanded="true" />
+            <element signature="e#2361#2362#0" expanded="true" />
           </folding>
         </state>
       </provider>

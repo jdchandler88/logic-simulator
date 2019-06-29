@@ -3,6 +3,7 @@ package com.darchan.elements.impl.com.darchan.elements.impl.logic;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.ConstantSignal;
+import com.darchan.elements.impl.logic.AndGate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -13,14 +14,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AndLogicUnitTest {
+class AndGateTest {
 
 
     @ParameterizedTest
     @MethodSource("getInputs")
     void andUnitShouldReturnAppropriateOutput(IBus inputBus, boolean expectedValue) {
-        //todo: implement and gate
-        assertEquals(expectedValue, null);
+        AndGate cut = new AndGate();
+        assertEquals(expectedValue, cut.evaluate(inputBus));
     }
 
     static Stream<Arguments> getInputs() {
