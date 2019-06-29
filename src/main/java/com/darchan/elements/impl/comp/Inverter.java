@@ -28,7 +28,3 @@ public class Inverter implements IComponent {
 	}
 	
 }
-
-//listen to events instead of trying to connect listener objects. this sounds similar, but the difference is that
-//every component, always, will listen to events. It will be up to the component to make sure  that it cares about the
-//incoming event.
