@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class InputWidthValidationTest {
+class ValidationTest {
 
     @Test
-    void shouldPassValidationIfNumberInputsWithinRange() {
+    void inputWidthShouldPassValidationIfNumberInputsWithinRange() {
         int numInputs = 5;
         int minRange = 1;
         int maxRange = 10;
@@ -16,7 +16,7 @@ class InputWidthValidationTest {
     }
 
     @Test
-    void shouldFailValidationIfNumberOfInputsBelowRange() {
+    void inputWidthshouldFailValidationIfNumberOfInputsBelowRange() {
         int numInputs = 0;
         int minRange = 1;
         int maxRange = 10;
@@ -24,7 +24,7 @@ class InputWidthValidationTest {
     }
 
     @Test
-    void shouldFailValidationIfNumberInputsAboveRange() {
+    void inputWidthShouldFailValidationIfNumberInputsAboveRange() {
         int numInputs = 11;
         int minRange = 1;
         int maxRange = 10;
