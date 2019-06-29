@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.com.darchan.com.darchan.validation;
 
+import com.darchan.com.darchan.validation.Validation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,7 +13,7 @@ class ValidationTest {
         int numInputs = 5;
         int minRange = 1;
         int maxRange = 10;
-        assertTrue(false);
+        assertTrue(Validation.validateInputWidth(minRange, maxRange, numInputs));
     }
 
     @Test
@@ -20,7 +21,7 @@ class ValidationTest {
         int numInputs = 0;
         int minRange = 1;
         int maxRange = 10;
-        assertFalse(true);
+        assertFalse(Validation.validateInputWidth(minRange, maxRange, numInputs));
     }
 
     @Test
@@ -28,7 +29,7 @@ class ValidationTest {
         int numInputs = 11;
         int minRange = 1;
         int maxRange = 10;
-        assertFalse(true);
+        assertFalse(Validation.validateInputWidth(minRange, maxRange, numInputs));
     }
 
 }
