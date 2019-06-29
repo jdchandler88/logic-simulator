@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/UnexpectedBusWidthException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/InputWidthValidationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -16,7 +16,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageViewManager">
-    <option name="myElementSize" value="330" />
+    <option name="myElementSize" value="329" />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
@@ -78,39 +78,35 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="26" column="5" lean-forward="true" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
+            <state relative-caret-position="98">
+              <caret line="7" column="23" lean-forward="true" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#190#191#0" expanded="true" />
-                <element signature="e#209#210#0" expanded="true" />
+                <element signature="e#469#470#0" expanded="true" />
+                <element signature="e#523#524#0" expanded="true" />
                 <element signature="e#311#312#0" expanded="true" />
                 <element signature="e#333#334#0" expanded="true" />
                 <element signature="e#379#380#0" expanded="true" />
                 <element signature="e#401#402#0" expanded="true" />
-                <element signature="e#454#455#0" expanded="true" />
-                <element signature="e#475#476#0" expanded="true" />
+                <element signature="e#774#775#0" expanded="true" />
+                <element signature="e#796#797#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/UnexpectedBusWidthException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+            <state relative-caret-position="165">
+              <caret line="11" column="25" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#498#499#0" expanded="true" />
+                <element signature="e#533#534#0" expanded="true" />
+                <element signature="e#569#570#0" expanded="true" />
+                <element signature="e#604#605#0" expanded="true" />
+                <element signature="e#639#640#0" expanded="true" />
+                <element signature="e#673#674#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -161,8 +157,10 @@
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/exception/UnexpectedBusWidthExceptionTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/InputWidthValidationTest.java" />
-        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/UnexpectedBusWidthException.java" />
       </list>
     </option>
   </component>
@@ -259,16 +257,6 @@
               <item name="darchan" type="462c0819:PsiDirectoryNode" />
               <item name="validation" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="exception" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -309,7 +297,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.All in logic-simulator.test">
+  <component name="RunManager" selected="JUnit.UnexpectedBusWidthExceptionTest">
     <configuration name="All in logic-simulator.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
       <option name="PACKAGE_NAME" value="" />
@@ -348,44 +336,43 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LogicSignalTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="UnexpectedBusWidthExceptionTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.darchan.elements.impl.*" />
+          <option name="PATTERN" value="com.darchan.elements.impl.com.darchan.com.darchan.validation.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.LogicSignalTest" />
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl.com.darchan.com.darchan.validation" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.com.darchan.com.darchan.validation.UnexpectedBusWidthExceptionTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LogicSignalTest.constructorShouldRegisterListenersForInputSignals" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ValidationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.darchan.elements.impl.*" />
+          <option name="PATTERN" value="com.darchan.elements.impl.com.darchan.com.darchan.validation.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.darchan.elements.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.LogicSignalTest" />
-      <option name="METHOD_NAME" value="constructorShouldRegisterListenersForInputSignals" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl.com.darchan.com.darchan.validation" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.com.darchan.com.darchan.validation.ValidationTest" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.UnexpectedBusWidthExceptionTest" />
+        <item itemvalue="JUnit.ValidationTest" />
         <item itemvalue="JUnit.All in logic-simulator.test" />
         <item itemvalue="JUnit.AndGateTest" />
         <item itemvalue="JUnit.InverterTest" />
-        <item itemvalue="JUnit.LogicSignalTest" />
-        <item itemvalue="JUnit.LogicSignalTest.constructorShouldRegisterListenersForInputSignals" />
       </list>
     </recent_temporary>
   </component>
@@ -400,7 +387,7 @@
       <option name="presentableId" value="Default" />
       <updated>1561760977585</updated>
       <workItem from="1561760981992" duration="1048000" />
-      <workItem from="1561762065316" duration="4909000" />
+      <workItem from="1561762065316" duration="5582000" />
     </task>
     <task id="LOCAL-00001" summary="creating a test for signal name decorator">
       <created>1561762414640</created>
@@ -472,16 +459,24 @@
       <option name="project" value="LOCAL" />
       <updated>1561769496386</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="refactored code. i know i'm refactoring prior to getting the tests to pass. I'm trying to get better. next time, just implement all in one place then move around to where it makes sense">
+      <created>1561769637171</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1561769637171</updated>
+    </task>
+    <task id="LOCAL-00012" summary="implemented input width validation">
+      <created>1561769814345</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1561769814345</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="ConstantSignalTest - 2019.06.28 at 19h 00m 35s.xml">
-      <configuration name="ConstantSignalTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="LogicSignalTest_constructorShouldRegisterListenersForInputSignals - 2019.06.28 at 19h 07m 13s.xml">
-      <configuration name="LogicSignalTest.constructorShouldRegisterListenersForInputSignals" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="LogicSignalTest - 2019.06.28 at 19h 10m 04s.xml">
       <configuration name="LogicSignalTest" configurationId="JUnit" />
     </history-entry>
@@ -506,15 +501,21 @@
     <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 20h 40m 35s.xml">
       <configuration name="All in logic-simulator.test" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="ValidationTest - 2019.06.28 at 20h 56m 32s.xml">
+      <configuration name="ValidationTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="UnexpectedBusWidthExceptionTest - 2019.06.28 at 21h 04m 20s.xml">
+      <configuration name="UnexpectedBusWidthExceptionTest" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5957000" />
+    <option name="totallyTimeSpent" value="6630000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -523,7 +524,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3293348" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3293348" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -532,17 +533,17 @@
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.27262813" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
-      <window_info anchor="right" id="Coverage" sideWeight="0.50074965" side_tool="true" visible="true" weight="0.32982263" />
+      <window_info active="true" anchor="right" id="Coverage" sideWeight="0.500813" side_tool="true" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Maven" order="3" />
       <window_info anchor="right" id="Palette" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49925038" visible="true" weight="0.32982263" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.499187" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
@@ -562,7 +563,9 @@
     <MESSAGE value="set expectations of the and gate through tests" />
     <MESSAGE value="implemented logic of and gate" />
     <MESSAGE value="added tests for additional required classes" />
-    <option name="LAST_COMMIT_MESSAGE" value="added tests for additional required classes" />
+    <MESSAGE value="refactored code. i know i'm refactoring prior to getting the tests to pass. I'm trying to get better. next time, just implement all in one place then move around to where it makes sense" />
+    <MESSAGE value="implemented input width validation" />
+    <option name="LAST_COMMIT_MESSAGE" value="implemented input width validation" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561768830428" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
@@ -573,11 +576,12 @@
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator.ic" NAME="All in logic-simulator Coverage Results" MODIFIED="1561762195889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/logic_simulator$AndLogicUnitTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561768800653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.logic.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$InverterTest.ic" NAME="InverterTest Coverage Results" MODIFIED="1561767660410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator__1_.ic" NAME="All in logic-simulator (1) Coverage Results" MODIFIED="1561762274874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$AndLogicUnitTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561768800653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.logic.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$LogicSignalTest.ic" NAME="LogicSignalTest Coverage Results" MODIFIED="1561763945718" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
@@ -586,8 +590,13 @@
     <SUITE FILE_PATH="coverage/logic_simulator$LogicSignalTest_constructorShouldRegisterListenersForInputSignals.ic" NAME="LogicSignalTest.constructorShouldRegisterListenersForInputSignals Coverage Results" MODIFIED="1561763231114" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$ValidationTest.ic" NAME="ValidationTest Coverage Results" MODIFIED="1561769790904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.com.darchan.validation.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$UnexpectedBusWidthExceptionTest.ic" NAME="UnexpectedBusWidthExceptionTest Coverage Results" MODIFIED="1561770286730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.com.darchan.validation.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$logic_simulator__build_.ic" NAME="logic-simulator [build] Coverage Results" MODIFIED="1561762166132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator__1_.ic" NAME="All in logic-simulator (1) Coverage Results" MODIFIED="1561762274874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/BusTest.java">
@@ -720,37 +729,56 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
-          <caret line="26" column="5" lean-forward="true" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
+          <caret line="26" column="9" lean-forward="true" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#190#191#0" expanded="true" />
-            <element signature="e#209#210#0" expanded="true" />
-            <element signature="e#311#312#0" expanded="true" />
-            <element signature="e#333#334#0" expanded="true" />
-            <element signature="e#379#380#0" expanded="true" />
-            <element signature="e#401#402#0" expanded="true" />
-            <element signature="e#454#455#0" expanded="true" />
-            <element signature="e#475#476#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+        <state relative-caret-position="105">
+          <caret line="7" column="46" selection-start-line="7" selection-start-column="46" selection-end-line="7" selection-end-column="46" />
+          <folding>
+            <element signature="e#189#190#0" expanded="true" />
+            <element signature="e#241#242#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+        <state relative-caret-position="98">
+          <caret line="7" column="23" lean-forward="true" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#469#470#0" expanded="true" />
+            <element signature="e#523#524#0" expanded="true" />
+            <element signature="e#311#312#0" expanded="true" />
+            <element signature="e#333#334#0" expanded="true" />
+            <element signature="e#379#380#0" expanded="true" />
+            <element signature="e#401#402#0" expanded="true" />
+            <element signature="e#774#775#0" expanded="true" />
+            <element signature="e#796#797#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/UnexpectedBusWidthException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="25" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
+          <folding>
+            <element signature="e#498#499#0" expanded="true" />
+            <element signature="e#533#534#0" expanded="true" />
+            <element signature="e#569#570#0" expanded="true" />
+            <element signature="e#604#605#0" expanded="true" />
+            <element signature="e#639#640#0" expanded="true" />
+            <element signature="e#673#674#0" expanded="true" />
           </folding>
         </state>
       </provider>
