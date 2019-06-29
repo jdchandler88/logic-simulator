@@ -1,10 +1,14 @@
 package com.darchan.elements.impl.com.darchan.com.darchan.validation;
 
+import com.darchan.com.darchan.validation.UnexpectedBusWidthException;
 import com.darchan.com.darchan.validation.Validation;
+import com.darchan.elements.iface.IBus;
+import com.darchan.elements.iface.ISignal;
+import com.darchan.elements.impl.Bus;
+import com.darchan.elements.impl.ConstantSignal;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationTest {
 
@@ -13,7 +17,7 @@ class ValidationTest {
         int numInputs = 5;
         int minRange = 1;
         int maxRange = 10;
-        assertTrue(Validation.validateInputWidth(minRange, maxRange, numInputs));
+        Validation.validateInputWidth(minRange, maxRange, createBusOfWidth(numInputs));
     }
 
     @Test
@@ -21,7 +25,7 @@ class ValidationTest {
         int numInputs = 0;
         int minRange = 1;
         int maxRange = 10;
-        assertFalse(Validation.validateInputWidth(minRange, maxRange, numInputs));
+        assertThrows(UnexpectedBusWidthException.class, () -> Validation.validateInputWidth(minRange, maxRange, createBusOfWidth(numInputs)));
     }
 
     @Test
@@ -29,7 +33,15 @@ class ValidationTest {
         int numInputs = 11;
         int minRange = 1;
         int maxRange = 10;
-        assertFalse(Validation.validateInputWidth(minRange, maxRange, numInputs));
+        assertThrows(UnexpectedBusWidthException.class, () -> Validation.validateInputWidth(minRange, maxRange, createBusOfWidth(numInputs)));
+    }
+
+    private static IBus createBusOfWidth(int length) {
+        ISignal[] sigs = new ISignal[length];
+        for (int i=0; i<length; i++) {
+            sigs[i] = ConstantSignal.ON;
+        }
+        return new Bus(sigs);
     }
 
 }
