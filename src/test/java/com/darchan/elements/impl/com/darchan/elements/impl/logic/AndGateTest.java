@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.com.darchan.elements.impl.logic;
 
+import com.darchan.com.darchan.validation.UnexpectedBusWidthException;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.ConstantSignal;
@@ -16,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AndGateTest {
 
+    private AndGate cut = new AndGate();
 
     @ParameterizedTest
     @MethodSource("getInputs")
     void andUnitShouldReturnAppropriateOutput(IBus inputBus, boolean expectedValue) {
-        AndGate cut = new AndGate();
         assertEquals(expectedValue, cut.evaluate(inputBus));
     }
 
@@ -44,12 +45,18 @@ class AndGateTest {
 
     @Test
     void shouldThrowExceptionIfNumberOfInputsIsZero() {
-        assertThrows(Exception.class, () -> {});
+        assertThrows(UnexpectedBusWidthException.class, () -> {
+            IBus bus = new Bus();
+            cut.evaluate(bus);
+        });
     }
 
     @Test
     void shouldThrowExceptionIfNumberOfInputsIsOne() {
-        assertThrows(Exception.class, () -> {});
+        assertThrows(UnexpectedBusWidthException.class, () -> {
+            IBus bus = new Bus(ConstantSignal.ON);
+            cut.evaluate(bus);
+        });
     }
 
 }
