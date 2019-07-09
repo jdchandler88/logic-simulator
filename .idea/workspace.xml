@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="">
+    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="adding tests to make sure that inverter throws exception if bus width is wrong">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -38,17 +38,6 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="logic-simulator" type="f1a62948:ProjectNode" />
               </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="logic-simulator" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="logic-simulator" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
-              </path>
             </expand>
             <select />
           </tree_state>
@@ -58,11 +47,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="429">
-              <caret line="57" column="30" selection-start-line="57" selection-start-column="30" selection-end-line="57" selection-end-column="30" />
+            <state relative-caret-position="660">
+              <caret line="44" selection-start-line="44" selection-end-line="44" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="105">
+              <caret line="7" column="23" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -73,10 +74,23 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="96" selection-start-line="15" selection-start-column="96" selection-end-line="15" selection-end-column="96" />
+            <state relative-caret-position="360">
+              <caret line="24" column="5" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="480">
+              <caret line="41" column="85" selection-start-line="41" selection-start-column="85" selection-end-line="41" selection-end-column="85" />
+              <folding>
+                <element signature="e#529#530#0" expanded="true" />
+                <element signature="e#574#575#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -86,7 +100,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="240">
-              <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+              <caret line="16" selection-start-line="16" selection-end-line="16" />
             </state>
           </provider>
         </entry>
@@ -94,8 +108,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+            <state relative-caret-position="240">
+              <caret line="16" column="20" selection-start-line="16" selection-start-column="20" selection-end-line="16" selection-end-column="20" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -140,6 +154,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" />
       </list>
     </option>
   </component>
@@ -194,7 +209,7 @@
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="validation" type="462c0819:PsiDirectoryNode" />
+              <item name="elements" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
@@ -234,7 +249,7 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="impl" type="462c0819:PsiDirectoryNode" />
               <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="validation" type="462c0819:PsiDirectoryNode" />
+              <item name="logic" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -346,6 +361,9 @@
       <updated>1561760977585</updated>
       <workItem from="1561760981992" duration="1048000" />
       <workItem from="1561762065316" duration="6604000" />
+      <workItem from="1561771525540" duration="660000" />
+      <workItem from="1562119781396" duration="123000" />
+      <workItem from="1562640640965" duration="744000" />
     </task>
     <task id="LOCAL-00001" summary="creating a test for signal name decorator">
       <created>1561762414640</created>
@@ -445,19 +463,17 @@
       <option name="project" value="LOCAL" />
       <updated>1561771172759</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="merging feature-andGate into master&#10;&#10;Squashed commit of the following:&#10;&#10;commit 4753a4b7c09591d2a3b78a7b9d10ba8db01c4978&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:23:01 2019 -0400&#10;&#10;    implemented error checking for input width for and gate&#10;&#10;commit b6368628aef1f7fcc8dfad4bbb4821662c8213ee&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:19:32 2019 -0400&#10;&#10;    refactored validation to use IBus instead of integer. this will be easier for clients and makes more sense based on teh api name&#10;&#10;commit 203dc64ff381a3b7a27be496811341b2e6a2dfba&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:05:06 2019 -0400&#10;&#10;    implemented exception for unexpected bus width&#10;&#10;commit 341f4919fcfa2beaa9a06477b99144b65079d8b8&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:56:54 2019 -0400&#10;&#10;    implemented input width validation&#10;&#10;commit 4b03018b9a5c2b8553eaa39aba8dc2bb380d332b&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:53:57 2019 -0400&#10;&#10;    refactored code. i know i'm refactoring prior to getting the tests to pass. I'm trying to get better. next time, just implement all in one place then move around to where it makes sense&#10;&#10;commit df384bbe16657cd819e31fb2ae0c6bb095c5fc8c&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:51:36 2019 -0400&#10;&#10;    added tests for additional required classes&#10;&#10;commit 69c602125611d0a5b9b90919d4eaed74c2945a68&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:41:25 2019 -0400&#10;&#10;    implemented logic of and gate&#10;&#10;commit a8077261a6233a9e0e1bfd8ca1d091114ec97d18&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:35:16 2019 -0400&#10;&#10;    set expectations of the and gate through tests">
+      <created>1561771578584</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1561771578584</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="AndLogicUnitTest - 2019.06.28 at 20h 38m 04s.xml">
-      <configuration name="AndLogicUnitTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="AndLogicUnitTest - 2019.06.28 at 20h 39m 10s.xml">
-      <configuration name="AndLogicUnitTest" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="AndGateTest - 2019.06.28 at 20h 40m 02s.xml">
-      <configuration name="AndGateTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 20h 40m 35s.xml">
       <configuration name="All in logic-simulator.test" configurationId="JUnit" />
     </history-entry>
@@ -479,15 +495,24 @@
     <history-entry file="All_in_logic-simulator_test - 2019.06.28 at 21h 18m 57s.xml">
       <configuration name="All in logic-simulator.test" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="All_in_logic-simulator_test_(1) - 2019.06.28 at 21h 25m 43s.xml">
+      <configuration name="All in logic-simulator.test (1)" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_logic-simulator_test_(1) - 2019.07.08 at 23h 00m 49s.xml">
+      <configuration name="All in logic-simulator.test (1)" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_logic-simulator_test_(1) - 2019.07.08 at 23h 02m 08s.xml">
+      <configuration name="All in logic-simulator.test (1)" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="7652000" />
+    <option name="totallyTimeSpent" value="9179000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27716187" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.28713968" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -496,7 +521,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3293348" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3293348" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -505,20 +530,20 @@
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="11" weight="0.27262813" />
+      <window_info active="true" anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
-      <window_info anchor="right" id="Coverage" sideWeight="0.500813" side_tool="true" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Maven" order="3" />
       <window_info anchor="right" id="Palette" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.499187" visible="true" weight="0.32982263" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49836424" visible="true" weight="0.32982263" />
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
+      <window_info anchor="right" id="Coverage" order="10" sideWeight="0.5016358" side_tool="true" visible="true" weight="0.32982263" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -539,7 +564,9 @@
     <MESSAGE value="implemented input width validation" />
     <MESSAGE value="implemented exception for unexpected bus width" />
     <MESSAGE value="refactored validation to use IBus instead of integer. this will be easier for clients and makes more sense based on teh api name" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactored validation to use IBus instead of integer. this will be easier for clients and makes more sense based on teh api name" />
+    <MESSAGE value="merging feature-andGate into master&#10;&#10;Squashed commit of the following:&#10;&#10;commit 4753a4b7c09591d2a3b78a7b9d10ba8db01c4978&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:23:01 2019 -0400&#10;&#10;    implemented error checking for input width for and gate&#10;&#10;commit b6368628aef1f7fcc8dfad4bbb4821662c8213ee&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:19:32 2019 -0400&#10;&#10;    refactored validation to use IBus instead of integer. this will be easier for clients and makes more sense based on teh api name&#10;&#10;commit 203dc64ff381a3b7a27be496811341b2e6a2dfba&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:05:06 2019 -0400&#10;&#10;    implemented exception for unexpected bus width&#10;&#10;commit 341f4919fcfa2beaa9a06477b99144b65079d8b8&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:56:54 2019 -0400&#10;&#10;    implemented input width validation&#10;&#10;commit 4b03018b9a5c2b8553eaa39aba8dc2bb380d332b&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:53:57 2019 -0400&#10;&#10;    refactored code. i know i'm refactoring prior to getting the tests to pass. I'm trying to get better. next time, just implement all in one place then move around to where it makes sense&#10;&#10;commit df384bbe16657cd819e31fb2ae0c6bb095c5fc8c&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:51:36 2019 -0400&#10;&#10;    added tests for additional required classes&#10;&#10;commit 69c602125611d0a5b9b90919d4eaed74c2945a68&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:41:25 2019 -0400&#10;&#10;    implemented logic of and gate&#10;&#10;commit a8077261a6233a9e0e1bfd8ca1d091114ec97d18&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:35:16 2019 -0400&#10;&#10;    set expectations of the and gate through tests" />
+    <MESSAGE value="adding tests to make sure that inverter throws exception if bus width is wrong" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding tests to make sure that inverter throws exception if bus width is wrong" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561771131796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
@@ -700,28 +727,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="98">
-          <caret line="7" column="23" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
+        <state relative-caret-position="240">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="44" selection-start-line="44" selection-end-line="44" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#469#470#0" expanded="true" />
-            <element signature="e#523#524#0" expanded="true" />
-            <element signature="e#311#312#0" expanded="true" />
-            <element signature="e#333#334#0" expanded="true" />
-            <element signature="e#379#380#0" expanded="true" />
-            <element signature="e#401#402#0" expanded="true" />
-            <element signature="e#774#775#0" expanded="true" />
-            <element signature="e#796#797#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/UnexpectedBusWidthExceptionTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="96" selection-start-line="15" selection-start-column="96" selection-end-line="15" selection-end-column="96" />
+        <state relative-caret-position="105">
+          <caret line="7" column="23" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -730,27 +756,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/com/darchan/validation/ValidationTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+        <state relative-caret-position="240">
+          <caret line="16" column="20" selection-start-line="16" selection-start-column="20" selection-end-line="16" selection-end-column="20" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/com/darchan/validation/Validation.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/AndGate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+        <state relative-caret-position="360">
+          <caret line="24" column="5" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="429">
-          <caret line="57" column="30" selection-start-line="57" selection-start-column="30" selection-end-line="57" selection-end-column="30" />
+        <state relative-caret-position="480">
+          <caret line="41" column="85" selection-start-line="41" selection-start-column="85" selection-end-line="41" selection-end-column="85" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="e#529#530#0" expanded="true" />
+            <element signature="e#574#575#0" expanded="true" />
           </folding>
         </state>
       </provider>
