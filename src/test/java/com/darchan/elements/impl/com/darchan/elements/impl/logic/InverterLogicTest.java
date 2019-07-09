@@ -41,4 +41,5 @@ class InverterLogicTest {
         Bus largeBus = new Bus(ConstantSignal.ON, ConstantSignal.ON);
         assertThrows(UnexpectedBusWidthException.class, () -> cut.evaluate(largeBus) );
     }
+
 }
