@@ -14,14 +14,7 @@ public class AndGate implements ILogicUnit {
     @Override
     public boolean evaluate(IBus inputBus) {
         Validation.validateInputWidth(MINIMUM_INPUT_BUS_WIDTH, MAXIMUM_INPUT_BUS_WIDTH, inputBus);
-        boolean result = true;
-        for (ISignal inputSignal : inputBus.getSignals()) {
-            if (!inputSignal.isOn()) {
-                result = false;
-                break;
-            }
-        }
-        return result;
+        return inputBus.getSignals().stream().allMatch(ISignal::isOn);
     }
 
 }
