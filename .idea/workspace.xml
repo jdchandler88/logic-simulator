@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="merging feature into master">
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java" afterDir="false" />
+    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="implemented logic for or gate to satisfy tests">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/OrGate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -59,17 +60,27 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="25" column="30" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
+            <state relative-caret-position="446">
+              <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#551#552#0" expanded="true" />
-                <element signature="e#570#571#0" expanded="true" />
-                <element signature="e#2029#2030#0" expanded="true" />
-                <element signature="e#2050#2051#0" expanded="true" />
+                <element signature="e#645#646#0" expanded="true" />
+                <element signature="e#678#679#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/OrGate.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="16" column="70" lean-forward="true" selection-start-line="16" selection-start-column="70" selection-end-line="16" selection-end-column="70" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -114,6 +125,7 @@
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/AndGateTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/InverterLogicTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/OrGate.java" />
       </list>
     </option>
   </component>
@@ -195,6 +207,17 @@
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="darchan" type="462c0819:PsiDirectoryNode" />
+              <item name="elements" type="462c0819:PsiDirectoryNode" />
+              <item name="impl" type="462c0819:PsiDirectoryNode" />
+              <item name="logic" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
+              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
@@ -245,6 +268,9 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit5" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
@@ -457,13 +483,17 @@
       <option name="project" value="LOCAL" />
       <updated>1562641670341</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="setting expectations for OR Gate">
+      <created>1562642291912</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1562642291913</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="ValidationTest - 2019.06.28 at 20h 56m 32s.xml">
-      <configuration name="ValidationTest" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="UnexpectedBusWidthExceptionTest - 2019.06.28 at 21h 04m 20s.xml">
       <configuration name="UnexpectedBusWidthExceptionTest" configurationId="JUnit" />
     </history-entry>
@@ -491,9 +521,12 @@
     <history-entry file="All_in_logic-simulator_test_(1) - 2019.07.08 at 23h 17m 22s.xml">
       <configuration name="All in logic-simulator.test (1)" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="All_in_logic-simulator_test_(1) - 2019.07.08 at 23h 22m 35s.xml">
+      <configuration name="All in logic-simulator.test (1)" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9793000" />
+    <option name="totallyTimeSpent" value="10166000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
@@ -508,7 +541,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3293348" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3293348" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -517,7 +550,7 @@
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="11" weight="0.27262813" />
+      <window_info active="true" anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -554,7 +587,9 @@
     <MESSAGE value="merging feature-andGate into master&#10;&#10;Squashed commit of the following:&#10;&#10;commit 4753a4b7c09591d2a3b78a7b9d10ba8db01c4978&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:23:01 2019 -0400&#10;&#10;    implemented error checking for input width for and gate&#10;&#10;commit b6368628aef1f7fcc8dfad4bbb4821662c8213ee&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:19:32 2019 -0400&#10;&#10;    refactored validation to use IBus instead of integer. this will be easier for clients and makes more sense based on teh api name&#10;&#10;commit 203dc64ff381a3b7a27be496811341b2e6a2dfba&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 21:05:06 2019 -0400&#10;&#10;    implemented exception for unexpected bus width&#10;&#10;commit 341f4919fcfa2beaa9a06477b99144b65079d8b8&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:56:54 2019 -0400&#10;&#10;    implemented input width validation&#10;&#10;commit 4b03018b9a5c2b8553eaa39aba8dc2bb380d332b&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:53:57 2019 -0400&#10;&#10;    refactored code. i know i'm refactoring prior to getting the tests to pass. I'm trying to get better. next time, just implement all in one place then move around to where it makes sense&#10;&#10;commit df384bbe16657cd819e31fb2ae0c6bb095c5fc8c&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:51:36 2019 -0400&#10;&#10;    added tests for additional required classes&#10;&#10;commit 69c602125611d0a5b9b90919d4eaed74c2945a68&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:41:25 2019 -0400&#10;&#10;    implemented logic of and gate&#10;&#10;commit a8077261a6233a9e0e1bfd8ca1d091114ec97d18&#10;Author: james darin &lt;jdchandler88@gmail.com&gt;&#10;Date:   Fri Jun 28 20:35:16 2019 -0400&#10;&#10;    set expectations of the and gate through tests" />
     <MESSAGE value="adding tests to make sure that inverter throws exception if bus width is wrong" />
     <MESSAGE value="merging feature into master" />
-    <option name="LAST_COMMIT_MESSAGE" value="merging feature into master" />
+    <MESSAGE value="setting expectations for OR Gate" />
+    <MESSAGE value="implemented logic for or gate to satisfy tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="implemented logic for or gate to satisfy tests" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1561771131796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
@@ -775,14 +810,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/logic/OrGateTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="25" column="30" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
+        <state relative-caret-position="446">
+          <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#551#552#0" expanded="true" />
-            <element signature="e#570#571#0" expanded="true" />
-            <element signature="e#2029#2030#0" expanded="true" />
-            <element signature="e#2050#2051#0" expanded="true" />
+            <element signature="e#645#646#0" expanded="true" />
+            <element signature="e#678#679#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/logic/OrGate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="70" lean-forward="true" selection-start-line="16" selection-start-column="70" selection-end-line="16" selection-end-column="70" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
