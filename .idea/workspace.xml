@@ -341,11 +341,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.All in logic-simulator.test (1)" />
-        <item itemvalue="JUnit.All in logic-simulator.test (4)" />
         <item itemvalue="JUnit.AndGateTest" />
-        <item itemvalue="JUnit.All in logic-simulator.test" />
+        <item itemvalue="JUnit.All in logic-simulator.test (4)" />
         <item itemvalue="JUnit.All in logic-simulator.test (3)" />
+        <item itemvalue="JUnit.All in logic-simulator.test (1)" />
+        <item itemvalue="JUnit.All in logic-simulator.test" />
       </list>
     </recent_temporary>
   </component>
