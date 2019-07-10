@@ -18,6 +18,9 @@ plugins {
 
     // intellij!
     id 'idea'
+
+    // javafx
+    id "org.openjfx.javafxplugin" version "0.0.7"
 }
 
 repositories {
@@ -25,6 +28,9 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.openjfx:javafx-base:11'
+    implementation 'org.openjfx:javafx-graphics:11'
+    implementation 'org.openjfx:javafx-controls:11'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
     testImplementation 'org.mockito:mockito-core:2.+'
@@ -33,6 +39,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+javafx {
+    version = '11'
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ]
 }
 
 // Define the main class for the application
