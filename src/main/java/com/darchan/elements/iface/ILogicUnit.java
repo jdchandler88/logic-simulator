@@ -2,6 +2,8 @@ package com.darchan.elements.iface;
 
 public interface ILogicUnit {
 
-    public boolean evaluate(IBus inputBus);
+    boolean evaluate(IBus inputBus);
+
+    IRange getAllowedInputBusWidth();
 
 }

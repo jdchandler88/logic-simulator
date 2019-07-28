@@ -2,7 +2,7 @@ package com.darchan.elements.impl.comp;
 
 import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
-import com.darchan.elements.impl.BusWidthAllowableRange;
+import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.SimpleSignal;
 
 public class FlipFlop implements IComponent {
@@ -10,7 +10,7 @@ public class FlipFlop implements IComponent {
     /**
      * both input/output buses should be width 1
      */
-    private static final IRange ALLOWABLE_BUS_WIDTH = new BusWidthAllowableRange(1, 1);
+    private static final IRange ALLOWABLE_BUS_WIDTH = new SimpleRange(1, 1);
 
     /**
      * input bus

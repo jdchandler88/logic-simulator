@@ -2,6 +2,7 @@ package com.darchan.elements.impl;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ILogicUnit;
+import com.darchan.elements.iface.IRange;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.logic.LogicalFalseLogicUnit;
 import com.darchan.elements.impl.logic.LogicalTrueLogicUnit;
@@ -53,6 +54,11 @@ class LogicSignalTest {
                 //this is the clock. could have referenced it here for clarity,
                 //but this is how logic units should be written
                 return inputBus.getSignals().get(0).isOn();
+            }
+
+            @Override
+            public IRange getAllowedInputBusWidth() {
+                return null;
             }
         };
         LogicSignal cut = new LogicSignal(bus, logicUnit);

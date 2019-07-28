@@ -5,7 +5,7 @@ import com.darchan.elements.iface.IRange;
 /**
  * Class used in communicating
  */
-public class BusWidthAllowableRange implements IRange {
+public class SimpleRange implements IRange {
 
     /**
      * min number of signals on bus
@@ -22,7 +22,7 @@ public class BusWidthAllowableRange implements IRange {
      * @param min minimum number of allowed signals on bus
      * @param max maximum number of allowed signals on bus
      */
-    public BusWidthAllowableRange(int min, int max) {
+    public SimpleRange(int min, int max) {
         this.min = min;
         this.max = max;
     }
