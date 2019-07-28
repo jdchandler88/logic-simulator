@@ -28,9 +28,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.openjfx:javafx-base:11'
-    implementation 'org.openjfx:javafx-graphics:11'
-    implementation 'org.openjfx:javafx-controls:11'
+    implementation 'org.openjfx:javafx-base:8'
+    implementation 'org.openjfx:javafx-graphics:8'
+    implementation 'org.openjfx:javafx-controls:8'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
     testImplementation 'org.mockito:mockito-core:2.+'
