@@ -20,7 +20,7 @@ public class Register implements IComponent {
     /**
      * input clock
      */
-    private final IClock clk;
+    private final ISignal clk;
 
     /**
      * input bus
@@ -43,7 +43,7 @@ public class Register implements IComponent {
      * @param inputBus input bus
      * @param initialValue initial value for each flip-flopp
      */
-    public Register(IClock clk, IBus inputBus, boolean initialValue) {
+    public Register(ISignal clk, IBus inputBus, boolean initialValue) {
         this.clk = clk;
         this.inputBus = inputBus;
         //create 'register' of flip flops. direct each input signal on this component's bus to each flipflop

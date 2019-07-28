@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="created Register (n-length flip-flop)">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/comp/RegisterTest.java" afterDir="false" />
+    <list default="true" id="cf5f08ee-7d2a-4b68-84de-88660c379a3e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/Cpu.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/RegisterFile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/darchan/util/Util.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/util/UtilTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -16,7 +20,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageViewManager">
-    <option name="myElementSize" value="178" />
+    <option name="myElementSize" value="168" />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
@@ -60,11 +64,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="205">
-              <caret line="58" column="68" selection-start-line="58" selection-start-column="68" selection-end-line="58" selection-end-column="68" />
+            <state relative-caret-position="361">
+              <caret line="53" column="35" lean-forward="true" selection-start-line="53" selection-start-column="35" selection-end-line="53" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1869#1870#0" expanded="true" />
@@ -75,6 +79,42 @@
                 <element signature="e#2093#2094#0" expanded="true" />
                 <element signature="e#2155#2156#0" expanded="true" />
                 <element signature="e#2197#2198#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-5">
+              <caret line="34" column="7" lean-forward="true" selection-start-line="34" selection-start-column="7" selection-end-line="34" selection-end-column="7" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/util/Util.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="25" column="5" lean-forward="true" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/util/UtilTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="266">
+              <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -133,7 +173,6 @@
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Inverter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/SimpleSignal.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/SimpleSignalTest.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/comp/FlipFlopTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IComponent.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/iface/IRange.java" />
@@ -149,7 +188,15 @@
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/comp/NFlipFlopTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/NFlipFlop.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/comp/RegisterTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/Intel8080.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/RegisterFile.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/Cpu.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/util/BusSplicer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/util/Util.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/RegisterFile.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/util/UtilTest.java" />
       </list>
     </option>
   </component>
@@ -202,57 +249,6 @@
               <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-              <item name="iface" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="comp" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="elements" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="logic" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
@@ -278,27 +274,6 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="impl" type="462c0819:PsiDirectoryNode" />
               <item name="darchan" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="logic-simulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="logic-simulator" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="darchan" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-              <item name="comp" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -349,15 +324,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.All in logic-simulator.test">
-    <configuration name="All in logic-simulator.test (2)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="logic-simulator.test" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="TEST_OBJECT" value="package" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="JUnit.UtilTest.sliceGetsCorrectSignals">
     <configuration name="All in logic-simulator.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="logic-simulator.test" />
       <option name="PACKAGE_NAME" value="" />
@@ -413,13 +380,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="UtilTest.sliceGetsCorrectSignals" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="logic-simulator.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.darchan.elements.impl.com.darchan.util.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.darchan.elements.impl.com.darchan.util" />
+      <option name="MAIN_CLASS_NAME" value="com.darchan.elements.impl.com.darchan.util.UtilTest" />
+      <option name="METHOD_NAME" value="sliceGetsCorrectSignals(int,int)" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.UtilTest.sliceGetsCorrectSignals" />
         <item itemvalue="JUnit.All in logic-simulator.test" />
         <item itemvalue="JUnit.RegisterTest" />
         <item itemvalue="JUnit.RegisterTest.outputBusShouldBeLengthN" />
         <item itemvalue="JUnit.RegisterTest.eachOutputShouldHaveSuppliedInitialValueWith16BitRegister" />
-        <item itemvalue="JUnit.All in logic-simulator.test (2)" />
       </list>
     </recent_temporary>
   </component>
@@ -442,7 +425,7 @@
       <workItem from="1562729119914" duration="491000" />
       <workItem from="1563660056124" duration="17000" />
       <workItem from="1564286184557" duration="8015000" />
-      <workItem from="1564331148460" duration="2664000" />
+      <workItem from="1564331148460" duration="8342000" />
     </task>
     <task id="LOCAL-00001" summary="creating a test for signal name decorator">
       <created>1561762414640</created>
@@ -591,16 +574,17 @@
       <option name="project" value="LOCAL" />
       <updated>1564329762961</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="created Register (n-length flip-flop)">
+      <created>1564333818170</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1564333818170</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="FlipFlopTest_outputShouldBeSuppliedInitialValue - 2019.07.28 at 11h 57m 23s.xml">
-      <configuration name="FlipFlopTest.outputShouldBeSuppliedInitialValue" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="FlipFlopTest_outputShouldBeSuppliedInitialValue - 2019.07.28 at 12h 00m 31s.xml">
-      <configuration name="FlipFlopTest.outputShouldBeSuppliedInitialValue" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="FlipFlopTest_outputShouldBeSuppliedInitialValue - 2019.07.28 at 12h 00m 39s.xml">
       <configuration name="FlipFlopTest.outputShouldBeSuppliedInitialValue" configurationId="JUnit" />
     </history-entry>
@@ -625,9 +609,15 @@
     <history-entry file="All_in_logic-simulator_test - 2019.07.28 at 13h 08m 08s.xml">
       <configuration name="All in logic-simulator.test" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="UtilTest_sliceGetsCorrectSignals - 2019.07.28 at 15h 31m 34s.xml">
+      <configuration name="UtilTest.sliceGetsCorrectSignals" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="UtilTest_sliceGetsCorrectSignals - 2019.07.28 at 15h 32m 00s.xml">
+      <configuration name="UtilTest.sliceGetsCorrectSignals" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24358000" />
+    <option name="totallyTimeSpent" value="30036000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="70" y="27" width="1850" height="1053" extended-state="6" />
@@ -642,7 +632,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3293348" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3293348" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3991276" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -651,7 +641,7 @@
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Messages" order="11" visible="true" weight="0.27262813" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.06543075" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -660,11 +650,11 @@
       <window_info anchor="right" id="Maven" order="3" />
       <window_info anchor="right" id="Palette" order="4" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49475262" visible="true" weight="0.23946784" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49430895" visible="true" weight="0.23946784" />
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
-      <window_info anchor="right" id="Coverage" order="10" sideWeight="0.50524735" side_tool="true" visible="true" weight="0.23946784" />
+      <window_info active="true" anchor="right" id="Coverage" order="10" sideWeight="0.50569105" side_tool="true" visible="true" weight="0.23946784" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -699,6 +689,29 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test.ic" NAME="All in logic-simulator.test Coverage Results" MODIFIED="1564333683047" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$RegisterTest_outputBusShouldBeLengthN.ic" NAME="RegisterTest.outputBusShouldBeLengthN Coverage Results" MODIFIED="1564333161515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__4_.ic" NAME="All in logic-simulator.test (4) Coverage Results" MODIFIED="1561771356456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$AndGateTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561771308989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.logic.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$FlipFlopTest.ic" NAME="FlipFlopTest Coverage Results" MODIFIED="1564330082092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$LogicSignalTest_constructorShouldRegisterListenersForInputSignals.ic" NAME="LogicSignalTest.constructorShouldRegisterListenersForInputSignals Coverage Results" MODIFIED="1561763231114" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$ValidationTest.ic" NAME="ValidationTest Coverage Results" MODIFIED="1561769790904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.com.darchan.validation.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$RegisterTest_eachOutputShouldHaveSuppliedInitialValueWith16BitRegister.ic" NAME="RegisterTest.eachOutputShouldHaveSuppliedInitialValueWith16BitRegister Coverage Results" MODIFIED="1564333067422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__3_.ic" NAME="All in logic-simulator.test (3) Coverage Results" MODIFIED="1561770992100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/logic_simulator$UtilTest_sliceGetsCorrectSignals.ic" NAME="UtilTest.sliceGetsCorrectSignals Coverage Results" MODIFIED="1564342318151" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.darchan.elements.impl.com.darchan.util.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$SignalNameDecoratorTest_nameShouldReturnStringAndSignalValue.ic" NAME="SignalNameDecoratorTest.nameShouldReturnStringAndSignalValue Coverage Results" MODIFIED="1561762633792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
@@ -710,22 +723,12 @@
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__2_.ic" NAME="All in logic-simulator.test (2) Coverage Results" MODIFIED="1564331022714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator.ic" NAME="All in logic-simulator Coverage Results" MODIFIED="1561762195889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/logic_simulator$RegisterTest_outputBusShouldBeLengthN.ic" NAME="RegisterTest.outputBusShouldBeLengthN Coverage Results" MODIFIED="1564333161515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$InverterTest.ic" NAME="InverterTest Coverage Results" MODIFIED="1561767660410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__4_.ic" NAME="All in logic-simulator.test (4) Coverage Results" MODIFIED="1561771356456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator__1_.ic" NAME="All in logic-simulator (1) Coverage Results" MODIFIED="1561762274874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/logic_simulator$AndGateTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561771308989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.logic.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__1_.ic" NAME="All in logic-simulator.test (1) Coverage Results" MODIFIED="1561771538333" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$FlipFlopTest_outputShouldChangeWhenClockChangesFromLowToHigh.ic" NAME="FlipFlopTest.outputShouldChangeWhenClockChangesFromLowToHigh Coverage Results" MODIFIED="1564328947327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/logic_simulator$FlipFlopTest.ic" NAME="FlipFlopTest Coverage Results" MODIFIED="1564330082092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$AndLogicUnitTest.ic" NAME="AndGateTest Coverage Results" MODIFIED="1561768800653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
@@ -735,19 +738,9 @@
       <FILTER>com.darchan.elements.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator__2_.ic" NAME="All in logic-simulator (2) Coverage Results" MODIFIED="1561762334536" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/logic_simulator$LogicSignalTest_constructorShouldRegisterListenersForInputSignals.ic" NAME="LogicSignalTest.constructorShouldRegisterListenersForInputSignals Coverage Results" MODIFIED="1561763231114" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/logic_simulator$ValidationTest.ic" NAME="ValidationTest Coverage Results" MODIFIED="1561769790904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.com.darchan.validation.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/logic_simulator$RegisterTest_eachOutputShouldHaveSuppliedInitialValueWith16BitRegister.ic" NAME="RegisterTest.eachOutputShouldHaveSuppliedInitialValueWith16BitRegister Coverage Results" MODIFIED="1564333067422" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
-    </SUITE>
     <SUITE FILE_PATH="coverage/logic_simulator$UnexpectedBusWidthExceptionTest.ic" NAME="UnexpectedBusWidthExceptionTest Coverage Results" MODIFIED="1561770286730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.com.darchan.com.darchan.validation.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/logic_simulator$All_in_logic_simulator_test__3_.ic" NAME="All in logic-simulator.test (3) Coverage Results" MODIFIED="1561770992100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$logic_simulator__build_.ic" NAME="logic-simulator [build] Coverage Results" MODIFIED="1561762166132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/logic_simulator$RegisterTest.ic" NAME="RegisterTest Coverage Results" MODIFIED="1564333664672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>com.darchan.elements.impl.com.darchan.elements.impl.comp.*</FILTER>
@@ -1110,16 +1103,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="21" column="7" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/elements/impl/comp/RegisterTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
@@ -1132,8 +1115,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/Register.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="58" column="68" selection-start-line="58" selection-start-column="68" selection-end-line="58" selection-end-column="68" />
+        <state relative-caret-position="361">
+          <caret line="53" column="35" lean-forward="true" selection-start-line="53" selection-start-column="35" selection-end-line="53" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1869#1870#0" expanded="true" />
@@ -1144,6 +1127,72 @@
             <element signature="e#2093#2094#0" expanded="true" />
             <element signature="e#2155#2156#0" expanded="true" />
             <element signature="e#2197#2198#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/Cpu.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#342#343#0" expanded="true" />
+            <element signature="e#369#370#0" expanded="true" />
+            <element signature="e#430#431#0" expanded="true" />
+            <element signature="e#457#458#0" expanded="true" />
+            <element signature="e#505#506#0" expanded="true" />
+            <element signature="e#532#533#0" expanded="true" />
+            <element signature="e#594#595#0" expanded="true" />
+            <element signature="e#621#622#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/util/Util.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="25" column="5" lean-forward="true" selection-start-line="25" selection-start-column="5" selection-end-line="25" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/cpu/intel8080/RegisterFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="12" lean-forward="true" selection-start-line="14" selection-start-column="12" selection-end-line="40" selection-end-column="7" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1222#1223#0" expanded="true" />
+            <element signature="e#1249#1250#0" expanded="true" />
+            <element signature="e#1310#1311#0" expanded="true" />
+            <element signature="e#1337#1338#0" expanded="true" />
+            <element signature="e#1385#1386#0" expanded="true" />
+            <element signature="e#1412#1413#0" expanded="true" />
+            <element signature="e#1474#1475#0" expanded="true" />
+            <element signature="e#1501#1502#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/darchan/elements/impl/comp/FlipFlop.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5">
+          <caret line="34" column="7" lean-forward="true" selection-start-line="34" selection-start-column="7" selection-end-line="34" selection-end-column="7" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/darchan/elements/impl/com/darchan/util/UtilTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="24" column="22" selection-start-line="24" selection-start-column="22" selection-end-line="24" selection-end-column="22" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

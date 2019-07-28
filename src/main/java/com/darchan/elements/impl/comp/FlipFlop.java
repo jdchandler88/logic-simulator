@@ -20,7 +20,7 @@ public class FlipFlop implements IComponent {
     /**
      * clock
      */
-    private final IClock clk;
+    private final ISignal clk;
 
     /**
      * signal on the output bus
@@ -37,7 +37,7 @@ public class FlipFlop implements IComponent {
      * @param clk clock
      * @param inputBus input signals
      */
-    public FlipFlop(IClock clk, IBus inputBus, boolean initialValue) {
+    public FlipFlop(ISignal clk, IBus inputBus, boolean initialValue) {
         this.clk = clk;
         this.inputBus = inputBus;
         //initialize outputs
