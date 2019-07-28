@@ -1,18 +1,18 @@
-package com.darchan.elements.impl.com.darchan;
+package com.darchan.elements.impl;
 
 import com.darchan.elements.impl.AbstractSignal;
 
 /**
  * Class used for test. This signal can be used to set values explicitly
  */
-public class TestSignal extends AbstractSignal {
+public class SimpleSignal extends AbstractSignal {
 
 
-    public TestSignal(boolean initialState) {
+    public SimpleSignal(boolean initialState) {
         super(initialState);
     }
 
-    public void setValue(boolean value) {
+    public void setOn(boolean value) {
         this.setState(value);
     }
 

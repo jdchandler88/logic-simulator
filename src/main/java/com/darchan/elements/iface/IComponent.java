@@ -2,8 +2,12 @@ package com.darchan.elements.iface;
 
 public interface IComponent {
 	 
-	public IBus getInputBus();
+	IBus getInputBus();
+
+	IRange getAllowedInputBusWidth();
 	
-	public IBus getOutputBus();
+	IBus getOutputBus();
+
+	IRange getAllowedOutputBusWidth();
 		
 }
