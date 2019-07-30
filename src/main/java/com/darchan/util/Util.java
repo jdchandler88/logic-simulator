@@ -3,6 +3,7 @@ package com.darchan.util;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IRange;
 import com.darchan.elements.iface.ISignal;
+import com.darchan.elements.iface.ISignalChangeListener;
 import com.darchan.elements.impl.Bus;
 
 /**
@@ -15,7 +16,7 @@ public final class Util {
      */
     private Util() {}
 
-    public static IBus getSubBus(IRange signalRange, IBus bus) {
+    public static IBus sliceBus(IRange signalRange, IBus bus) {
         int numSignals = signalRange.getMax() - signalRange.getMin() + 1;
         ISignal[] splice = new ISignal[numSignals];
         int signalIdx = signalRange.getMin();

@@ -1,11 +1,10 @@
-package com.darchan.elements.impl.com.darchan.elements.impl.comp;
+package com.darchan.elements.impl.comp;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.Clock;
 import com.darchan.elements.impl.SimpleSignal;
-import com.darchan.elements.impl.comp.FlipFlop;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

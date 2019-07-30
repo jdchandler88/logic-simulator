@@ -3,6 +3,9 @@ package com.darchan.elements.impl.comp.cpu.intel8080;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.iface.IRange;
+import com.darchan.elements.iface.ISignal;
+import com.darchan.elements.impl.Bus;
+import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.comp.Register;
 
 /**
@@ -12,33 +15,62 @@ import com.darchan.elements.impl.comp.Register;
  */
 public class RegisterFile implements IComponent {
 
-//    private final Register F;
-//
-//    private final Register A;
-//
-//    private final Register B;
-//
-//    private final Register C;
-//
-//    private final Register D;
-//
-//    private final Register E;
-//
-//    private final Register H;
-//
-//    private final Register L;
-//
-//
-//    public RegisterFile(IBus inputBus) {
-//        this.F = new Register(inputBus.getSignals().get(23), fData, false);
-//        this.A = new Register(aLatch, aData, false);
-//        this.B = new Register(bLatch, bData, false);
-//        this.C = new Register(cLatch, cData, false);
-//        this.D = new Register(dLatch, dData, false);
-//        this.E = new Register(eLatch, eData, false);
-//        this.H = new Register(hLatch, hData, false);
-//        this.L = new Register(lLatch, lData, false);
-//    }
+    //input bus should be exactly 24 bits wide. 8 for 'select/enable/latch' and 16 for data
+    private static final IRange ALLOWED_INPUT_BUS_WIDTH = new SimpleRange(24, 24);
+
+    //output bus should be exactly 16 bits wide. 8 bits for flags and 8 bits from the accumulator
+    private static final IRange ALLOWED_OUTPUT_BUS_WIDTH = new SimpleRange(8, 8);
+
+    private final IBus inputBus;
+
+    private final IBus outputBus;
+
+    final Register F;
+
+    final Register A;
+
+    final Register B;
+
+    final Register C;
+
+    final Register D;
+
+    final Register E;
+
+    final Register H;
+
+    final Register L;
+
+
+    public RegisterFile(IBus inputBus) {
+        //validate that input bus is the correct width
+
+        this.inputBus = inputBus;
+
+        //get shared bus
+        IBus highBus = inputBus.slice(new SimpleRange(8, 15));
+        IBus lowBus = inputBus.slice(new SimpleRange(0, 7));
+
+        //initialize registers
+        this.F = new Register(inputBus.getSignal(23), highBus, false);
+        this.A = new Register(inputBus.getSignal(22), lowBus, false);
+        this.B = new Register(inputBus.getSignal(21), highBus, false);
+        this.C = new Register(inputBus.getSignal(20), lowBus, false);
+        this.D = new Register(inputBus.getSignal(19), highBus, false);
+        this.E = new Register(inputBus.getSignal(18), lowBus, false);
+        this.H = new Register(inputBus.getSignal(17), highBus, false);
+        this.L = new Register(inputBus.getSignal(16), lowBus, false);
+
+        //output is F/A?
+        ISignal[] outputSignals = new ISignal[16];
+        for (int i=0; i<8; i++) {
+            outputSignals[i] = this.F.getOutputBus().getSignal(i);
+            outputSignals[i+8] = this.A.getOutputBus().getSignal(i);
+        }
+        this.outputBus = new Bus(outputSignals);
+
+
+    }
 
     /**
      * latch and 8-bit-input for each register in the following order: F,A,B,C,D,E,H,L
@@ -47,21 +79,21 @@ public class RegisterFile implements IComponent {
      */
     @Override
     public IBus getInputBus() {
-        return null;
+        return this.inputBus;
     }
 
     @Override
     public IRange getAllowedInputBusWidth() {
-        return null;
+        return ALLOWED_INPUT_BUS_WIDTH;
     }
 
     @Override
     public IBus getOutputBus() {
-        return null;
+        return this.outputBus;
     }
 
     @Override
     public IRange getAllowedOutputBusWidth() {
-        return null;
+        return ALLOWED_OUTPUT_BUS_WIDTH;
     }
 }

@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.darchan.elements.iface.IBus;
+import com.darchan.elements.iface.IRange;
 import com.darchan.elements.iface.ISignal;
+import com.darchan.util.Util;
 
 public class Bus implements IBus {
 
@@ -18,6 +20,16 @@ public class Bus implements IBus {
 	@Override
 	public List<ISignal> getSignals() {
 		return this.signals;
+	}
+
+	@Override
+	public IBus slice(IRange range) {
+		return Util.sliceBus(range, this);
+	}
+
+	@Override
+	public ISignal getSignal(int idx) {
+		return this.signals.get(idx);
 	}
 
 }

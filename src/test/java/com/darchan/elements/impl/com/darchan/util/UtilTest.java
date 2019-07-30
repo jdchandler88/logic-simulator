@@ -7,7 +7,6 @@ import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.SimpleSignal;
 import com.darchan.util.Util;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -35,20 +34,20 @@ class UtilTest {
         }
         IBus busToSlice = new Bus(sigs);
 
-        //slice the bus
-        IBus result = Util.getSubBus(range, busToSlice);
+        //sliceBus the bus
+        IBus result = Util.sliceBus(range, busToSlice);
 
-        //need to get values from slice to test
+        //need to get values from sliceBus to test
         int rangeWidth = range.getMax() - range.getMin();
         assertEquals(collectValuesFromBus(range, busToSlice), collectValuesFromBus(new SimpleRange(0, rangeWidth), result));
 
-        //sweep in 8-bit slices across the bus to see if we're getting the correct range from the slice util
+        //sweep in 8-bit slices across the bus to see if we're getting the correct range from the sliceBus util
         int numBitsInSweep = 8;
         int numSweeps = busWidth/numBitsInSweep;
         for (int i=0; i<numSweeps; i++) {
             int start = i*numBitsInSweep;
             int end = start + numBitsInSweep - 1;
-            IBus slice = Util.getSubBus(new SimpleRange(start, end), busToSlice);
+            IBus slice = Util.sliceBus(new SimpleRange(start, end), busToSlice);
         }
     }
 

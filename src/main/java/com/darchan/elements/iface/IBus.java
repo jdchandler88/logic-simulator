@@ -4,6 +4,10 @@ import java.util.List;
 
 public interface IBus {
 
-	public List<ISignal> getSignals();
+	List<ISignal> getSignals();
+
+	IBus slice(IRange range);
+
+	ISignal getSignal(int idx);
 	
 }
