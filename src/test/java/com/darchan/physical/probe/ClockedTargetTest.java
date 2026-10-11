@@ -1,6 +1,8 @@
 package com.darchan.physical.probe;
 
 import com.darchan.diag.Snapshot;
+import com.darchan.diag.compare.GoldenTrace;
+import com.darchan.diag.compare.GoldenTraceResult;
 import com.darchan.diag.compare.Lockstep;
 import com.darchan.diag.compare.LockstepResult;
 import com.darchan.diag.run.Debugger;
@@ -8,7 +10,9 @@ import com.darchan.diag.run.StopReason;
 import com.darchan.diag.trace.InMemoryTrace;
 import com.darchan.physical.comp.Counter;
 import com.darchan.physical.comp.Register;
+import com.darchan.physical.signal.Bus;
 import com.darchan.physical.signal.Clock;
+import com.darchan.physical.signal.SimpleSignal;
 import com.darchan.physical.signal.IBus;
 import com.darchan.physical.signal.Wire;
 import com.darchan.physical.sim.Simulator;
@@ -105,6 +109,65 @@ class ClockedTargetTest {
         Simulator s2 = new Simulator();
         assertThrows(IllegalArgumentException.class, () -> new ClockedTarget("x", new Clock(s2, true), new ProbeSet(s2)));
     }
+    /** a 4-bit register loading a bus whose low nibble is driven and whose high bit floats or fights */
+    private static final class UnknownBits {
+        final Simulator sim = new Simulator();
+        final Clock clk = new Clock(sim, false);
+        final SimpleSignal[] drivers = new SimpleSignal[]{new SimpleSignal(sim, true), new SimpleSignal(sim, false),
+                new SimpleSignal(sim, false), new SimpleSignal(sim, false)};
+        final Wire[] bus = {new Wire(sim), new Wire(sim), new Wire(sim), new Wire(sim)};
+        final ProbeSet probes = new ProbeSet(sim);
+        final ClockedTarget target;
+
+        UnknownBits() {
+            for (int i = 0; i < 3; i++) {
+                bus[i].connect(drivers[i]);
+            }
+            // bus[3] has no driver until the stimulus adds two fighting ones
+            Register reg = new Register(sim, clk, new Bus(bus), null, false, "r");
+            sim.settle();
+            probes.add("B", new Bus(bus));
+            probes.add("R", reg.getOutputBus());
+            target = new ClockedTarget("bits", clk, probes);
+        }
+    }
+
+    @Test
+    void traceColumnsShowZAndX() {
+        UnknownBits c = new UnknownBits();
+        InMemoryTrace trace = new InMemoryTrace();
+        new Debugger(c.target, null).addTraceListener(trace);
+        c.target.step();
+        c.target.step();
+        // the bus's top bit floats: 4 bits, one digit, mixed known/Z: '?'; the register latched it as X
+        assertEquals("000000000000 000000000000 0000:     CLK            B=? R=0", trace.lines().get(0));
+        assertEquals("000000000001 000000000001 0000:     CLK            B=? R=?", trace.lines().get(1));
+        assertEquals(0x8, c.target.snapshot().value("R.X"));
+    }
+
+    @Test
+    void aGoldenZeroAgainstALiveXIsAMismatch() {
+        UnknownBits c = new UnknownBits();
+        for (int i = 0; i < 3; i++) {
+            c.bus[3].connect(c.drivers[i]); // drives 1, 0, 0: conflicting, so X
+        }
+        c.sim.settle();
+        String golden = "000000000000 000000000000 0000:     CLK            B=1 R=0\n";
+        GoldenTraceResult r = GoldenTrace.ofText("golden", golden).compare(new Debugger(c.target, null), 10);
+        assertFalse(r.matched(), r::report);
+        assertTrue(r.mismatch().differingColumns().contains("B: expected 1, actual ?"),
+                r.mismatch().differingColumns().toString());
+        // and the state a run stops in is rendered the same way when compared with the next golden line
+        UnknownBits d = new UnknownBits();
+        Debugger dbg = new Debugger(d.target, null);
+        dbg.step(1);
+        GoldenTraceResult stopped = GoldenTrace.ofText("golden",
+                "000000000001 000000000001 0000:     CLK            B=1 R=1\n").compare(dbg, 0);
+        assertFalse(stopped.matched(), stopped::report);
+        assertTrue(stopped.mismatch().differingColumns().contains("R: expected 1, actual ?"),
+                stopped.mismatch().differingColumns().toString());
+    }
+
     @Test
     void lockstepCompareOnlySeesAFloatingBus() {
         // reference: a bus driven to 0000; candidate: a bus nobody drives (all Z, which reads as 0000)

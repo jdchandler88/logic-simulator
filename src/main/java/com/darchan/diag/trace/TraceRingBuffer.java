@@ -1,6 +1,7 @@
 package com.darchan.diag.trace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,10 +16,14 @@ public final class TraceRingBuffer implements TraceListener {
     private TraceLayout layout;
     private InstructionDecoder decoder;
     private int regCount;
+    private boolean masks;
 
     /** per slot: cycle, instruction */
     private final long[] counters;
-    /** per slot ({@code stride} ints): pc, length (negative for an interrupt), packed bytes, registers */
+    /**
+     * per slot ({@code stride} ints): pc, length (negative for an interrupt), packed bytes, registers, then (layouts
+     * with unknown bits only) the registers' Z masks and X masks
+     */
     private int[] data = new int[0];
     private int stride;
 
@@ -51,6 +56,10 @@ public final class TraceRingBuffer implements TraceListener {
         int[] src = e.rawRegisters();
         int at = base + 3;
         System.arraycopy(src, 0, d, at, regCount);
+        if (masks) {
+            System.arraycopy(e.rawZ(), 0, d, at + regCount, regCount);
+            System.arraycopy(e.rawX(), 0, d, at + 2 * regCount, regCount);
+        }
         next = slot + 1 == capacity ? 0 : slot + 1;
         total++;
         if (held < capacity) {
@@ -62,7 +71,8 @@ public final class TraceRingBuffer implements TraceListener {
         layout = e.layout();
         decoder = e.decoder();
         regCount = layout.registers().size();
-        stride = 3 + regCount;
+        masks = layout.unknownBits();
+        stride = 3 + regCount * (masks ? 3 : 1);
         data = new int[capacity * stride];
         next = 0;
         total = 0;
@@ -122,8 +132,17 @@ public final class TraceRingBuffer implements TraceListener {
             int packed = data[base + 2];
             String disassembly = TraceEvent.decode(decoder, pc, packed, len);
             sb.setLength(0);
-            TraceFormatter.append(sb, layout, counters[2 * slot], counters[2 * slot + 1], pc, interrupt,
-                    packed, len, disassembly, data, base + 3);
+            if (masks) {
+                // the masks sit regCount and 2 * regCount after the registers: pass shifted views of the slot
+                int[] z = Arrays.copyOfRange(data, base + 3 + regCount, base + 3 + 2 * regCount);
+                int[] x = Arrays.copyOfRange(data, base + 3 + 2 * regCount, base + 3 + 3 * regCount);
+                int[] regs = Arrays.copyOfRange(data, base + 3, base + 3 + regCount);
+                TraceFormatter.append(sb, layout, counters[2 * slot], counters[2 * slot + 1], pc, interrupt,
+                        packed, len, disassembly, regs, z, x, 0);
+            } else {
+                TraceFormatter.append(sb, layout, counters[2 * slot], counters[2 * slot + 1], pc, interrupt,
+                        packed, len, disassembly, data, base + 3);
+            }
             out.add(sb.toString());
         }
         return out;

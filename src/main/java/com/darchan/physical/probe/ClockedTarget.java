@@ -60,7 +60,8 @@ import java.util.function.LongSupplier;
  * <p>Tracing: with a listener attached, every step reports the state before the cycle as a {@link TraceEvent}
  * whose registers are the probes (or a chosen subset, {@link #setTraceRegisters}); a program counter and an
  * instruction (bytes + decoder) can be supplied by whatever sequences the circuit (a testbench "control unit") so
- * trace lines read like a CPU's. Without them the PC column is 0 and the disassembly is {@code CLK}.
+ * trace lines read like a CPU's. Without them the PC column is 0 and the disassembly is {@code CLK}. Z and X bits
+ * of the traced probes show as {@code z}, {@code x} or {@code ?} digits (see {@code TraceFormatter}).
  */
 public final class ClockedTarget implements DebugTarget {
 
@@ -287,7 +288,8 @@ public final class ClockedTarget implements DebugTarget {
                 }
             }
             traceProbes = specs.stream().map(r -> probes.get(r.name())).toArray(Probe[]::new);
-            traceEvent = new TraceEvent(new TraceLayout(machine, pcWidth, maxInstructionLength, 14, specs), decoder);
+            traceEvent = new TraceEvent(new TraceLayout(machine, pcWidth, maxInstructionLength, 14, specs, true),
+                    decoder);
         }
         return traceEvent.layout();
     }
@@ -298,7 +300,8 @@ public final class ClockedTarget implements DebugTarget {
         e.begin(cycles, steps, programCounter.getAsInt(), false);
         e.setBytes(instructionBytes.getAsInt(), instructionLength.getAsInt());
         for (int i = 0; i < traceProbes.length; i++) {
-            e.setRegister(i, (int) traceProbes[i].read().value());
+            ProbeValue v = traceProbes[i].read();
+            e.setRegister(i, (int) v.value(), (int) v.z(), (int) v.x());
         }
         trace.onInstruction(e);
     }

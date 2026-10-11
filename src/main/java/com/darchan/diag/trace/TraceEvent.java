@@ -20,6 +20,9 @@ public final class TraceEvent {
     private final TraceLayout layout;
     private final InstructionDecoder decoder;
     private final int[] registers;
+    /** per register: Z and X bit masks, or null for a layout without {@link TraceLayout#unknownBits()} */
+    private final int[] zMasks;
+    private final int[] xMasks;
     /** instruction bytes packed little-endian: byte i in bits 8i..8i+7 */
     private int bytes;
     private long cycle;
@@ -33,6 +36,8 @@ public final class TraceEvent {
         this.layout = Objects.requireNonNull(layout, "layout");
         this.decoder = Objects.requireNonNull(decoder, "decoder");
         this.registers = new int[layout.registers().size()];
+        this.zMasks = layout.unknownBits() ? new int[registers.length] : null;
+        this.xMasks = layout.unknownBits() ? new int[registers.length] : null;
     }
 
     // ---- producer side -------------------------------------------------------------------------------------
@@ -78,6 +83,27 @@ public final class TraceEvent {
 
     public void setRegister(int index, int value) {
         registers[index] = value;
+        if (zMasks != null) {
+            zMasks[index] = 0;
+            xMasks[index] = 0;
+        }
+    }
+
+    /**
+     * Sets a register with high-impedance and unknown bits (layouts with {@link TraceLayout#unknownBits()} only).
+     *
+     * @param value known bits that are 1
+     * @param z     bits that are Z
+     * @param x     bits that are X
+     * @throws IllegalStateException if the layout has no unknown bits
+     */
+    public void setRegister(int index, int value, int z, int x) {
+        if (zMasks == null) {
+            throw new IllegalStateException("the " + layout.cpu() + " trace layout has no Z/X masks");
+        }
+        registers[index] = value;
+        zMasks[index] = z;
+        xMasks[index] = x;
     }
 
     // ---- consumer side -------------------------------------------------------------------------------------
@@ -141,6 +167,16 @@ public final class TraceEvent {
         throw new IllegalArgumentException("no register " + name + " in " + layout.cpu() + " trace");
     }
 
+    /** the Z mask of register {@code index} (0 if the layout has none) */
+    public int registerZ(int index) {
+        return zMasks == null ? 0 : zMasks[index];
+    }
+
+    /** the X mask of register {@code index} (0 if the layout has none) */
+    public int registerX(int index) {
+        return xMasks == null ? 0 : xMasks[index];
+    }
+
     public String disassembly() {
         if (disassembly == null) {
             disassembly = decode(decoder, pc, bytes, length);
@@ -155,6 +191,10 @@ public final class TraceEvent {
         c.bytes = bytes;
         c.length = length;
         System.arraycopy(registers, 0, c.registers, 0, registers.length);
+        if (zMasks != null) {
+            System.arraycopy(zMasks, 0, c.zMasks, 0, zMasks.length);
+            System.arraycopy(xMasks, 0, c.xMasks, 0, xMasks.length);
+        }
         c.disassembly = disassembly;
         return c;
     }
@@ -178,11 +218,22 @@ public final class TraceEvent {
         return registers;
     }
 
+    /** Z masks, or null */
+    int[] rawZ() {
+        return zMasks;
+    }
+
+    /** X masks, or null */
+    int[] rawX() {
+        return xMasks;
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof TraceEvent e && e.cycle == cycle && e.instruction == instruction && e.pc == pc
                 && e.interrupt == interrupt && e.length == length && e.layout.equals(layout)
-                && e.bytes == bytes && Arrays.equals(e.registers, registers);
+                && e.bytes == bytes && Arrays.equals(e.registers, registers) && Arrays.equals(e.zMasks, zMasks)
+                && Arrays.equals(e.xMasks, xMasks);
     }
 
     @Override

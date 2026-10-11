@@ -3,7 +3,10 @@ package com.darchan.physical.wave;
 import com.darchan.physical.comp.Counter;
 import com.darchan.physical.logic.InverterLogicUnit;
 import com.darchan.physical.probe.ProbeSet;
+import com.darchan.physical.comp.arith.RippleCarryAdder;
 import com.darchan.physical.signal.Bus;
+import com.darchan.physical.signal.ConstantSignal;
+import com.darchan.physical.signal.ISignal;
 import com.darchan.physical.signal.Clock;
 import com.darchan.physical.signal.LogicSignal;
 import com.darchan.physical.signal.LogicValue;
@@ -135,6 +138,35 @@ class VcdWriterTest {
         assertEquals("zx1", r.valueAt("top.bus.data", 0));
         assertEquals("x", r.valueAt("top.bus.en", 1));
         assertEquals("1x1", r.valueAt("top.bus.data", 1));
+    }
+
+    @Test
+    void unknownLevelsPropagatedThroughGatesAppearInTheDump() {
+        // a 4-bit adder, A = 0001 and B = 0001; then A bit 0 floats: the sum's low bits become unknown
+        Simulator s = new Simulator();
+        SimpleSignal a0 = new SimpleSignal(s, true);
+        ISignal[] in = new ISignal[9];
+        in[0] = a0;
+        for (int i = 1; i < 9; i++) {
+            in[i] = i == 4 ? ConstantSignal.ON : ConstantSignal.OFF;
+        }
+        RippleCarryAdder adder = new RippleCarryAdder(s, 4, new Bus(in));
+        s.settle();
+        ProbeSet p = new ProbeSet(s);
+        p.add("a0", a0);
+        p.add("sum", adder.getOutputBus());
+        StringWriter text = new StringWriter();
+        VcdWriter vcd = VcdWriter.builder(p).to(text);
+        a0.setValue(LogicValue.Z);
+        s.settle();
+        a0.setOn(true);
+        s.settle();
+        vcd.close();
+        VcdReader r = new VcdReader(text.toString());
+        assertEquals("00010", r.valueAt("top.sum", 0));
+        assertEquals("z", r.valueAt("top.a0", 1));
+        assertEquals("000xx", r.valueAt("top.sum", 1), "sum bit 0 and the carry into bit 1 are unknown");
+        assertEquals("00010", r.valueAt("top.sum", 2));
     }
 
     @Test

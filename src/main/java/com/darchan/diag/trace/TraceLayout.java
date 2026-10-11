@@ -11,9 +11,19 @@ import java.util.Objects;
  * @param maxInstructionLength longest instruction in bytes, 1..4 (sizes the bytes column)
  * @param disassemblyWidth     the disassembly column is padded to this many characters
  * @param registers            register columns, in order (the PC is its own column and is not listed here)
+ * @param unknownBits          registers may have high-impedance (Z) or unknown (X) bits, given as masks with
+ *                             {@link TraceEvent#setRegister(int, int, int, int)} and shown as described in
+ *                             {@link TraceFormatter} (gate-level models); {@code false} for a CPU model, whose
+ *                             events then carry no masks at all
  */
 public record TraceLayout(String cpu, int pcWidth, int maxInstructionLength, int disassemblyWidth,
-                          List<RegisterSpec> registers) {
+                          List<RegisterSpec> registers, boolean unknownBits) {
+
+    /** A layout without Z/X masks (a CPU model). */
+    public TraceLayout(String cpu, int pcWidth, int maxInstructionLength, int disassemblyWidth,
+                       List<RegisterSpec> registers) {
+        this(cpu, pcWidth, maxInstructionLength, disassemblyWidth, registers, false);
+    }
 
     public TraceLayout {
         Objects.requireNonNull(cpu, "cpu");

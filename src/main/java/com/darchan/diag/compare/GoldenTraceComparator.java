@@ -149,7 +149,8 @@ public final class GoldenTraceComparator implements TraceListener, AutoCloseable
      * watchpoint, halt, cycle limit) before the golden trace ends. A golden line shows the state <em>before</em> an
      * instruction, so it must match the stopped target: the {@code cycle}, {@code instruction} and {@code pc}
      * columns are compared with the target's counters and PC, and every register column with the snapshot field of
-     * the same name, formatted like the golden text. Columns that cannot be rebuilt from the state (the instruction
+     * the same name, formatted like the golden text (with {@code z}/{@code x}/{@code ?} digits for the
+     * {@code NAME.Z}/{@code NAME.X} masks of a gate-level probe). Columns that cannot be rebuilt from the state (the instruction
      * bytes, the disassembly, flag groups such as {@code SZAPC}, registers the snapshot lacks) and ignored columns
      * are skipped. Does nothing if a mismatch was already found, the golden trace is used up, or no column could be
      * compared.
@@ -214,7 +215,15 @@ public final class GoldenTraceComparator implements TraceListener, AutoCloseable
             case "bytes", "disassembly" -> null;
             default -> state.field(c.name())
                     .filter(f -> f.format() == Field.Format.HEX)
-                    .map(f -> padded(Long.toHexString(f.value()).toUpperCase(Locale.ROOT), digits))
+                    .map(f -> {
+                        // a gate-level probe's Z/X masks (NAME.Z, NAME.X) render as z/x/? digits, like the trace
+                        long z = state.field(c.name() + ".Z").map(Field::value).orElse(0L);
+                        long x = state.field(c.name() + ".X").map(Field::value).orElse(0L);
+                        if ((z | x) != 0) {
+                            return TraceFormatter.hex(f.value(), z, x, f.width());
+                        }
+                        return padded(Long.toHexString(f.value()).toUpperCase(Locale.ROOT), digits);
+                    })
                     .orElse(null);
         };
     }
