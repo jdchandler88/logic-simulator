@@ -7,6 +7,8 @@ import com.darchan.physical.signal.SimpleSignal;
 import com.darchan.physical.signal.Wire;
 import com.darchan.physical.comp.Inverter;
 import com.darchan.physical.logic.InverterLogicUnit;
+import com.darchan.physical.logic.NandGate;
+import com.darchan.physical.signal.LogicValue;
 import com.darchan.physical.logic.OrGate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Combinational feedback: stable loops must settle, zero-delay loops that never settle must be reported with an
- * {@link OscillationException} (never a StackOverflowError).
+ * {@link OscillationException} (never a StackOverflowError). Loops start unknown (X) until something drives them to a
+ * known level, as in an HDL simulator.
  */
 class FeedbackCircuitTest {
 
@@ -53,7 +56,9 @@ class FeedbackCircuitTest {
     @Test
     void srLatchSetResetHold() {
         SrLatch latch = new SrLatch();
-        assertNotEquals(latch.q.isOn(), latch.qBar.isOn(), "latch must power up in a valid state");
+        // nothing has set or reset it yet: like in an HDL simulator, an uninitialised latch is unknown
+        assertEquals(LogicValue.X, latch.q.getValue());
+        assertEquals(LogicValue.X, latch.qBar.getValue());
 
         //set
         latch.s.setOn(true);
@@ -99,37 +104,68 @@ class FeedbackCircuitTest {
         assertThrows(OscillationException.class, sim::settle);
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 3, 5})
-    void zeroDelayRingOscillatorThrowsOscillationException(int inverters) {
+    /**
+     * An odd ring of inverting stages whose first stage is NAND(enable, loop): while the enable is 0 the ring holds a
+     * known state, once it is 1 the zero-delay ring oscillates.
+     */
+    private ISignal enabledRing(SimpleSignal enable, int stages) {
         Wire loop = new Wire(sim);
-        ISignal s = loop;
-        for (int i = 0; i < inverters; i++) {
+        ISignal s = new LogicSignal(sim, new Bus(enable, loop), new NandGate());
+        for (int i = 1; i < stages; i++) {
             s = new Inverter(sim, new Bus(s)).getOutputBus().getSignal(0);
         }
         loop.connect(s);
+        return s;
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 3, 5})
+    void zeroDelayRingOscillatorThrowsOscillationException(int stages) {
+        SimpleSignal enable = new SimpleSignal(sim, false);
+        ISignal out = enabledRing(enable, stages);
+        sim.settle();
+        assertTrue(out.getValue().isKnown(), "held in a known state while disabled");
+        enable.setOn(true);
         OscillationException ex = assertThrows(OscillationException.class, sim::settle);
         assertEquals(Simulator.DEFAULT_MAX_DELTA_CYCLES, ex.getDeltaCycles());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {2, 4})
-    void evenRingIsStable(int inverters) {
+    @ValueSource(ints = {1, 3, 5})
+    void anUninitialisedRingIsUnknownAndStable(int inverters) {
+        // with nothing to start from, every node of the ring is X (a floating wire inverts to X): stable, not an
+        // oscillation, exactly as an HDL simulator shows an unreset ring oscillator
         Wire loop = new Wire(sim);
         ISignal s = loop;
-        ISignal first = null;
         for (int i = 0; i < inverters; i++) {
             s = new Inverter(sim, new Bus(s)).getOutputBus().getSignal(0);
-            if (first == null) {
-                first = s;
-            }
         }
         loop.connect(s);
         sim.settle();
-        ISignal firstInverter = first;
+        assertTrue(sim.isQuiescent());
+        assertEquals(LogicValue.X, loop.getValue());
+        assertEquals(LogicValue.X, s.getValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 4})
+    void evenRingIsStable(int stages) {
+        // initialised through a NAND stage (enable 0 forces its output to 1), then released: it keeps that state
+        SimpleSignal enable = new SimpleSignal(sim, false);
+        Wire loop = new Wire(sim);
+        ISignal first = new LogicSignal(sim, new Bus(enable, loop), new NandGate());
+        ISignal s = first;
+        for (int i = 1; i < stages; i++) {
+            s = new Inverter(sim, new Bus(s)).getOutputBus().getSignal(0);
+        }
+        loop.connect(s);
+        sim.settle();
+        enable.setOn(true);
+        sim.settle();
         assertAll(
                 () -> assertTrue(sim.isQuiescent()),
-                () -> assertNotEquals(loop.isOn(), firstInverter.isOn())
+                () -> assertEquals(LogicValue.ONE, first.getValue()),
+                () -> assertEquals(LogicValue.ZERO, loop.getValue())
         );
     }
 }

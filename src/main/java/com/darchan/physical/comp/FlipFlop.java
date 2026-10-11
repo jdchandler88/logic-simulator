@@ -25,6 +25,20 @@ import com.darchan.physical.sim.StateElement;
  * clock and creates a race with flip-flops on the raw clock (as in any delta-cycle HDL simulator). Use a
  * write-enable instead of gating the clock.
  *
+ * <p><b>Unknown levels</b> (see {@link LogicValue}). A Z on D is treated as X. The clock rules follow the pessimistic
+ * choice of a Verilog edge-triggered UDP: a transition that is certainly a rising edge latches D; one that
+ * <em>may</em> be a rising edge leaves Q unchanged only if D equals Q, and otherwise makes Q X; one that cannot be a
+ * rising edge leaves Q alone.
+ * <table>
+ *     <caption>Q after a clock transition</caption>
+ *     <tr><th>clock</th><th>Q becomes</th></tr>
+ *     <tr><td>0 &rarr; 1</td><td>D (X if D is Z or X)</td></tr>
+ *     <tr><td>0 &rarr; X/Z, X/Z &rarr; 1</td><td>Q if D equals Q, otherwise X</td></tr>
+ *     <tr><td>1 &rarr; 0, 1 &rarr; X/Z, X/Z &rarr; 0, X &harr; Z</td><td>Q (unchanged)</td></tr>
+ * </table>
+ * With a write enable, an unknown enable makes the gate-level multiplexer in front of D produce X (even where D
+ * equals Q: the gates see each input separately), so an unknown enable at a rising edge latches X.
+ *
  * <p>A flip-flop is a {@link StateElement}: it registers itself with its simulator at construction (unless it is
  * part of a {@link Register} or {@link Counter}, which register themselves as one element), under the name given
  * or an automatic {@code ff<n>}. {@link #get}/{@link #force} read and overwrite the stored level.
@@ -198,21 +212,39 @@ public class FlipFlop implements IComponent, StateElement {
     }
 
     /**
-     * implementation of signal change listener that propagates input to output ONLY WHEN the
-     * input clock goes from low->high. A rising edge is any change to 1 from a value that is not 1 (0, Z or X).
-     * The sampled value is copied as-is, so Z or X data is captured as Z or X (with a write enable, D passes
-     * through gates first, which read Z/X as 0).
+     * Latches on rising clock edges, with the pessimistic (Verilog UDP style) treatment of unknown clocks described
+     * in the class comment.
      */
     private class PosEdgeClockListener implements ISignalChangeListener {
 
         @Override
         public void signalChanged(boolean oldValue, boolean newValue) {
-            // only act on pos-edge clock
-            if (!oldValue && newValue) {
-                //latch the input value to the output
-                FlipFlop.this.outputSignal.setValue(FlipFlop.this.sampled.getValue());
-            }
+            //not used: valueChanged is overridden so Z/X clock levels are seen too
         }
+
+        @Override
+        public void valueChanged(LogicValue oldValue, LogicValue newValue) {
+            LogicValue d = FlipFlop.this.sampled.getValue();
+            if (!d.isKnown()) {
+                d = LogicValue.X; //Z on D is a floating input: unknown
+            }
+            if (oldValue == LogicValue.ZERO && newValue == LogicValue.ONE) {
+                //a real rising edge: latch D
+                FlipFlop.this.outputSignal.setValue(d);
+            } else if (mayBeRisingEdge(oldValue, newValue)) {
+                //it may or may not have been a rising edge: Q is unchanged only if loading D would not change it
+                LogicValue q = FlipFlop.this.outputSignal.getValue();
+                if (d != q) {
+                    FlipFlop.this.outputSignal.setValue(LogicValue.X);
+                }
+            }
+            //anything else (falling edges, 1 -> X/Z, X/Z -> 0, X <-> Z) cannot be a rising edge: Q holds
+        }
+    }
+
+    /** 0 -> X/Z or X/Z -> 1: the clock may have risen */
+    static boolean mayBeRisingEdge(LogicValue from, LogicValue to) {
+        return (from == LogicValue.ZERO && !to.isKnown()) || (!from.isKnown() && to == LogicValue.ONE);
     }
 
 }

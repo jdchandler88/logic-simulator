@@ -86,7 +86,8 @@ public final class AluDatapathCosim {
 
         ISignal[] in = new ISignal[30];
         for (int i = 0; i < in.length; i++) {
-            in[i] = new SimpleSignal(sim, false);
+            // until the first instruction is decoded, operand B comes from the immediate (0) so no net is unknown
+            in[i] = new SimpleSignal(sim, i == AluDatapath.USE_IMM.getMin());
         }
         controls = new Bus(in);
         datapath = new AluDatapath(sim, clock, controls, operandBTap, "dp");
@@ -180,8 +181,10 @@ public final class AluDatapathCosim {
         boolean flagsWe = false;
         switch (hi) {
             case 0 -> {
+                // NOP selects no source register, so operand B comes from the (unused) immediate rather than
+                // from the source selector, whose outputs float when nothing is selected (Z, which gates see as X)
+                useImm = true;
                 if (op != 0x00) { // MVI r,n
-                    useImm = true;
                     passB = true;
                     we = slotBit(mid);
                 }

@@ -151,11 +151,16 @@ public final class Simulator {
     /**
      * Registers a storage element (called by storage components at construction).
      *
-     * @throws IllegalArgumentException if its name is malformed or already used in this simulator
+     * @throws IllegalArgumentException if its name is malformed, ends in a segment {@code Z} or {@code X}, or is
+     *                                  already used in this simulator
      */
     public void register(StateElement element) {
         String name = element.name();
         checkName(name);
+        if (name.equals("Z") || name.equals("X") || name.endsWith(".Z") || name.endsWith(".X")) {
+            throw new IllegalArgumentException("a storage element's last name segment may not be Z or X (reserved for"
+                    + " the Z/X mask fields of snapshots): " + name);
+        }
         if (elementNames.contains(name)) {
             throw new IllegalArgumentException("a storage element called " + name + " already exists");
         }

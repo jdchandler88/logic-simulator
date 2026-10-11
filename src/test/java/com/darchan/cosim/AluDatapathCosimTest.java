@@ -58,6 +58,25 @@ class AluDatapathCosimTest {
     }
 
     @Test
+    void aProperlyDrivenDatapathNeverShowsZOrX() {
+        AluDatapathCosim cosim = new AluDatapathCosim(randomProgram(8080, 1500));
+        assertNoUnknowns(cosim, "initially");
+        for (int i = 0; i < 1500; i++) {
+            cosim.gateLevel().step();
+            assertNoUnknowns(cosim, "after step " + (i + 1));
+        }
+    }
+
+    private static void assertNoUnknowns(AluDatapathCosim cosim, String when) {
+        for (var p : cosim.probes().probes()) {
+            assertTrue(p.read().isKnown(), () -> p.name() + " = " + p.read() + " " + when);
+        }
+        for (String field : cosim.gateLevel().snapshot().fieldNames()) {
+            assertFalse(field.endsWith(".Z") || field.endsWith(".X"), () -> field + " " + when);
+        }
+    }
+
+    @Test
     void aStuckAtFaultIsCaughtAtTheFirstInstructionThatExercisesIt() {
         byte[] program = bytes(
                 0x06, 0x05,   // MVI B,05H

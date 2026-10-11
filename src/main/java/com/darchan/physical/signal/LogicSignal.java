@@ -11,7 +11,8 @@ import com.darchan.physical.sim.Simulator;
  * result is scheduled onto this signal, either in the next delta cycle (zero delay, the default) or after a
  * propagation delay in simulated time units (transport delay).
  *
- * <p>The input width is validated against the unit at construction
+ * <p>The unit is evaluated four-valued ({@link ILogicUnit#evaluateValue}), so Z and X inputs propagate as described
+ * in {@link LogicValue}. The input width is validated against the unit at construction
  * ({@link com.darchan.physical.validation.UnexpectedBusWidthException}). The initial value is the unit evaluated on the
  * inputs' values at construction time.
  */
@@ -51,9 +52,9 @@ public class LogicSignal extends AbstractSignal {
         }
     }
 
-    private static boolean validateAndEvaluate(IBus inputBus, ILogicUnit logicUnit) {
+    private static LogicValue validateAndEvaluate(IBus inputBus, ILogicUnit logicUnit) {
         logicUnit.validateInputBus(inputBus);
-        return logicUnit.evaluate(inputBus);
+        return logicUnit.evaluateValue(inputBus);
     }
 
     private void listenForSignalChange(boolean oldValue, boolean newValue) {
@@ -62,11 +63,11 @@ public class LogicSignal extends AbstractSignal {
             return;
         }
         this.lastEvaluatedDelta = currentDelta;
-        boolean value = this.logicUnit.evaluate(this.inputBus);
+        LogicValue value = this.logicUnit.evaluateValue(this.inputBus);
         if (this.delay == 0) {
-            this.setState(value);
+            this.scheduleValue(value);
         } else {
-            this.sim.scheduleAfter(this.delay, () -> this.setState(value));
+            this.sim.scheduleAfter(this.delay, () -> this.scheduleValue(value));
         }
     }
 

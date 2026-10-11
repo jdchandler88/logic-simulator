@@ -7,8 +7,6 @@ import com.darchan.physical.signal.SimpleRange;
 import com.darchan.physical.signal.SimpleSignal;
 import com.darchan.physical.sim.Simulator;
 
-import java.util.Collections;
-import java.util.stream.IntStream;
 
 /**
  * Class that is a multiplexer for 8-bit buses. The input consists of an 8-bit select signal and 8 8-bit buses. The
@@ -16,7 +14,9 @@ import java.util.stream.IntStream;
  *
  * <p>Input bus (72 bits): data bus {@code n} at {@code [8n+7:8n]} for n = 0..7, one-hot select at {@code [71:64]}
  * (bit {@code 64+n} selects data bus {@code n}; if several are set, the highest wins). Output bus (8 bits): the
- * selected data bus, or high impedance ({@link LogicValue#Z}) when no select bit is set.
+ * selected data bus, or high impedance ({@link LogicValue#Z}) when no select bit is set, or unknown
+ * ({@link LogicValue#X}) when a select bit that could decide the selection (above the highest 1, or any when none is
+ * 1) is Z or X.
  */
 public class BusSelector8By8Bit implements IComponent {
 
@@ -33,7 +33,8 @@ public class BusSelector8By8Bit implements IComponent {
         DATA_5(new SimpleRange(40, 47)),
         DATA_6(new SimpleRange(48, 55)),
         DATA_7(new SimpleRange(56, 63)),
-        FLOATING(new SimpleRange(-1, -1));
+        FLOATING(new SimpleRange(-1, -1)),
+        UNKNOWN(new SimpleRange(-1, -1));
 
         /**
          * range represented by enum value
@@ -156,8 +157,8 @@ public class BusSelector8By8Bit implements IComponent {
     }
 
     private void assignInputToOutputBus(DATA_SELECTOR selector) {
-        //remove listeners from previously-selected input IF IT's NOT FLOATING! there are no connections when floating
-        if (this.currentDataSelection != DATA_SELECTOR.FLOATING) {
+        //remove listeners from previously-selected input IF IT's NOT FLOATING (or unknown)! there are no connections then
+        if (this.currentDataSelection.getRange().getMin() >= 0) {
             IBus previouslySelectedInput = inputBus.slice(this.currentDataSelection.getRange());
             for (int i=0; i<8; i++) {
                 previouslySelectedInput.getSignal(i).removeSignalChangeListener(this.signalChangeListener);
@@ -167,8 +168,8 @@ public class BusSelector8By8Bit implements IComponent {
         //store the range as selected
         this.currentDataSelection = selector;
 
-        //add change listeners and assign input to output. if the current selection is FLOATING, then don't make any connections
-        if (this.currentDataSelection != DATA_SELECTOR.FLOATING) {
+        //add change listeners and assign input to output. if the current selection is FLOATING (or unknown), then don't make any connections
+        if (this.currentDataSelection.getRange().getMin() >= 0) {
             IBus toAssign = inputBus.slice(this.currentDataSelection.getRange());
             for (int i=0; i<8; i++) {
                 //add signal change listener to current data
@@ -182,10 +183,11 @@ public class BusSelector8By8Bit implements IComponent {
     }
 
     private void updateOutputBus() {
-        if (this.currentDataSelection == DATA_SELECTOR.FLOATING) {
-            //nothing selected: the outputs float (high impedance)
+        if (this.currentDataSelection == DATA_SELECTOR.FLOATING || this.currentDataSelection == DATA_SELECTOR.UNKNOWN) {
+            //nothing selected: the outputs float (high impedance); unknown selection: unknown outputs
+            LogicValue level = this.currentDataSelection == DATA_SELECTOR.FLOATING ? LogicValue.Z : LogicValue.X;
             for (int i=0; i<8; i++) {
-                ((SimpleSignal)this.outputBus.getSignal(i)).setValue(LogicValue.Z);
+                ((SimpleSignal)this.outputBus.getSignal(i)).setValue(level);
             }
         } else {
             IBus toAssign = inputBus.slice(this.currentDataSelection.getRange());
@@ -195,14 +197,21 @@ public class BusSelector8By8Bit implements IComponent {
         }
     }
 
+    /**
+     * The highest select bit that is 1 wins; if a select bit above it (or, with none set, any select bit) is Z or X
+     * the selection is unknown.
+     */
     private static DATA_SELECTOR getSelector(IBus selectSignal) {
-        return IntStream.range(0, selectSignal.getSignals().size())
-                .boxed()
-                .sorted(Collections.reverseOrder())
-                .filter(i -> selectSignal.getSignal(i).isOn())
-                .map(i -> DATA_SELECTOR.values()[i])
-                .findFirst()
-                .orElse(DATA_SELECTOR.FLOATING);
+        for (int i = selectSignal.getSignals().size() - 1; i >= 0; i--) {
+            LogicValue v = selectSignal.getSignal(i).getValue();
+            if (v == LogicValue.ONE) {
+                return DATA_SELECTOR.values()[i];
+            }
+            if (v != LogicValue.ZERO) {
+                return DATA_SELECTOR.UNKNOWN;
+            }
+        }
+        return DATA_SELECTOR.FLOATING;
     }
 
     private IBus getSelectSignals() {

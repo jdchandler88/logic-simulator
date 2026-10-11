@@ -72,24 +72,33 @@ class FlipFlopTest {
         assertEquals(initialValue, ff.getOutputBus().getSignals().get(0).isOn());
     }
 
-    /** A rising edge is any transition to 1 from a value that is not 1 (so Z->1 counts, 1->Z->1 too). */
+    /**
+     * Z -> 1 may or may not be a rising edge: Q keeps its value only if D equals it, otherwise it becomes X (see
+     * {@code XPropagationTest} for every transition).
+     */
     @org.junit.jupiter.api.Test
-    void transitionFromFloatingToHighIsARisingEdge() {
+    void transitionFromFloatingToHighMayBeARisingEdge() {
         SimpleSignal clk = new SimpleSignal(sim, LogicValue.Z);
         FlipFlop ff = new FlipFlop(sim, clk, new Bus(ConstantSignal.ON), false);
         clk.setOn(true);
         sim.settle();
-        assertTrue(ff.getOutputBus().getSignal(0).isOn());
+        assertEquals(LogicValue.X, ff.getOutputBus().getSignal(0).getValue());
+        FlipFlop same = new FlipFlop(sim, clk, new Bus(ConstantSignal.ON), true);
+        clk.setValue(LogicValue.Z);
+        sim.settle();
+        clk.setOn(true);
+        sim.settle();
+        assertEquals(LogicValue.ONE, same.getOutputBus().getSignal(0).getValue(), "D equals Q: no change either way");
     }
 
     @ParameterizedTest
     @CsvSource(value = {"X", "Z"})
-    void flipFlopCapturesUnknownData(LogicValue data) {
+    void flipFlopLatchesUnknownDataAsX(LogicValue data) {
         Clock clk = new Clock(sim, false);
         SimpleSignal in = new SimpleSignal(sim, data);
         FlipFlop ff = new FlipFlop(sim, clk, new Bus(in), true);
         clk.tick();
-        assertEquals(data, ff.getOutputBus().getSignal(0).getValue());
+        assertEquals(LogicValue.X, ff.getOutputBus().getSignal(0).getValue(), "a floating D input is unknown");
     }
 
     @ParameterizedTest

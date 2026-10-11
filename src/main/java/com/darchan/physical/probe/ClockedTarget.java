@@ -124,8 +124,9 @@ public final class ClockedTarget implements DebugTarget {
         this.machine = Objects.requireNonNull(machine);
         this.clock = Objects.requireNonNull(clock);
         this.probes = Objects.requireNonNull(probes);
-        if (clock.isOn()) {
-            throw new IllegalArgumentException("the clock must start low (a step is a rising then a falling edge)");
+        if (clock.getValue() != LogicValue.ZERO) {
+            throw new IllegalArgumentException("the clock must start low (a step is a rising then a falling edge): "
+                    + clock.getValue());
         }
         for (Probe p : probes.probes()) {
             checkNotReserved(p.name(), "a probe");

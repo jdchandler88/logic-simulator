@@ -92,8 +92,9 @@ public class AluDatapath implements IComponent {
      * @param operandBTap replaces the 8-bit operand-B bus (e.g. with one bit tied to a constant); identity for a
      *                    fault-free datapath
      * @param name        prefix of the storage-element names: the register file is {@code <name>.regs}
-     *                    ({@code <name>.regs.A} ...), the flag flip-flops {@code <name>.flags.CY}, {@code .P},
-     *                    {@code .AC}, {@code .Z}, {@code .S}; {@code null} for an automatic {@code datapath<n>}
+     *                    ({@code <name>.regs.A} ...), the flag flip-flops {@code <name>.flag_CY}, {@code flag_P},
+     *                    {@code flag_AC}, {@code flag_Z}, {@code flag_S}; {@code null} for an automatic
+     *                    {@code datapath<n>}
      */
     public AluDatapath(Simulator sim, ISignal clk, IBus inputBus, UnaryOperator<IBus> operandBTap, String name) {
         Validation.validateInputWidth(ALLOWED_INPUT_BUS_WIDTH, inputBus);
@@ -148,7 +149,7 @@ public class AluDatapath implements IComponent {
                 case 1 -> ConstantSignal.ON;
                 case 3, 5 -> ConstantSignal.OFF;
                 default -> new FlipFlop(sim, clk, new Bus(flagIn[bit]), flagsWe, false,
-                        prefix + ".flags." + FLAG_NAMES[bit]).getOutputBus().getSignal(0);
+                        prefix + ".flag_" + FLAG_NAMES[bit]).getOutputBus().getSignal(0);
             };
         }
         this.flags = new Bus(flagOut);

@@ -79,7 +79,7 @@ class GateLevelRestoreTest {
     void namesAreHierarchicalAndStable() {
         List<String> first = datapathStateNames();
         assertEquals(List.of("dp.regs.L", "dp.regs.H", "dp.regs.E", "dp.regs.D", "dp.regs.C", "dp.regs.B",
-                "dp.regs.F", "dp.regs.A", "dp.flags.CY", "dp.flags.P", "dp.flags.AC", "dp.flags.Z", "dp.flags.S"),
+                "dp.regs.F", "dp.regs.A", "dp.flag_CY", "dp.flag_P", "dp.flag_AC", "dp.flag_Z", "dp.flag_S"),
                 first);
         assertEquals(first, datapathStateNames(), "identically built circuits get identical names");
     }
@@ -104,7 +104,7 @@ class GateLevelRestoreTest {
         assertEquals("regfile0.L", names.get(0));
         assertEquals("regfile1.A", names.get(15));
         assertEquals("datapath0.regs.L", names.get(16));
-        assertEquals("datapath0.flags.S", names.get(names.size() - 1));
+        assertEquals("datapath0.flag_S", names.get(names.size() - 1));
     }
 
     @Test
@@ -116,6 +116,9 @@ class GateLevelRestoreTest {
         assertThrows(IllegalArgumentException.class, () -> new FlipFlop(sim, clk, new Bus(d), null, false, "x.y"));
         assertThrows(IllegalArgumentException.class, () -> new FlipFlop(sim, clk, new Bus(d), null, false, "a b"));
         assertThrows(IllegalArgumentException.class, () -> new FlipFlop(sim, clk, new Bus(d), null, false, ".a"));
+        // a last segment Z or X would be mistaken for a snapshot mask field
+        assertThrows(IllegalArgumentException.class, () -> new FlipFlop(sim, clk, new Bus(d), null, false, "f.Z"));
+        assertThrows(IllegalArgumentException.class, () -> new FlipFlop(sim, clk, new Bus(d), null, false, "X"));
         // an automatic name skips names already taken explicitly
         new FlipFlop(sim, clk, new Bus(d), null, false, "ff0");
         assertEquals("ff1", new FlipFlop(sim, clk, new Bus(d), false).name());
@@ -266,10 +269,10 @@ class GateLevelRestoreTest {
         Snapshot otherMachine = Snapshot.builder("other").build();
         assertThrows(IllegalArgumentException.class, () -> a.target.restore(otherMachine));
         Snapshot.Builder missing = Snapshot.builder("dp");
-        before.fields().stream().filter(f -> !f.name().equals("state.dp.flags.Z")).forEach(missing::field);
+        before.fields().stream().filter(f -> !f.name().equals("state.dp.flag_Z")).forEach(missing::field);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> a.target.restore(missing.build()));
-        assertTrue(e.getMessage().contains("state.dp.flags.Z"), e.getMessage());
+        assertTrue(e.getMessage().contains("state.dp.flag_Z"), e.getMessage());
         Snapshot.Builder extra = Snapshot.builder("dp").fields(before.fields()).hex("state.dp.ghost", 1, 1);
         e = assertThrows(IllegalArgumentException.class, () -> a.target.restore(extra.build()));
         assertTrue(e.getMessage().contains("state.dp.ghost"), e.getMessage());

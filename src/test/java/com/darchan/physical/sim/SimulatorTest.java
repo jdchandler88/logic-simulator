@@ -5,7 +5,9 @@ import com.darchan.physical.signal.Bus;
 import com.darchan.physical.signal.LogicSignal;
 import com.darchan.physical.signal.SimpleSignal;
 import com.darchan.physical.signal.Wire;
+import com.darchan.physical.signal.LogicValue;
 import com.darchan.physical.logic.InverterLogicUnit;
+import com.darchan.physical.logic.NandGate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -168,12 +170,17 @@ class SimulatorTest {
 
     @Test
     void ringOscillatorWithDelayOscillatesInSimulatedTime() {
-        //three inverters, delay 1 each: period is 2 * 3 = 6 time units
+        //three inverting stages, delay 1 each: period is 2 * 3 = 6 time units. The first stage is a NAND with an
+        //enable: while the enable is 0 it drives 1, giving the ring a known state (an uninitialised ring is X)
+        SimpleSignal enable = new SimpleSignal(sim, false);
         Wire loop = new Wire(sim);
-        LogicSignal i1 = new LogicSignal(sim, new Bus(loop), new InverterLogicUnit(), 1);
+        LogicSignal i1 = new LogicSignal(sim, new Bus(enable, loop), new NandGate(), 1);
         LogicSignal i2 = new LogicSignal(sim, new Bus(i1), new InverterLogicUnit(), 1);
         LogicSignal i3 = new LogicSignal(sim, new Bus(i2), new InverterLogicUnit(), 1);
         loop.connect(i3);
+        sim.runUntil(10);
+        assertEquals(LogicValue.ONE, i3.getValue(), "held in a known state while disabled");
+        enable.setOn(true);
 
         List<Long> risingEdges = new ArrayList<>();
         i3.addSignalChangeListener((o, n) -> {
@@ -182,7 +189,7 @@ class SimulatorTest {
             }
         });
 
-        sim.runUntil(40);
+        sim.runUntil(50);
 
         assertTrue(risingEdges.size() >= 5, "expected oscillation, edges: " + risingEdges);
         for (int i = 1; i < risingEdges.size(); i++) {

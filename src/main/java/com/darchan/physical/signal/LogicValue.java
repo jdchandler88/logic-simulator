@@ -9,9 +9,18 @@ package com.darchan.physical.signal;
  *     <li>{@link #X}: unknown, e.g. two drivers fighting (one drives 0, the other 1).</li>
  * </ul>
  *
- * <p>{@link #isOn()} is {@code true} only for {@link #ONE}: Z and X read as "not on". This keeps boolean code (all
- * {@link ILogicUnit} gates) simple, at the cost of not propagating X through gates: a gate with a Z or X input treats
- * it as 0. Code that cares about Z/X (bus resolution, tri-state buffers, tests) uses {@link ISignal#getValue()}.
+ * <p>Gates evaluate four-valued ({@link ILogicUnit#evaluateValue}) with the usual pessimistic rules, which
+ * {@link #and}, {@link #or}, {@link #xor} and {@link #not} implement for two operands:
+ * <ul>
+ *     <li>a Z input behaves like X (a floating CMOS input is not a defined level);</li>
+ *     <li>AND: any 0 gives 0, all 1 gives 1, otherwise X. OR: any 1 gives 1, all 0 gives 0, otherwise X. NAND and
+ *     NOR are their inversions;</li>
+ *     <li>NOT, XOR: any Z or X input gives X.</li>
+ * </ul>
+ * So a controlling value (0 into AND, 1 into OR) masks an unknown input, and anything else unknown propagates.
+ *
+ * <p>{@link #isOn()} is {@code true} only for {@link #ONE}: Z and X read as "not on". Boolean code that only ever
+ * sees 0 and 1 can keep using it; code that cares about Z/X uses {@link ISignal#getValue()}.
  */
 public enum LogicValue {
 
@@ -56,6 +65,35 @@ public enum LogicValue {
             return this;
         }
         return X;
+    }
+
+    /** four-valued AND (see the class comment) */
+    public LogicValue and(LogicValue other) {
+        if (this == ZERO || other == ZERO) {
+            return ZERO;
+        }
+        return this == ONE && other == ONE ? ONE : X;
+    }
+
+    /** four-valued OR (see the class comment) */
+    public LogicValue or(LogicValue other) {
+        if (this == ONE || other == ONE) {
+            return ONE;
+        }
+        return this == ZERO && other == ZERO ? ZERO : X;
+    }
+
+    /** four-valued XOR: X if either operand is Z or X */
+    public LogicValue xor(LogicValue other) {
+        if (!isKnown() || !other.isKnown()) {
+            return X;
+        }
+        return this == other ? ZERO : ONE;
+    }
+
+    /** four-valued NOT: 0 and 1 swap, Z and X give X */
+    public LogicValue not() {
+        return this == ZERO ? ONE : this == ONE ? ZERO : X;
     }
 
     @Override
