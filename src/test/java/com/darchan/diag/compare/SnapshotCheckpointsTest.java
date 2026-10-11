@@ -111,4 +111,15 @@ class SnapshotCheckpointsTest {
         assertThrows(IllegalArgumentException.class, () -> SnapshotCheckpoints.in(dir)
                 .add(Checkpoint.atCycle("x", 1)).add(Checkpoint.atCycle("x", 2)));
     }
+    @Test
+    void aHugeBudgetAfterSomeCyclesStillRuns() {
+        TinyMachine m = new TinyMachine();
+        Debugger dbg = new Debugger(m, null);
+        dbg.step(); // cycleCount() + Long.MAX_VALUE would overflow
+        CheckpointReport r = SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("i10", 10))
+                .record(dbg, Long.MAX_VALUE);
+        assertTrue(r.allPassed(), r::report);
+        assertEquals(RECORDED, r.result("i10").orElseThrow().status());
+        assertEquals(10, m.steps);
+    }
 }

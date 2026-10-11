@@ -196,4 +196,51 @@ class DebuggerTest {
         cpu.restore(before);
         assertTrue(before.diff(cpu.snapshot()).isEmpty());
     }
+    @Test
+    void hugeBudgetsAfterSomeCyclesStillRun() {
+        dbg.step(); // cycleCount() is now non-zero, so cycleCount() + Long.MAX_VALUE would overflow
+        dbg.addBreakpoint(0x09);
+        StopReason r = dbg.run(Long.MAX_VALUE);
+        assertEquals(BREAKPOINT, r.kind(), r::toString);
+        assertEquals(0x09, cpu.pc);
+
+        dbg.addCycleBreakpoint(cpu.cycles + 30);
+        r = dbg.stepCycles(Long.MAX_VALUE);
+        assertEquals(CYCLE_BREAKPOINT, r.kind(), r::toString);
+
+        dbg.clearBreakpointsAndWatchpoints();
+        long before = cpu.cycles;
+        r = dbg.runUntil(() -> cpu.cycles >= before + 50, Long.MAX_VALUE);
+        assertEquals(CONDITION, r.kind(), r::toString);
+    }
+
+    @Test
+    void aHugeDumpIntervalNeverDumps() {
+        List<String> sink = new ArrayList<>();
+        dbg.setDumpSink(sink::add);
+        dbg.step();
+        dbg.setDumpEvery(Long.MAX_VALUE);
+        dbg.step(20);
+        assertEquals(List.of(), sink);
+    }
+
+    @Test
+    void breakpointsDoNotFireWhileHalted() {
+        // 00: INC; 01: HLT; 02: INC -- the HLT leaves the PC at 02, but nothing executes there until the core resumes
+        cpu.load(0x03, 0x04, 0x03);
+        dbg.addBreakpoint(0x02);
+        StopReason r = dbg.run(1000);
+        assertEquals(HALTED, r.kind(), r::toString);
+        long cycles = cpu.cycles;
+        r = dbg.run(100);
+        assertEquals(CYCLE_LIMIT, r.kind(), "idle steps are not instruction boundaries: " + r);
+        assertTrue(cpu.cycles >= cycles + 100);
+        assertEquals(2, cpu.instructions);
+        // once execution really reaches 02 (here: rerun with a NOP in place of the HLT), the breakpoint fires
+        cpu.halted = false;
+        cpu.pc = 0x00;
+        cpu.mem[0x01] = 0x00;
+        assertEquals(BREAKPOINT, dbg.run(1000).kind());
+        assertEquals(0x02, cpu.pc);
+    }
 }

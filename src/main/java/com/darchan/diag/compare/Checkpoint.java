@@ -72,7 +72,11 @@ public record Checkpoint(String name, Trigger trigger) {
         }
     }
 
-    /** The {@code occurrence}-th time (1-based) the next instruction is at {@code address}, before executing it. */
+    /**
+     * The {@code occurrence}-th time (1-based) the next instruction is at {@code address}, before executing it.
+     * Boundaries where the target is halted (right after {@code HLT} and its idle steps) are not counted, since no
+     * instruction is about to execute there.
+     */
     public static final class AtPc implements Trigger {
         private final int address;
         private final int occurrence;
@@ -96,7 +100,8 @@ public record Checkpoint(String name, Trigger trigger) {
 
         @Override
         public boolean reached(DebugTarget t) {
-            return t.programCounter() == address && ++seen == occurrence;
+            // a halted target (after HLT, and during its idle steps) is not about to execute the instruction at PC
+            return !t.isHalted() && t.programCounter() == address && ++seen == occurrence;
         }
 
         @Override

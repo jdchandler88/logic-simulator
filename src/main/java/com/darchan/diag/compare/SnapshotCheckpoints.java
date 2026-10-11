@@ -3,6 +3,7 @@ package com.darchan.diag.compare;
 import com.darchan.diag.Snapshot;
 import com.darchan.diag.SnapshotDiff;
 import com.darchan.diag.SnapshotJson;
+import com.darchan.diag.run.Budgets;
 import com.darchan.diag.run.DebugTarget;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.run.StopReason;
@@ -117,7 +118,7 @@ public final class SnapshotCheckpoints {
         List<Checkpoint> pending = new ArrayList<>(checkpoints);
         Evaluator triggers = new Evaluator(target, checkpoints);
         List<CheckpointResult> results = new ArrayList<>();
-        long budgetEnd = target.cycleCount() + maxCycles;
+        long budgetEnd = Budgets.saturatedAdd(target.cycleCount(), maxCycles);
         StopReason stop;
         triggers.evaluate(); // the initial state is a boundary too
         while (true) {

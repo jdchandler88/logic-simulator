@@ -4,6 +4,7 @@ import com.darchan.diag.Field;
 import com.darchan.diag.MemoryView;
 import com.darchan.diag.Snapshot;
 import com.darchan.diag.SnapshotDiff;
+import com.darchan.diag.run.Budgets;
 import com.darchan.diag.run.DebugTarget;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.trace.TraceRingBuffer;
@@ -62,7 +63,6 @@ public final class Lockstep {
     private long totalSteps;
     private long comparisons;
     private long lastMatchingStep = -1;
-    private long windows;
     private Divergence divergence;
 
     private static final class Side {
@@ -70,14 +70,14 @@ public final class Lockstep {
         final Debugger debugger;
         final DebugTarget target;
         final Supplier<Snapshot> snapshot;
-        long startCycles;
+        /** in cycle mode: the cycle count that ends the current comparison window */
+        long boundary;
 
         Side(String name, Debugger debugger, Supplier<Snapshot> snapshot) {
             this.name = name;
             this.debugger = debugger;
             this.target = debugger.target();
             this.snapshot = snapshot != null ? snapshot : target::snapshot;
-            this.startCycles = target.cycleCount();
         }
     }
 
@@ -89,13 +89,18 @@ public final class Lockstep {
         this.only = List.copyOf(b.only);
         this.memory = List.copyOf(b.memory);
         this.contextLines = b.contextLines;
+        reference.boundary = Budgets.saturatedAdd(reference.target.cycleCount(), granularity.every());
+        candidate.boundary = Budgets.saturatedAdd(candidate.target.cycleCount(), granularity.every());
     }
 
     public static Builder builder(String referenceName, Debugger reference, String candidateName, Debugger candidate) {
         return new Builder(referenceName, reference, candidateName, candidate);
     }
 
-    /** Runs until the first divergence or until {@code maxSteps} reference steps have been executed. */
+    /**
+     * Runs until the first divergence or until {@code maxSteps} reference steps have been executed (in either
+     * granularity the reference never executes more than {@code maxSteps} steps per call).
+     */
     public LockstepResult run(long maxSteps) {
         return runUntil(() -> false, maxSteps);
     }
@@ -122,9 +127,12 @@ public final class Lockstep {
             if (stop.getAsBoolean()) {
                 return new LockstepResult(steps, comparisons - comparisonsBefore, "stop condition met", null);
             }
-            // in step mode both sides execute the same number of steps; in cycle mode each runs to the boundary
-            long quota = granularity.unit() == Granularity.Unit.STEPS
-                    ? Math.min(granularity.every(), maxSteps - steps) : Long.MAX_VALUE;
+            // in step mode both sides execute the same number of steps; in cycle mode each runs to its boundary.
+            // The reference never executes more than the steps left in this call, in either mode.
+            long quota = maxSteps - steps;
+            if (granularity.unit() == Granularity.Unit.STEPS) {
+                quota = Math.min(granularity.every(), quota);
+            }
             long executed;
             try {
                 executed = advance(reference, quota);
@@ -134,13 +142,22 @@ public final class Lockstep {
             }
             steps += executed;
             totalSteps += executed;
+            if (granularity.unit() == Granularity.Unit.CYCLES && reference.target.cycleCount() < reference.boundary) {
+                // the step limit ran out inside a cycle window: leave the candidate where it is and compare once
+                // the reference reaches the boundary (a later call continues the same window)
+                return new LockstepResult(steps, comparisons - comparisonsBefore, "step limit " + maxSteps + " reached",
+                        null);
+            }
             try {
                 advance(candidate, granularity.unit() == Granularity.Unit.STEPS ? executed : Long.MAX_VALUE);
             } catch (RuntimeException e) {
                 failed("candidate \"" + candidate.name + "\" threw " + e);
                 return new LockstepResult(steps, comparisons - comparisonsBefore, null, divergence);
             }
-            windows++;
+            if (granularity.unit() == Granularity.Unit.CYCLES) {
+                reference.boundary = Budgets.saturatedAdd(reference.boundary, granularity.every());
+                candidate.boundary = Budgets.saturatedAdd(candidate.boundary, granularity.every());
+            }
             if (compare(totalSteps)) {
                 return new LockstepResult(steps, comparisons - comparisonsBefore, null, divergence);
             }
@@ -153,8 +170,8 @@ public final class Lockstep {
     }
 
     /**
-     * Steps one side through the next comparison window: {@code quota} steps in step mode, or up to the next cycle
-     * boundary in cycle mode. Returns the steps executed.
+     * Steps one side through (part of) the next comparison window: {@code quota} steps in step mode, or up to the
+     * side's next cycle boundary but at most {@code quota} steps in cycle mode. Returns the steps executed.
      */
     private long advance(Side side, long quota) {
         DebugTarget t = side.target;
@@ -164,9 +181,8 @@ public final class Lockstep {
             }
             return quota;
         }
-        long boundary = side.startCycles + (windows + 1) * granularity.every();
         long n = 0;
-        while (t.cycleCount() < boundary) {
+        while (n < quota && t.cycleCount() < side.boundary) {
             t.step();
             n++;
         }
@@ -179,8 +195,15 @@ public final class Lockstep {
         Snapshot expected = prepare(reference, true, step);
         Snapshot actual = prepare(candidate, false, step);
         if (!only.isEmpty()) {
-            expected = project(expected, expected.machine());
-            actual = project(actual, expected.machine());
+            for (String name : only) {
+                if (expected.field(name).isEmpty() && actual.field(name).isEmpty()) {
+                    throw new IllegalArgumentException("compareOnly field " + name + " is in neither snapshot ("
+                            + reference.name + ": " + expected + "; " + candidate.name + ": " + actual + ")");
+                }
+            }
+            String machine = expected.machine();
+            expected = project(expected, machine);
+            actual = project(actual, machine);
         }
         SnapshotDiff diff = expected.diff(actual, ignored);
         if (diff.isEmpty()) {
@@ -207,7 +230,15 @@ public final class Lockstep {
 
     private Snapshot project(Snapshot s, String machine) {
         Snapshot.Builder b = Snapshot.builder(machine).label(s.label());
+        // the Z/X masks of a gate-level probe (see ProbeSet) travel with it: a floating or contended bus reads as 0
+        // in NAME itself, so dropping NAME.Z / NAME.X would make it compare equal to 00
+        Set<String> names = new LinkedHashSet<>();
         for (String name : only) {
+            names.add(name);
+            names.add(name + ".Z");
+            names.add(name + ".X");
+        }
+        for (String name : names) {
             s.field(name).ifPresent(b::field);
         }
         s.regions().forEach(b::region);
@@ -263,7 +294,11 @@ public final class Lockstep {
 
         /**
          * Compare only these fields (plus memory regions); both snapshots are reduced to them and treated as the
-         * same machine. Use this for models of different machines.
+         * same machine. Use this for models of different machines. A field's {@code NAME.Z} / {@code NAME.X} mask
+         * fields (see {@code ProbeSet}) are kept with it, so a floating or contended bus diverges from a driven
+         * value even where its bits read as 0; a mask present on one side only is a divergence. A field that is in
+         * neither snapshot is a configuration error: the run throws {@link IllegalArgumentException} at the first
+         * comparison instead of silently comparing nothing.
          */
         public Builder compareOnly(String... fields) {
             for (String f : fields) {

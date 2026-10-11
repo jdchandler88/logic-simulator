@@ -5,11 +5,18 @@ import com.darchan.behavioral.bus.Ram;
 import com.darchan.diag.Snapshot;
 import com.darchan.diag.SnapshotDiff;
 import com.darchan.diag.SnapshotJson;
+import com.darchan.diag.compare.Checkpoint;
+import com.darchan.diag.compare.CheckpointReport;
+import com.darchan.diag.compare.CheckpointResult;
+import com.darchan.diag.compare.SnapshotCheckpoints;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.run.StopReason;
 import com.darchan.diag.run.Watchpoint;
 import com.darchan.diag.trace.InMemoryTrace;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
 
 import java.util.List;
 import java.util.Set;
@@ -189,5 +196,66 @@ class Debug8080Test {
         dbg.run(1000);
         assertEquals(9, cpu.instructionCount());
         assertSame(ram, cpu.memory(), "no bus decorators");
+    }
+    /**
+     * <pre>
+     * 0000: FB     EI
+     * 0001: 76     HLT
+     * 0002: 00     NOP
+     * 0008: C9     RET      (RST 1 handler)
+     * </pre>
+     */
+    private void loadHaltProgram() {
+        ram.load(0, bytes(0xFB, 0x76, 0x00));
+        ram.write(0x0008, 0xC9);
+        cpu.setSP(0x2000);
+    }
+
+    @Test
+    void aBreakpointAfterHltFiresOnlyWhenExecutionResumesThere() {
+        loadHaltProgram();
+        Debugger dbg = Debug8080.attach(cpu);
+        dbg.addBreakpoint(0x0002);
+        StopReason r = dbg.run(1000);
+        assertEquals(HALTED, r.kind(), "HLT leaves the PC at 0002, but 0002 is not about to execute: " + r);
+        // cont while halted with interrupts enabled keeps idling until an interrupt or the budget
+        long cycles = cpu.cycleCount();
+        r = dbg.run(1000);
+        assertEquals(CYCLE_LIMIT, r.kind(), r::toString);
+        assertTrue(cpu.cycleCount() >= cycles + 1000);
+        assertEquals(2, cpu.instructionCount());
+        // the interrupt handler returns to 0002: now the breakpoint fires
+        cpu.requestRst(1);
+        r = dbg.run(1000);
+        assertEquals(BREAKPOINT, r.kind(), r::toString);
+        assertEquals(0x0002, cpu.pc());
+        assertFalse(cpu.isHalted());
+        assertEquals(4, cpu.instructionCount(), "EI, HLT, INT RST 1, RET");
+    }
+
+    @Test
+    void pcCheckpointsDoNotCountHaltIdleSteps(@TempDir Path dir) {
+        loadHaltProgram();
+        cpu.requestRst(1); // accepted after the HLT (EI takes effect after the following instruction)
+        Debugger dbg = Debug8080.attach(cpu);
+        dbg.setStopOnHalt(false);
+        CheckpointReport rep = SnapshotCheckpoints.in(dir)
+                .add(Checkpoint.atPc("first", 0x0002))
+                .add(Checkpoint.atPc("second", 0x0002, 2))
+                .record(dbg, 200);
+        CheckpointResult first = rep.results().get(0);
+        assertEquals(CheckpointResult.Status.RECORDED, first.status(), rep::report);
+        assertEquals(4, first.instruction(), "reached when RET returns to 0002, not right after the HLT");
+        CheckpointResult second = rep.results().get(1);
+        assertEquals(CheckpointResult.Status.NOT_REACHED, second.status(), rep::report);
+
+        Cpu8080 idle = new Cpu8080(new Ram(), IoBus.UNCONNECTED);
+        idle.memory().write(0, 0xFB);
+        idle.memory().write(1, 0x76);
+        Debugger idleDbg = Debug8080.attach(idle);
+        idleDbg.setStopOnHalt(false);
+        rep = SnapshotCheckpoints.in(dir).add(Checkpoint.atPc("never", 0x0002)).record(idleDbg, 100);
+        assertEquals(CheckpointResult.Status.NOT_REACHED, rep.results().get(0).status(),
+                "halted for good: no instruction ever executes at 0002");
     }
 }

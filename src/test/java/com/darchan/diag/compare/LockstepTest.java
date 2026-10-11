@@ -1,5 +1,6 @@
 package com.darchan.diag.compare;
 
+import com.darchan.diag.Snapshot;
 import com.darchan.diag.run.Debugger;
 import org.junit.jupiter.api.Test;
 
@@ -152,5 +153,76 @@ class LockstepTest {
     @Test
     void sameTargetTwiceIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> Lockstep.builder("a", refDbg, "b", refDbg));
+    }
+    @Test
+    void cycleGranularityNeverExceedsMaxSteps() {
+        Lockstep ls = lockstep().granularity(Granularity.everyCycles(1000)).build();
+        LockstepResult r = ls.run(1);
+        assertFalse(r.diverged(), r::report);
+        assertEquals(1, r.steps());
+        assertEquals(1, ref.steps);
+        assertEquals("step limit 1 reached", r.ended());
+        // a later call finishes the window (1000 cycles = 250 steps) and compares at its boundary
+        r = ls.run(300);
+        assertFalse(r.diverged(), r::report);
+        assertEquals(300, r.steps());
+        assertEquals(301, ref.steps);
+        assertEquals(1, r.comparisons(), "one boundary (cycle 1000) within the first 301 steps");
+        assertEquals(250, cand.steps, "the candidate waits at the boundary the reference has not finished");
+    }
+
+    @Test
+    void cycleGranularityWithAHugeIntervalRespectsMaxSteps() {
+        Lockstep ls = lockstep().granularity(Granularity.everyCycles(Long.MAX_VALUE)).build();
+        LockstepResult r = assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> ls.run(20));
+        assertFalse(r.diverged(), r::report);
+        assertEquals(20, ref.steps);
+    }
+
+    @Test
+    void compareOnlyKeepsZAndXMasks() {
+        // a gate-level probe on a floating bus reads 00 with A.Z = FF (see ProbeSet): not equal to a driven 00
+        Lockstep.Builder b = lockstep()
+                .referenceSnapshot(() -> Snapshot.builder("cpu").hex("A", 8, 0).hex("B", 8, 1)
+                        .build())
+                .candidateSnapshot(() -> Snapshot.builder("gates").hex("A", 8, 0)
+                        .hex("A.Z", 8, 0xFF).hex("B", 8, 1).build());
+        LockstepResult r = b.compareOnly("A", "B").build().run(5);
+        assertTrue(r.diverged(), r::report);
+        assertEquals("A.Z", r.divergence().diff().fieldDifferences().get(0).name());
+        assertTrue(r.report().contains("expected=<missing>  actual=FF"), r::report);
+
+        LockstepResult x = Lockstep.builder("ref", new Debugger(new TinyMachine(), null), "cand",
+                        new Debugger(new TinyMachine(), null))
+                .referenceSnapshot(() -> Snapshot.builder("a").hex("A", 8, 0).hex("A.X", 8, 1)
+                        .build())
+                .candidateSnapshot(() -> Snapshot.builder("b").hex("A", 8, 0).hex("A.X", 8, 1)
+                        .build())
+                .compareOnly("A").build().run(5);
+        assertFalse(x.diverged(), "identical masks on both sides match: " + x.report());
+
+        LockstepResult named = lockstep()
+                .candidateSnapshot(() -> Snapshot.builder("tiny").hex("PC", 8, cand.pc).hex("ACC", 8, cand.acc)
+                        .hex("ACC.Z", 8, 0x80).build())
+                .compareOnly("PC", "ACC", "ACC.Z").build().run(5);
+        assertEquals("ACC.Z", named.divergence().diff().fieldDifferences().get(0).name(),
+                "naming a mask explicitly is allowed too");
+    }
+
+    @Test
+    void compareOnlyRejectsAFieldNeitherSideHas() {
+        Lockstep ls = lockstep().compareOnly("PC", "ACCUMULATOR").build();
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ls.run(5));
+        assertTrue(e.getMessage().contains("ACCUMULATOR"), e.getMessage());
+        assertEquals(0, ref.steps, "rejected at the first (initial) comparison");
+    }
+
+    @Test
+    void compareOnlyFieldOnOneSideOnlyIsADivergence() {
+        Lockstep.Builder b = lockstep()
+                .candidateSnapshot(() -> Snapshot.builder("tiny").hex("PC", 8, cand.pc).build());
+        LockstepResult r = b.compareOnly("PC", "ACC").build().run(5);
+        assertTrue(r.diverged(), r::report);
+        assertEquals("ACC", r.divergence().diff().fieldDifferences().get(0).name());
     }
 }

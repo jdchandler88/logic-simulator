@@ -226,8 +226,7 @@ public final class DebuggerRepl {
 
     private void cont(long maxCycles) {
         running = true;
-        long budget = Math.min(maxCycles, Long.MAX_VALUE - target.cycleCount());
-        report(debugger.runUntil(() -> interruptRequested, budget));
+        report(debugger.runUntil(() -> interruptRequested, maxCycles));
     }
 
     private void until(String[] args) {
@@ -248,7 +247,7 @@ public final class DebuggerRepl {
                     throw new IllegalArgumentException("already at instruction " + target.instructionCount());
                 }
                 report(debugger.runUntil(() -> interruptRequested || target.instructionCount() >= n,
-                        Long.MAX_VALUE - target.cycleCount()));
+                        Long.MAX_VALUE));
             }
             default -> throw new IllegalArgumentException("until cycle <n> | until instr <n>");
         }

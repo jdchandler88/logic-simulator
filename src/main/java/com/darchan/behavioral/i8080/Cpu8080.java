@@ -3,6 +3,7 @@ package com.darchan.behavioral.i8080;
 import com.darchan.behavioral.bus.IoBus;
 import com.darchan.behavioral.bus.MemoryBus;
 import com.darchan.diag.Snapshot;
+import com.darchan.diag.run.Budgets;
 import com.darchan.diag.run.DebugTarget;
 import com.darchan.diag.trace.RegisterSpec;
 import com.darchan.diag.trace.TraceEvent;
@@ -127,9 +128,12 @@ public final class Cpu8080 implements DebugTarget {
         return n;
     }
 
-    /** Steps until at least {@code minCycles} more cycles have passed; returns the cycles actually executed. */
+    /**
+     * Steps until at least {@code minCycles} more cycles have passed; returns the cycles actually executed. A budget
+     * that would overflow the cycle counter (e.g. {@code Long.MAX_VALUE}) means "run without a limit".
+     */
     public long run(long minCycles) {
-        long target = cycles + minCycles;
+        long target = Budgets.saturatedAdd(cycles, minCycles);
         long start = cycles;
         while (cycles < target) {
             step();

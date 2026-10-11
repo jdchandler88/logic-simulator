@@ -1,6 +1,8 @@
 package com.darchan.physical.probe;
 
 import com.darchan.diag.Snapshot;
+import com.darchan.diag.compare.Lockstep;
+import com.darchan.diag.compare.LockstepResult;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.run.StopReason;
 import com.darchan.diag.trace.InMemoryTrace;
@@ -8,6 +10,7 @@ import com.darchan.physical.comp.Counter;
 import com.darchan.physical.comp.Register;
 import com.darchan.physical.signal.Clock;
 import com.darchan.physical.signal.IBus;
+import com.darchan.physical.signal.Wire;
 import com.darchan.physical.sim.Simulator;
 import com.darchan.testutil.Buses;
 import org.junit.jupiter.api.Test;
@@ -97,5 +100,25 @@ class ClockedTargetTest {
     void theClockMustStartLow() {
         Simulator s2 = new Simulator();
         assertThrows(IllegalArgumentException.class, () -> new ClockedTarget("x", new Clock(s2, true), new ProbeSet(s2)));
+    }
+    @Test
+    void lockstepCompareOnlySeesAFloatingBus() {
+        // reference: a bus driven to 0000; candidate: a bus nobody drives (all Z, which reads as 0000)
+        Simulator refSim = new Simulator();
+        Clock refClk = new Clock(refSim, false);
+        ProbeSet refProbes = new ProbeSet(refSim);
+        refProbes.add("A", Buses.simpleBus(refSim, 4, 0));
+        refSim.settle();
+        Simulator candSim = new Simulator();
+        Clock candClk = new Clock(candSim, false);
+        ProbeSet candProbes = new ProbeSet(candSim);
+        candProbes.add("A", Wire.createBus(candSim, 4));
+        candSim.settle();
+        LockstepResult r = Lockstep.builder("driven", new Debugger(new ClockedTarget("driven", refClk, refProbes), null),
+                        "floating", new Debugger(new ClockedTarget("floating", candClk, candProbes), null))
+                .compareOnly("A").build().run(5);
+        assertTrue(r.diverged(), "a floating bus must not compare equal to 0000: " + r.report());
+        assertEquals("A.Z", r.divergence().diff().fieldDifferences().get(0).name(), r::report);
+        assertTrue(r.report().contains("expected=<missing>  actual=F"), r::report);
     }
 }

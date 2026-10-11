@@ -122,7 +122,12 @@ public final class Debugger {
 
     // ---- breakpoints and watchpoints -------------------------------------------------------------------------
 
-    /** Stop before executing the instruction at {@code pc}. */
+    /**
+     * Stop before executing the instruction at {@code pc}. Checked only at instruction boundaries where the target
+     * is not halted: after {@code HLT} (whose PC already points past it) and during the idle steps that follow,
+     * the breakpoint does not fire; it does once execution actually resumes at {@code pc}, e.g. when an interrupt
+     * handler returns there.
+     */
     public void addBreakpoint(int pc) {
         breakpoints.set(pc);
     }
@@ -238,7 +243,7 @@ public final class Debugger {
             throw new IllegalArgumentException("cycles must be >= 0");
         }
         dumpEveryCycles = cycles;
-        nextPeriodicDump = cycles == 0 ? Long.MAX_VALUE : target.cycleCount() + cycles;
+        nextPeriodicDump = cycles == 0 ? Long.MAX_VALUE : Budgets.saturatedAdd(target.cycleCount(), cycles);
     }
 
     /** Where automatic dumps go; the default logs them at INFO via {@link System.Logger}. */
@@ -295,18 +300,20 @@ public final class Debugger {
 
     /** Executes until at least {@code cycles} more cycles have passed, finishing the instruction that crosses. */
     public StopReason stepCycles(long cycles) {
-        return execute(Long.MAX_VALUE, target.cycleCount() + cycles, StopReason.Kind.STEPPED, null);
+        return execute(Long.MAX_VALUE, Budgets.saturatedAdd(target.cycleCount(), cycles), StopReason.Kind.STEPPED,
+                null);
     }
 
     /** Runs until a breakpoint, watchpoint, halt, or until {@code maxCycles} more cycles have passed. */
     public StopReason run(long maxCycles) {
-        return execute(Long.MAX_VALUE, target.cycleCount() + maxCycles, StopReason.Kind.CYCLE_LIMIT, null);
+        return execute(Long.MAX_VALUE, Budgets.saturatedAdd(target.cycleCount(), maxCycles),
+                StopReason.Kind.CYCLE_LIMIT, null);
     }
 
     /** Like {@link #run(long)} but also stops after any instruction that leaves {@code condition} true. */
     public StopReason runUntil(BooleanSupplier condition, long maxCycles) {
-        return execute(Long.MAX_VALUE, target.cycleCount() + maxCycles, StopReason.Kind.CYCLE_LIMIT,
-                Objects.requireNonNull(condition));
+        return execute(Long.MAX_VALUE, Budgets.saturatedAdd(target.cycleCount(), maxCycles),
+                StopReason.Kind.CYCLE_LIMIT, Objects.requireNonNull(condition));
     }
 
     private StopReason execute(long maxSteps, long cycleTarget, StopReason.Kind cycleKind, BooleanSupplier condition) {
@@ -333,14 +340,17 @@ public final class Debugger {
             if (cycles >= nextPeriodicDump) {
                 dumpSink.accept(dump());
                 while (nextPeriodicDump <= cycles) {
-                    nextPeriodicDump += dumpEveryCycles;
+                    nextPeriodicDump = Budgets.saturatedAdd(nextPeriodicDump, dumpEveryCycles);
                 }
             }
             if (watchHit != null) {
                 return stop(StopReason.Kind.WATCHPOINT, watchHit);
             }
             int pc = target.programCounter();
-            if (breakpoints.get(pc)) {
+            // PC breakpoints only fire at real instruction boundaries: while the target is halted (after HLT and
+            // during each idle step) the PC is not the address of an instruction about to execute
+            boolean halted = target.isHalted();
+            if (!halted && breakpoints.get(pc)) {
                 return stop(StopReason.Kind.BREAKPOINT, "breakpoint at " + String.format("%04X", pc));
             }
             if (cycles >= nextCycleBreak) {
@@ -349,7 +359,7 @@ public final class Debugger {
             if (condition != null && condition.getAsBoolean()) {
                 return stop(StopReason.Kind.CONDITION, "condition met");
             }
-            if (stopOnHalt && !wasHalted && target.isHalted()) {
+            if (stopOnHalt && !wasHalted && halted) {
                 return stop(StopReason.Kind.HALTED, "halted");
             }
             if (steps >= maxSteps) {
