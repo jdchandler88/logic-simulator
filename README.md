@@ -464,8 +464,8 @@ Commands: `step [n]`, `next-cycles <n>`, `cont [max-cycles]`, `until cycle|instr
 `save|load|diff <file.json>` (registers + all memory), `help`, `quit`. Addresses and ports are hex (`0100`,
 `0x100`, `100H`), counts decimal. Every stop shows the reason, the next instruction and the registers. Ctrl-C
 stops a running command; Ctrl-D or `quit` leaves. A command that fails (bad argument, malformed snapshot
-file...) prints `error: ...` and the session goes on; a `trace on FILE` file is closed however the session
-ends. The REPL reads from any `Reader` and writes to any `PrintStream`, so sessions are scripted in tests
+file...) prints `error: ...` and the session goes on; a trace (`trace on`, to the console or a file) is switched off
+and its file closed however the session ends. The REPL reads from any `Reader` and writes to any `PrintStream`, so sessions are scripted in tests
 (`CpmReplTest`).
 
 ```
@@ -508,3 +508,109 @@ dbg> diff s.json
   ram[06BF]   expected=44  actual=45
 dbg> quit
 ```
+
+## Testing
+
+```bash
+./gradlew test          # ~1,070 unit and property tests, ~30 s; report: build/reports/tests/test/index.html
+./gradlew build         # compile + tests + JaCoCo report + coverage floors: what CI runs
+./gradlew slowTest      # the tests tagged `slow`: 8080EXM, 23.8 billion emulated cycles, ~3.5 min
+./gradlew pitest        # mutation testing, ~12 min; report: build/reports/pitest/index.html
+```
+
+**Kinds of tests.** JUnit 5 example tests per package (mirroring `src/main`), exhaustive tests where the domain is
+small (every 8080 opcode taken/not taken, the ALU for all 8 operations x 256 x 256 x carry), the CP/M diagnostics
+(8080PRE, TST8080, CPUTEST in `build`; 8080EXM in `slowTest`), golden traces, fault-injection tests for the
+comparison tools, scripted REPL sessions, and `ArchitectureTest` (layering, ArchUnit).
+
+**Property-based tests** (jqwik 1.10.2, `*PropertyTest`, run by the JUnit Platform next to Jupiter) state laws and
+check them on random inputs, 1,000 tries each unless a test says otherwise (about 8 s in all):
+
+- `Alu8080PropertyTest`: S/Z/P/fixed bits for every operation, ADD/ADC against a bit-serial adder, SUB/SBB as
+  `A + ~B + !borrow`, the ADD/SUB inverse relations with carry, CMP == SUB flags, AND/OR/XOR identities, INR/DCR wrap,
+  DAA == decimal addition, rotates, DAD.
+- `Cpu8080PropertyTest`: PUSH/POP for every register pair (stack pointer anywhere, including wraparound), CALL/RET,
+  RST, XCHG/XTHL involutions, DAD, INX/DCX and PC wraparound at 0xFFFF, ALU instructions against `Alu8080` (CMP keeps
+  A), random state -> snapshot -> JSON -> restore.
+- Gate level: `GateLevelAluPropertyTest` (gate ALU and ripple-carry adder against `Alu8080` with random Z/X inputs:
+  a known output bit must be right for *every* way the unknown inputs could resolve, so an output that depends on an
+  unknown input must be X), `FlipFlopPropertyTest` (four-valued clock/D/enable sequences against the table above),
+  `RegisterPropertyTest`/`RegisterFilePropertyTest` (write-enable sequences against a model), and
+  `ClockedTargetPropertyTest` (snapshot/restore on random stimulus including X).
+- Diagnostics: `SnapshotPropertyTest` (JSON round trip for arbitrary snapshots: escapes, widths 1..64, regions;
+  truncated, damaged and garbage files fail only with `IllegalArgumentException`; a snapshot never differs from
+  itself), `TraceFormatPropertyTest` (arbitrary layouts and Z/X masks: lines keep their shape and `TraceLine` reads
+  them back).
+
+A failing property prints its seed and shrunk counter-example; jqwik keeps failed seeds in `build/jqwik-database` and
+retries them first on the next run. Re-run one with `@Property(seed = "...")`.
+
+### Mutation testing (PIT)
+
+`./gradlew pitest` mutates `com.darchan.physical`, `behavioral`, `diag` and `cosim` (not `project.App`) and reports
+which mutants (a flipped condition, a `+` turned into `-`, a deleted call, a changed return value ...) no test notices.
+It is deliberately not part of `build`: a full run takes about 12 minutes on 4 threads. Reports: HTML in
+`build/reports/pitest/index.html` (per class, with the surviving mutants marked on the source) and XML in
+`build/reports/pitest/mutations.xml`. `.github/workflows/mutation.yml` runs it weekly and on demand and uploads the
+HTML report; `python3 .github/scripts/pit-summary.py` prints the per-package table below from a report.
+
+Configuration notes (`build.gradle`):
+
+- PIT 1.22.1 and `pitest-junit5-plugin` 1.2.3 are pinned. 1.22.1 is the last PIT with the built-in history files;
+  later versions moved incremental analysis to the commercial arcmutate plugin and refuse `withHistory`.
+- Mutators: `DEFAULTS` (invert negatives, math, void-method calls, conditional boundary, increments, return values,
+  "replace conditional by false"). `-PpitMutators=STRONGER` adds the switch mutator and "replace conditional by true"
+  and is about 30% slower; it is a stricter measure but the same triage rules apply.
+- Excluded tests: anything tagged `slow` (8080EXM) and `mutation-skip` (CPUTEST, 255 M cycles: about 2 s per run, and a
+  mutant that loops would run it to its cycle budget). The fast CP/M diagnostics, the exhaustive ALU and opcode tests
+  and everything else (none of the others takes more than about 2 s) stay in. Calls into `System.Logger` are not mutated.
+- History: `.gradle/pitest-history.bin` lets a re-run skip mutants whose class and covering tests did not change, which
+  makes a rerun after a small edit take a few minutes. Delete it for a from-scratch figure; the scheduled CI run
+  always starts from scratch.
+
+Results at this commit (`DEFAULTS`, from scratch, 3,059 mutants):
+
+| package | line coverage | mutation score | before this work |
+|---|---|---|---|
+| physical | 98.9% | 98.0% | 83.2% |
+| behavioral | 99.0% | 100.0% | 94.2% |
+| diag | 98.0% | 96.7% | 73.8% |
+| cosim | 100.0% | 98.0% | 93.9% |
+| **all** | 98.5% | **97.7%** | **81.1%** (line 92.1%) |
+
+(PIT's line coverage counts only the mutated classes.) With `STRONGER` (3,992 mutants) the score is 96.5% (3,854 killed). The
+survivors left are equivalent mutants or not worth a test, for example:
+
+- arithmetic on a `StringBuilder` initial capacity (`HexDump`, `SnapshotJson`); `return map` of an already empty map;
+- a guard that another check makes redundant (`Cpu8080.requestRst` range before `requestInterrupt`'s, the
+  `lastMatchingStep < 0` test in `Lockstep.narrow` next to `comparison() == 0`);
+- code that is unreachable by construction (the reference-side branch of the narrowing cross-check: when the
+  reference threw, the candidate has not moved yet, so there is nothing to cross-check);
+- stale-listener cleanup whose only effect is skipping a redundant re-evaluation (`BusSelector8By8Bit`,
+  `VcdWriter.close` behind its `closed` flag);
+- boundary mutants in the malformed-line fallbacks of `TraceLine.parse` (every malformed line becomes one `line`
+  column either way).
+
+What this work found: `MemoryRegion` accepted a region whose last address overflows `int` (its `end()` went negative
+and `SnapshotJson` wrote a file it then refused to load), and `DebuggerRepl` left its trace listener on the debugger
+after `quit`/end of input (the next instruction run on that debugger then failed writing to the closed file); both are
+fixed with regression tests.
+
+### Coverage (JaCoCo)
+
+`./gradlew test` writes `build/reports/jacoco/test/index.html` (and `jacocoTestReport.xml`); CI uploads it as the
+`jacoco-report` artifact. `./gradlew check` (so `build`) fails when coverage falls below a floor, per top-level package
+and overall (`jacocoVerifyPhysical` ... `jacocoVerifyProject`, `jacocoTestCoverageVerification`). The floors sit a point or
+two under what the tests reach so that a regression fails the build but one new untested line does not:
+
+| scope | line floor (now) | branch floor (now) |
+|---|---|---|
+| `physical` | 97% (98.9%) | 97% (99.2%) |
+| `behavioral` | 98% (99.5%) | 97% (99.3%) |
+| `diag` | 97% (98.5%) | 95% (97.0%) |
+| `cosim` | 98% (100%) | 98% (100%) |
+| `project` (`App`, the CLI) | 60% (67.7%) | 60% (67.0%) |
+| everything | 96% (97.5%) | 95% (96.8%) |
+
+`project.App` is included, with a lower floor: its `main` and `System.exit` paths are only smoke-tested. Raise the
+floors in `build.gradle` (`coverageFloors`) when the tests get stronger.

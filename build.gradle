@@ -43,14 +43,14 @@ jacoco {
     toolVersion = '0.8.13'
 }
 
-// Coverage thresholds: a floor slightly under what the tests achieve (measured with this tree: see the README's
-// Testing section), so a regression fails the build without a single new line of untested code doing so. They are
+// Coverage thresholds: a floor a point or two under what the tests achieve (measured with this tree: see the
+// README's Testing section), so a regression fails the build but a single new untested line does not. They are
 // enforced per top-level package, plus one overall rule, as part of `check`. `project` is `project.App`, the command
 // line front end: its main() and System.exit paths are driven by a few smoke tests only, hence the lower floor.
 def coverageFloors = [
         physical  : [classes: 'com/darchan/physical/**',   line: 0.97, branch: 0.97],
-        behavioral: [classes: 'com/darchan/behavioral/**', line: 0.98, branch: 0.95],
-        diag      : [classes: 'com/darchan/diag/**',       line: 0.97, branch: 0.94],
+        behavioral: [classes: 'com/darchan/behavioral/**', line: 0.98, branch: 0.97],
+        diag      : [classes: 'com/darchan/diag/**',       line: 0.97, branch: 0.95],
         cosim     : [classes: 'com/darchan/cosim/**',      line: 0.98, branch: 0.98],
         project   : [classes: 'project/**',                line: 0.60, branch: 0.60],
 ]
@@ -101,7 +101,7 @@ tasks.named('jacocoTestCoverageVerification') {
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.94
+                minimum = 0.95
             }
         }
     }

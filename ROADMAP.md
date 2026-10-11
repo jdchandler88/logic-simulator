@@ -131,7 +131,17 @@ no check.
         throws).
       - X propagation through gates and flip-flops (four-valued, pessimistic), and Z/X shown in gate-level traces
         (`z`/`x`/`?` digits), golden comparisons and VCD.
-- [ ] Test hardening (next).
+- [x] Test hardening:
+      - Mutation testing with PIT (`./gradlew pitest`, weekly `mutation` workflow, not part of `build`): the
+        mutation score of `physical`/`behavioral`/`diag`/`cosim` went from 81.1% to 97.7% (behavioral 94.2% -> 100%,
+        physical 83.2% -> 98.0%, diag 73.8% -> 96.7%, cosim 93.9% -> 98.0%; `STRONGER` mutators: 96.5%) by killing
+        survivors with targeted tests; what is left is equivalent or not worth a test (see the README's Testing
+        section).
+      - jqwik property tests for `Alu8080`, `Cpu8080`, the gate-level ALU/adder/flip-flops/registers with Z/X
+        inputs, `ClockedTarget` restore and the `diag` serialisers/formatters.
+      - JaCoCo coverage floors per top-level package enforced by `check`; the report is a CI artifact.
+      - Real bugs found on the way (fixed with regression tests): `MemoryRegion` accepted a region past the
+        largest `int` address, and the REPL left its trace listener on the debugger when a session ended.
 - [ ] Netlist + visualizer (after).
 
 ## Phase 3 – Space Invaders (fun 8080 milestone)

@@ -3,7 +3,6 @@ package com.darchan.diag.compare;
 import com.darchan.diag.run.Debugger;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +43,7 @@ class LockstepCrossCheckTest {
             assertEquals(20, lines.size(), "the ring buffer after the narrowing");
             assertTrue(lines.get(19).contains("000000000019 "), lines.get(19));
         }
-        assertEquals(20, d.narrowing().reference().recentTrace().size() + 4, "16 context lines");
+        assertEquals(Lockstep.DEFAULT_CONTEXT_LINES, d.narrowing().reference().recentTrace().size());
     }
 
     @Test
@@ -56,7 +55,7 @@ class LockstepCrossCheckTest {
         var refTrace = d.narrowing().reference().recentTrace();
         assertEquals(15, refTrace.size(), "each instruction once on the reference side: " + refTrace);
         for (int i = 0; i < refTrace.size(); i++) {
-            assertTrue(refTrace.get(i).startsWith(String.format("%012d %012d ", i == 0 ? 0 : refTrace.get(i).length() > 0 ? cyclesBefore(i) : 0, i)),
+            assertTrue(refTrace.get(i).startsWith(String.format("%012d %012d ", cyclesBefore(i), i)),
                     "line " + i + ": " + refTrace.get(i));
         }
         var ring = refDbg.ringBuffer().lines();

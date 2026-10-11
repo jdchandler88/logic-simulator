@@ -2,7 +2,6 @@ package com.darchan.physical.wave;
 
 import com.darchan.physical.probe.ProbeSet;
 import com.darchan.physical.signal.Bus;
-import com.darchan.physical.signal.Clock;
 import com.darchan.physical.signal.SimpleSignal;
 import com.darchan.physical.sim.Simulator;
 import com.darchan.testutil.Buses;
@@ -269,6 +268,5 @@ class VcdWriterEdgeCasesTest {
         VcdWriter.builder(p).to(out).close();
         assertTrue(out.toString().contains("$var wire 1 ! one $end\n"), out.toString());
         assertTrue(out.toString().contains("$dumpvars\n1!\n$end"), out.toString());
-        assertNotNull(new Clock(s, false));
     }
 }
