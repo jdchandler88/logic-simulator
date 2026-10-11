@@ -1,10 +1,10 @@
 package com.darchan.testutil;
 
-import com.darchan.elements.iface.IBus;
-import com.darchan.elements.iface.ISignal;
-import com.darchan.elements.impl.Bus;
-import com.darchan.elements.impl.SimpleSignal;
-import com.darchan.sim.Simulator;
+import com.darchan.physical.signal.IBus;
+import com.darchan.physical.signal.ISignal;
+import com.darchan.physical.signal.Bus;
+import com.darchan.physical.signal.SimpleSignal;
+import com.darchan.physical.sim.Simulator;
 
 import java.util.List;
 import java.util.stream.Collectors;

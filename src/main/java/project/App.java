@@ -1,12 +1,12 @@
 package project;
 
-import com.darchan.elements.iface.IBus;
-import com.darchan.elements.iface.IClock;
-import com.darchan.elements.impl.Bus;
-import com.darchan.elements.impl.Clock;
-import com.darchan.elements.impl.SignalNameDecorator;
-import com.darchan.elements.impl.comp.Inverter;
-import com.darchan.sim.Simulator;
+import com.darchan.physical.signal.IBus;
+import com.darchan.physical.signal.IClock;
+import com.darchan.physical.signal.Bus;
+import com.darchan.physical.signal.Clock;
+import com.darchan.physical.signal.SignalNameDecorator;
+import com.darchan.physical.comp.Inverter;
+import com.darchan.physical.sim.Simulator;
 
 /**
  * Small demo: a clock driving an inverter.

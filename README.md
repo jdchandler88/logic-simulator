@@ -12,11 +12,11 @@ bus at construction (`UnexpectedBusWidthException`).
 
 ## Simulation semantics
 
-The gate-level library (`com.darchan.elements`) is an event-driven simulator with
+The gate-level library (`com.darchan.physical`) is an event-driven simulator with
 VHDL/Verilog-style **delta cycles**.
 
 - **Simulator context.** Every signal and component is created with an explicit
-  `com.darchan.sim.Simulator`, which owns the event queue. There is no global state, so
+  `com.darchan.physical.sim.Simulator`, which owns the event queue. There is no global state, so
   independent circuits (and tests) never interfere.
 - **Scheduled writes.** Writing a signal (`SimpleSignal.setOn`, a gate re-evaluating, a
   flip-flop loading) never changes it immediately. The write is scheduled and becomes

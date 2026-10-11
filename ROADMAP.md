@@ -7,12 +7,17 @@ and ending with a working Game Boy (DMG).
 
 Two layers, kept separate:
 
-1. **Gate/RTL layer** (`com.darchan.elements`) – the existing signal/bus/gate
+1. **Gate/RTL layer** (`com.darchan.physical`) – the existing signal/bus/gate
    library. Used to build and *verify* hardware blocks (adders, ALU, register
    file) the way a hardware team would.
-2. **Behavioral layer** (new, e.g. `com.darchan.emu`) – instruction-level,
+2. **Behavioral layer** (`com.darchan.behavioral`) – instruction-level,
    M-cycle-timed CPU and system models using `int`s, not signal objects. This is
    what runs real programs at real speed.
+
+Packages: `com.darchan.physical` (gate level), `com.darchan.behavioral` (instruction
+level) and `com.darchan.diag` (shared diagnostics). `physical` and `behavioral` must
+not depend on each other; both may depend on `diag`, which depends on neither. This
+is enforced by `ArchitectureTest` (ArchUnit, production classes only).
 
 The behavioral models act as the golden reference: gate-level blocks are tested
 by checking them against the behavioral ALU/register logic.
@@ -68,8 +73,8 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
 - [x] Build an 8-bit ripple-carry adder and ALU from gates; test against the
       behavioral ALU for all 256×256×carry inputs.
       (`HalfAdder`, `FullAdder`, `RippleCarryAdder`, 8080 `Alu` with S Z AC P CY. The golden
-      model is `Alu8080Reference` in the test sources for now — move it into the Phase 2
-      behavioral core (`com.darchan.emu`) and point the gate test at it. Exhaustive run of all
+      model is `Alu8080`, now in `com.darchan.behavioral.i8080`; the gate-level `AluTest`
+      checks against it. Exhaustive run of all
       8 ops × 256 × 256 × CY takes ~2.5 s.)
 
 ## Phase 2 – Behavioral Intel 8080
@@ -79,12 +84,17 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
 - [ ] Disassembler and a step/trace debugger (registers + disassembly per step).
 - [ ] Pass the CP/M diagnostics: `8080PRE`, `TST8080`, `CPUTEST`, `8080EXM`
       (stub BDOS call 5, functions 2 and 9, to print output).
+- [ ] Diagnostics core (`com.darchan.diag`): named state snapshots for both layers; run control (step instruction / N cycles / run-until, breakpoints on PC, memory read/write watchpoints, I/O port, cycle count); per-instruction text trace in a fixed diffable format; ring buffer of last N trace lines dumped on failure; register + memory hex dumps at breakpoints / every N cycles / on exception; JSON snapshot save/load.
+- [ ] Lockstep comparison: two live models, recorded golden trace logs, and saved snapshot files; stop on first divergence with a field diff plus recent trace.
+- [ ] VCD waveform output for the physical layer (GTKWave/Surfer) plus simulator stats (deltas per settle, events per tick).
+- [ ] Interactive CLI debugger (REPL): step, continue, break/watch, regs, mem, trace on/off, dump, save/load snapshot.
 
 ## Phase 3 – Space Invaders (fun 8080 milestone)
 - [ ] Memory map: ROM 0x0000–0x1FFF, RAM 0x2000–0x23FF, VRAM 0x2400–0x3FFF.
 - [ ] Shift-register hardware on ports 2/3/4, input ports 0/1/2.
 - [ ] `RST 1` mid-frame and `RST 2` at VBlank, 60 Hz, 2 MHz.
 - [ ] Swing window (rotated 1-bpp framebuffer), keyboard input.
+- [ ] Debugger GUI (technology open: JavaFX, local web UI served by the emulator, or ImGui/LWJGL) — registers, memory, disassembly, breakpoints, waveforms.
 
 ## Phase 4 – SM83 (Game Boy CPU)
 - [ ] Core + CB-prefix table, HALT (and HALT bug), STOP, IME delay after `EI`.
