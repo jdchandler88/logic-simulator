@@ -440,6 +440,10 @@ public final class ClockedTarget implements DebugTarget {
         for (TestbenchState t : testbenchState.values()) {
             Field f = snapshot.field(t.field()).orElseThrow(() -> new IllegalArgumentException(
                     "snapshot has no testbench state " + t.field()));
+            if (f.width() != t.width()) {
+                throw new IllegalArgumentException(t.field() + " is " + f.width() + " bits in the snapshot but "
+                        + t.width() + " here");
+            }
             tbValues.add(f.value());
         }
         List<LogicValue[]> inputLevels = new ArrayList<>();

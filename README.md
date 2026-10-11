@@ -47,14 +47,43 @@ VHDL/Verilog-style **delta cycles**.
   exactly as in an HDL simulator. Use write-enables instead of gated clocks.
 - **Four-valued signals, tri-state and shared buses.** Every signal has a `LogicValue`:
   `ZERO`, `ONE`, `Z` (high impedance: nothing drives it) or `X` (unknown, e.g. two drivers
-  fighting). `getValue()` returns it. `isOn()` is `true` only for `ONE`; **Z and X read as
-  `false`**, so boolean code and all gates (`ILogicUnit`) stay simple — but gates do not
-  propagate X (a Z/X input counts as 0). A `Wire` may have any number of drivers and
+  fighting). `getValue()` returns it; `isOn()` is `true` only for `ONE` (Z and X read as `false`), so code that
+  only ever sees 0 and 1 can keep using it. A `Wire` may have any number of drivers and
   resolves them: no driver (or all drivers Z) → `Z`, one driver or agreeing drivers → that
   value, conflicting drivers → `X`. `TriStateBuffer` (data bus + enable) drives its data
   when enabled and `Z` otherwise; connect several to the same wires to share a bus
-  (`Wire.createBus`, `Wire.connect(wires, drivers)`). A flip-flop's rising edge is any
-  change to `ONE` from a value that is not `ONE`, and it captures Z/X data as-is.
+  (`Wire.createBus`, `Wire.connect(wires, drivers)`).
+- **Gates are four-valued and pessimistic** (`ILogicUnit.evaluateValue`, also `LogicValue.and/or/xor/not`):
+  - a `Z` on a gate input behaves like `X` (a floating CMOS input is not a level);
+  - AND: any 0 → 0, all 1 → 1, otherwise X. OR: any 1 → 1, all 0 → 0, otherwise X. NAND/NOR invert those;
+  - NOT and XOR: any Z or X input → X.
+
+  So a controlling value (0 into AND, 1 into OR) masks an unknown input and anything else propagates: adders,
+  the ALU and gate multiplexers inherit it, and `BusSelector8By8Bit` outputs X when a select bit that could
+  decide the selection is unknown. `ILogicUnit.evaluate` remains the boolean view (`isOn()` of the result); a
+  custom unit that only defines `evaluate` gets X whenever any input is unknown. An uninitialised feedback loop
+  (a ring oscillator, a NOR latch) is X until something drives it to a known level, as in an HDL simulator:
+  start a ring through a NAND enable, set or reset a latch.
+- **Flip-flops** (`FlipFlop`, and therefore `Register`, `RegisterFile`, `Counter` and the flag flip-flops) follow
+  the pessimistic rule of a Verilog edge-triggered UDP:
+
+  | clock transition | Q becomes |
+  |---|---|
+  | 0 → 1 | D (X if D is Z or X) |
+  | 0 → X/Z, X/Z → 1 (may be a rising edge) | Q if D equals Q, otherwise X |
+  | 1 → 0, 1 → X/Z, X/Z → 0, X ↔ Z (cannot be a rising edge) | Q, unchanged |
+
+  With a write enable, an unknown enable makes the gate multiplexer in front of D produce X, so the flip-flop
+  latches X at the edge.
+- **Storage elements and gate-level restore.** Every `FlipFlop`, `Register` and `Counter` is a `StateElement`
+  (`physical.sim`): it registers itself with its `Simulator` at construction (a register or counter as one
+  multi-bit element), so `sim.stateElements()` lists all the circuit's storage and nothing has to be listed by
+  hand. `get(bit)` reads and `force(bit, value)` overwrites a stored level (visible after `settle()`). Names are
+  hierarchical and stable: components name their storage from their own name (`RegisterFile` → `<name>.A` ...,
+  `AluDatapath` → `<name>.regs.A` ... and `<name>.flag_CY` ... `flag_S`), and unnamed components get
+  `sim.uniqueName(prefix)` (`ff0`, `reg1`, `counter0`, `regfile0`, `datapath0`) in construction order, so two
+  identically built circuits have identical names. A last name segment `Z` or `X` is rejected (it would read as a
+  snapshot mask).
 - **Listeners** are notified on every change of the four-valued level (a change between
   0, Z and X reaches boolean-only listeners as `(false, false)`; override
   `ISignalChangeListener.valueChanged` to see the levels). They may add or remove listeners while being notified; each event is delivered
@@ -110,6 +139,11 @@ cycles before the instruction (decimal, 12 digits) · instructions before it (de
 interrupt; padded to 14) · registers `NAME=hex` · flags (`S Z AC P CY` as letters, `-` when clear). No trailing
 spaces. Disassembly uses Intel mnemonics; undocumented opcodes are prefixed `*` (`*NOP`, `*JMP`, `*CALL`,
 `*RET`). The full rules are in `TraceFormatter`'s javadoc.
+
+Gate-level traces can have unknown bits. Each hex digit covers a nibble (the top digit only the register's
+remaining bits) and prints `z` if every bit is Z, `x` if every bit is X, `?` if the nibble mixes Z, X and/or known
+bits (`A=zF`, `A=x0`, `A=?3`); a Z or X flag prints `z` or `x` instead of its letter or `-` (`SZAPC=Sx--C`). These
+are ordinary characters to golden-trace comparison, so a golden `0` against a live `x` is a mismatch.
 
 ### Examples
 
@@ -206,7 +240,58 @@ LOCKSTEP DIVERGENCE after step 438 (comparison #438, last match after step 437)
   ...
 ```
 
-With cycle granularity the divergence lies within the last window; re-run with `everyStep()` to pin it down.
+**Narrowing a coarse divergence.** With `everySteps(n)` or `everyCycles(n)` a difference is first seen at the end of
+a window. `Lockstep` then narrows it to the first diverging step and reports that, with the coarse comparison
+kept below it (`Divergence.narrowing()`, `Divergence.firstStep()`):
+
+1. **Restore**: if both sides can be rewound, both complete states are saved at every matching comparison; on a
+   divergence they are restored and the window is re-run one step at a time. A side can be rewound if it was given
+   a `StateSaver` (`Builder.restoreWith`) or its target's snapshot is complete
+   (`Snapshottable.isSnapshotComplete()`, true for a gate-level `ClockedTarget`). A CPU's snapshot leaves its memory
+   out, so give it a saver: `StateSaver.of(cpu).withMemory("ram", ram::peek, ram::restore, 0, 0x10000)`, or
+   `CpmMachine.stateSaver()` (CPU, all RAM and the console length). The targets are left right after the
+   diverging step; trace ring buffers are rolled back first, and other trace listeners do not see the re-run.
+2. **Replay**: otherwise, or if the re-run does not reproduce the divergence, `Builder.replayWith(() -> setup())`
+   builds a fresh, identically configured pair (checked: names, ignored fields, `compareOnly`, memory regions),
+   replays the coarse comparisons up to the last match (which must match again) and then compares every step of
+   the window. The original targets stay where the coarse comparison stopped them.
+3. Otherwise the report says `NOT NARROWED: the first difference is somewhere in steps 401..450 (compared every 50
+   step(s)): <reason>`.
+
+**Determinism is required**: both mechanisms re-execute steps, so input stimulus (I/O, interrupts, a gate-level
+testbench) must depend only on the saved or replayed state, not on wall-clock time or call order, and anything
+outside the saved state sees the re-executed steps again. A re-run that finds no difference is reported as not
+reproduced, never guessed, and a step that is found is cross-checked: both sides continue to where the coarse
+comparison saw the divergence and must arrive in exactly the states it compared (or throw the same exception),
+otherwise the re-run was not the run that diverged (an incomplete `StateSaver`, a non-deterministic side) and the
+step is not reported. The window is re-run with both sides taking equal numbers of steps, so a difference
+that is only one of timing (cycle granularity, different instruction timings) may not reproduce per step. An
+exception inside a window is pinned to the step that threw, and a state difference before it is found first.
+
+```java
+LockstepResult r = Lockstep.builder("reference", golden.debugger(), "faulty", candidate.debugger())
+        .granularity(Granularity.everySteps(50))
+        .restoreWith(golden.stateSaver(), candidate.stateSaver())
+        .build().runUntil(golden::exited, 10_000);
+```
+
+```
+LOCKSTEP DIVERGENCE after step 438 (narrowed by restore from steps 401..450: compared every 50 step(s), seen at comparison #9 after step 450, last match after step 400)
+  reference "reference":   instruction 438, cycle 3139, PC=050B
+  candidate "faulty":      instruction 438, cycle 3139, PC=050B
+--- state diff after step 438 (expected = reference, actual = candidate) ---
+1 field(s) and 0 memory byte(s) differ (expected "reference after step 438" vs actual "faulty after step 438")
+  A           expected=FF  actual=FE
+--- coarse comparison #9 after step 450 (every 50 step(s)) ---
+  reference "reference":   instruction 450, cycle 3266, PC=0528
+  candidate "faulty":      instruction 450, cycle 3269, PC=06A6
+9 field(s) and 0 memory byte(s) differ (expected "reference after step 450" vs actual "faulty after step 450")
+  PC          expected=0528  actual=06A6
+  ...
+--- reference "reference": last 16 instruction(s), '>' = executed last ---
+  ...
+> 000000003126 000000000437 0508: 3A BF 06  LDA 06BFH      A=00 F=46 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-Z-P-
+```
 
 **Against a golden trace file** (`GoldenTrace`). Record a trace once from a model you trust, keep the file (it is
 plain trace text, so it diffs well in version control and could come from another emulator), and compare any
@@ -283,6 +368,16 @@ shows up in a diff instead of silently reading as 0. `ClockedTarget` makes a clo
 **one step is one clock cycle** (the stimulus drives the inputs, the circuit settles, the clock rises and falls),
 so `Debugger`, `Lockstep`, `SnapshotCheckpoints` and traces work on it unchanged.
 
+A `ClockedTarget` snapshot holds the probes, then `state.<name>` for every storage element of the simulator (with
+`.Z`/`.X` masks), `tb.<name>` for testbench state registered with `addState` (e.g. a control unit's PC kept in
+Java), `in.<name>` for inputs registered with `addInputs`, and `CYCLES`/`INSTRUCTIONS`. `restore(snapshot)` checks
+that the snapshot fits the circuit (machine name, every storage element, no unknown `state.*` field) before
+changing anything, forces all storage and inputs, sets the testbench state, settles the combinational logic, and
+then re-reads every probe: if one differs, the circuit holds state the target does not know about (a latch built
+from gates, an input neither registered nor re-driven each cycle), and restore throws `IllegalStateException`
+rather than restoring silently lossily. A snapshot can also be restored into an identically built circuit.
+`setCyclesPerStep` lets a datapath that executes one CPU instruction per clock be charged the CPU's cycle count.
+
 ```java
 Simulator sim = new Simulator();
 Clock clk = new Clock(sim, false);
@@ -305,7 +400,13 @@ gate-level `AluDatapath` (decoded by a small control unit, one instruction per c
 ```java
 AluDatapathCosim cosim = new AluDatapathCosim(program);                  // or (program, stuckAt(3, false))
 LockstepResult r = cosim.lockstep().run(cosim.instructionCount());
+LockstepResult coarse = cosim.lockstep(Granularity.everyCycles(1000)).run(cosim.instructionCount());
 ```
+
+`lockstep(granularity)` narrows a coarse divergence by restoring both layers (the CPU with all of RAM; the gate
+level through its storage elements, its control unit's PC and control lines) and falls back to replaying a fresh
+co-simulation. The gate level is charged the 8080's clock states per instruction, so cycle windows line up. A
+properly driven datapath shows no Z or X anywhere (the control unit never leaves the operand selector floating).
 
 A random 1500-instruction program agrees on both layers; with a stuck-at-0 fault on bit 3 of the ALU's operand
 B the lockstep stops at the first instruction that needs that bit (`ADI 08H`: A expected 10, actual 08), and both
@@ -314,7 +415,8 @@ sides' traces look alike because the gate-level trace uses the control unit's PC
 ### Waveforms (VCD) and simulator statistics
 
 `VcdWriter` (`com.darchan.physical.wave`) records chosen probes to a Value Change Dump. Dotted probe names
-become scopes (`alu.result` is `result` in scope `top.alu`), buses are vectors, Z/X bits are written as `z`/`x`.
+become scopes (`alu.result` is `result` in scope `top.alu`), buses are vectors, Z/X bits are written as `z`/`x`
+(including X propagated through gates and flip-flops).
 VCD has one time axis but the simulator has simulated time *and* delta cycles, so the time mapping is a choice
 (see the `VcdWriter` javadoc for the trade-offs):
 

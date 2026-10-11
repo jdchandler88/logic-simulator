@@ -62,7 +62,9 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       the empty `Cpu` stub was removed — the CPU will be the Phase 2 behavioral core.)
 - [x] Tri-state / high-Z signals and bus resolution (needed for a shared data bus).
       (`LogicValue` 0/1/Z/X, multi-driver resolved `Wire`, `TriStateBuffer`; `isOn()` reads Z/X
-      as false. Deferred: X-propagation through gates — `ILogicUnit` is still boolean.)
+      as false.)
+- [x] X-propagation through gates (deferred from the item above; done in "Pre-Phase 3 tightening"): four-valued
+      pessimistic gate evaluation, Z on an input behaves as X, Verilog-UDP-style flip-flop clock rule.
 - [x] Fix `RegisterFile`: docs say `[15:0]` data and F in the high bits; code wires
       F/B/D/H to bits 8–15, A/C/E/L to bits 0–7, puts F on output `[7:0]`, and declares
       an 8-bit output width for a 16-bit bus. Gated clocks via latch lines should
@@ -102,8 +104,8 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       `run-com --golden`; 650-line TST8080 golden trace in test resources), `SnapshotCheckpoints` (at instruction,
       cycle or k-th PC hit). Fault-injection tests catch a corrupted read/write at the exact instruction. The gate
       level became a `DebugTarget` via `ProbeSet` + `ClockedTarget` (one step = one clock), and `com.darchan.cosim`
-      runs the gate-level `AluDatapath` in lockstep with `Cpu8080`. Not done: automatic bisection of a coarse
-      (cycle-window) divergence down to the instruction; re-run with step granularity instead.)
+      runs the gate-level `AluDatapath` in lockstep with `Cpu8080`. A coarse (step- or cycle-window) divergence is
+      now narrowed to the exact step automatically: see "Pre-Phase 3 tightening".)
 - [x] VCD waveform output for the physical layer (GTKWave/Surfer) plus simulator stats (deltas per settle, events per tick).
       (`VcdWriter`: probes → scopes from dotted names, vectors, z/x; time mapping `SETTLE` (default, one tick per
       settle/Clock.tick), `DELTA` (one tick per delta cycle) or `SIM_TIME`. `Simulator.stats()`: runs, deltas and
@@ -111,6 +113,26 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
 - [x] Interactive CLI debugger (REPL): step, continue, break/watch, regs, mem, trace on/off, dump, save/load snapshot.
       (`diag.repl.DebuggerRepl` over a CPU-agnostic `ReplTarget` (8080: `ReplTarget8080`); `App debug FILE.COM` or
       `debug --raw FILE --org ADDR`; also next-cycles, until, io watch, dis, history, diff; Ctrl-C interrupts a run.)
+
+## Pre-Phase 3 tightening
+Make the diagnostics trustworthy before running real ROMs: a check that can pass when it should not is worse than
+no check.
+- [x] PR + review of Phases 0–2 (fixes for budgets, halt boundaries, lockstep comparisons, golden-trace stop state,
+      input handling, CI ROM checks).
+- [x] Divergence + X/Z tightening:
+      - Lockstep narrowing: a coarse divergence (`everySteps(n)`, `everyCycles(n)`) is narrowed to the first
+        diverging step by restoring the last matching state (`StateSaver`, `Snapshottable.isSnapshotComplete()`)
+        and re-running the window, or by replaying fresh identically configured models (`replayWith`); otherwise
+        reported as `NOT NARROWED` with the window and reason. Tested with faults at known steps for 8080-vs-8080
+        and the gate-level co-simulation.
+      - Gate-level restore: `StateElement` storage (flip-flops, registers, counters) registered with the
+        `Simulator` at construction under stable hierarchical names; `ClockedTarget` snapshots include storage,
+        testbench state and inputs, and `restore` forces them, settles, and verifies the probes (lossless or it
+        throws).
+      - X propagation through gates and flip-flops (four-valued, pessimistic), and Z/X shown in gate-level traces
+        (`z`/`x`/`?` digits), golden comparisons and VCD.
+- [ ] Test hardening (next).
+- [ ] Netlist + visualizer (after).
 
 ## Phase 3 – Space Invaders (fun 8080 milestone)
 - [ ] Memory map: ROM 0x0000–0x1FFF, RAM 0x2000–0x23FF, VRAM 0x2400–0x3FFF.
