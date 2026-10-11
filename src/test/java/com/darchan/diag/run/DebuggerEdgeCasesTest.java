@@ -175,7 +175,7 @@ class DebuggerEdgeCasesTest {
         // the write to 0x80 no longer stops the run; the OUT to port 7 still does
         StopReason r = dbg.run(1000);
         assertEquals(WATCHPOINT, r.kind());
-        assertTrue(r.detail().contains("IO_OUT"), r.detail());
+        assertTrue(r.detail().startsWith("watch [IO_OUT] 0007: IO_OUT 0007 value "), r.detail());
         assertThrows(NullPointerException.class, () -> dbg.addWatchpoint(null));
     }
 

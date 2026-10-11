@@ -2,6 +2,7 @@ package com.darchan.diag.trace;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
+import net.jqwik.api.Assume;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
@@ -52,7 +53,14 @@ class TraceFormatPropertyTest {
         }
         boolean unknown = r.nextBoolean();
         TraceLayout layout = new TraceLayout("cpu", 1 + r.nextInt(32), 1 + r.nextInt(4), r.nextInt(30), specs, unknown);
-        TraceEvent e = new TraceEvent(layout, (pc, bytes, length) -> "OP" + length + (length > 0 ? "," + bytes[0] : ""));
+        int style = r.nextInt(5);
+        TraceEvent e = new TraceEvent(layout, (pc, bytes, length) -> switch (style) {
+            case 0 -> "";
+            case 1 -> "NOP";
+            case 2 -> "MVI A,3FH";
+            case 3 -> "LD (HL),B ; x";
+            default -> "OP" + length + (length > 0 ? "," + bytes[0] : "");
+        });
         long cycle = r.nextInt(4) == 0 ? Math.abs(r.nextLong() % 1_000_000_000_000_000L) : r.nextInt(100_000);
         long instruction = r.nextInt(100_000);
         int pc = r.nextInt();
@@ -94,9 +102,9 @@ class TraceFormatPropertyTest {
         String counters = String.format("%012d %012d ", c.cycle(), c.instruction());
         assertTrue(line.startsWith(counters), "decimal counters zero-padded to 12 digits: " + line);
         int pcDigits = (c.layout().pcWidth() + 3) / 4;
-        assertTrue(line.substring(counters.length()).startsWith(hexDigits(c.pc(), pcDigits) + ": "), line);
+        assertTrue(line.substring(counters.length()).startsWith(hexDigits(c.pc(), pcDigits) + ":"), line);
         if (c.interrupt()) {
-            assertTrue(line.contains("INT "), line);
+            assertTrue(line.contains("INT"), line);
         }
         assertEquals(c.event().copy(), c.event());
         assertEquals(line, TraceFormatter.format(c.event().copy()));
@@ -110,8 +118,37 @@ class TraceFormatPropertyTest {
         return sb.toString();
     }
 
+    /** a line that ends right after "pc:" (no bytes, no disassembly, no registers) has nothing to split */
+    private static boolean isDegenerate(Case c) {
+        return c.layout().registers().isEmpty() && c.event().length() == 0
+                && (c.interrupt() ? "INT " : "").concat(c.event().disassembly()).isBlank();
+    }
+
+    @Property
+    void theParserReadsBackTheFixedColumns(@ForAll("cases") Case c) {
+        Assume.that(!isDegenerate(c));
+        TraceLine parsed = TraceLine.parse(TraceFormatter.format(c.event()));
+        assertTrue(parsed.isTrace(), parsed.line());
+        StringBuilder bytes = new StringBuilder();
+        for (int i = 0; i < c.event().length(); i++) {
+            bytes.append(i > 0 ? " " : "").append(String.format("%02X", c.event().byteAt(i)));
+        }
+        assertEquals(bytes.toString(), parsed.text("bytes").orElseThrow(), parsed.line());
+        String disassembly = (c.interrupt() ? "INT " : "") + c.event().disassembly();
+        assertEquals(disassembly.strip(), parsed.text("disassembly").orElseThrow(), parsed.line());
+        int pcDigits = (c.layout().pcWidth() + 3) / 4;
+        assertEquals(hexDigits(c.pc(), pcDigits), parsed.text("pc").orElseThrow(), parsed.line());
+        // columns follow each other without overlapping, in line order
+        int end = 0;
+        for (TraceLine.Column col : parsed.columns()) {
+            assertTrue(col.start() >= end, col + " starts before the previous column ended: " + parsed.line());
+            end = col.end();
+        }
+    }
+
     @Property
     void theParserReadsBackTheRegisterColumns(@ForAll("cases") Case c) {
+        Assume.that(!isDegenerate(c));
         TraceLine parsed = TraceLine.parse(TraceFormatter.format(c.event()));
         assertTrue(parsed.isTrace(), parsed.line());
         assertEquals(String.format("%012d", c.cycle()), parsed.text("cycle").orElseThrow());

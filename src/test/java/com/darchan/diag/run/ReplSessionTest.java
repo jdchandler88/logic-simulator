@@ -374,7 +374,9 @@ class ReplSessionTest {
     @Test
     void watchRangesNeedBothEndsAndCountsAcceptUpperCaseHexPrefixes() {
         String out = session("watch r -80\nwatch r 80-\nbreak 0X10\nstep 0X2\nmem 0X0 0X4\nq\n");
-        assertTrue(out.contains("error: not a hex address: \n"), out);
+        assertEquals(2, out.split("error: not a hex address: \n", -1).length - 1,
+                "an empty address on either side of the dash: " + out);
+        assertFalse(out.contains("-80"), "the dash splits the range, it is not part of an address: " + out);
         assertTrue(out.contains("#1 break 10\n"), out);
         assertTrue(out.contains("[STEPPED] 2 step(s)"), out);
         assertTrue(out.contains("0000: 00 03 02 80  "), out);
@@ -393,7 +395,11 @@ class ReplSessionTest {
         assertEquals(4, defaultLines, "64 bytes by default: four lines");
         assertEquals(10, session("dis\nq\n").lines().filter(l -> l.matches("(dbg> )?(-> |   )[0-9A-F]{2}: .*")).count() - 1,
                 "ten instructions by default (the banner shows the first one too)");
-        assertEquals(1, session("dis 0 1\nq\n").lines().filter(l -> l.contains("-> 00:") || l.contains("   00:")).count()
+        assertEquals(1, session("dis 0 1\nq\n").lines().filter(l -> l.matches("(dbg> )?(-> |   )[0-9A-F]{2}: .*")).count()
+                - 1, "dis 0 1 lists a single instruction (the banner shows the first one too)");
+        assertEquals(0, session("dis 0 0\nq\n").lines().filter(l -> l.matches("(dbg> )?(-> |   )[0-9A-F]{2}: .*")).count()
+                - 1);
+        assertEquals(3, session("dis 0 3\nq\n").lines().filter(l -> l.matches("(dbg> )?(-> |   )[0-9A-F]{2}: .*")).count()
                 - 1);
         // the listing wraps from the last address back to 00
         String wrap = session("dis FF 3\nq\n");
