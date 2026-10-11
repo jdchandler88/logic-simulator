@@ -14,10 +14,14 @@ import java.util.List;
  * @param differingColumns one entry per differing column, e.g. {@code "A: expected FF, actual FE"}
  * @param context          the live lines just before the mismatch (all of which matched), oldest first
  * @param following        the next few golden lines after the expected one (what the golden run did next)
+ * @param note             how the mismatch was found when it was not a live trace line, else {@code null}: when a
+ *                         run stops before the golden trace ends, the state it stopped in is compared with the next
+ *                         golden line, and {@code actual} is then rebuilt from that state (columns that cannot be
+ *                         rebuilt, such as the instruction bytes and disassembly, show {@code ?})
  */
 public record TraceMismatch(String source, long lineNumber, long instruction, String expected, String actual,
                             String markers, List<String> differingColumns, List<String> context,
-                            List<String> following) {
+                            List<String> following, String note) {
 
     public TraceMismatch {
         differingColumns = List.copyOf(differingColumns);
@@ -25,10 +29,19 @@ public record TraceMismatch(String source, long lineNumber, long instruction, St
         following = List.copyOf(following);
     }
 
+    /** a mismatch between two trace lines (no note) */
+    public TraceMismatch(String source, long lineNumber, long instruction, String expected, String actual,
+                         String markers, List<String> differingColumns, List<String> context, List<String> following) {
+        this(source, lineNumber, instruction, expected, actual, markers, differingColumns, context, following, null);
+    }
+
     public String report() {
         StringBuilder sb = new StringBuilder();
         sb.append("GOLDEN TRACE MISMATCH at line ").append(lineNumber).append(" of ").append(source)
                 .append(" (instruction ").append(instruction).append(")");
+        if (note != null) {
+            sb.append("\n  (").append(note).append(")");
+        }
         sb.append("\n  expected: ").append(expected);
         sb.append("\n  actual:   ").append(actual);
         sb.append("\n            ").append(markers);

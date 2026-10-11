@@ -15,9 +15,17 @@ import com.darchan.diag.run.StopReason;
 public record GoldenTraceResult(String source, long linesCompared, boolean complete, StopReason stop,
                                 TraceMismatch mismatch, String nextExpectedLine) {
 
-    /** no line differed (the golden trace may still have lines the run did not reach, see {@link #complete()}) */
+    /**
+     * no line differed, including the next golden line compared with the state the run stopped in (the golden
+     * trace may still have lines the run did not reach, see {@link #complete()} and {@link #verified()})
+     */
     public boolean matched() {
         return mismatch == null;
+    }
+
+    /** matched and complete: every golden line was reached and matched */
+    public boolean verified() {
+        return mismatch == null && complete;
     }
 
     public String report() {

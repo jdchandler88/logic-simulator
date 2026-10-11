@@ -107,6 +107,11 @@ public final class GoldenTrace {
     /**
      * Runs {@code debugger}'s target, comparing every instruction with the golden trace, until the first mismatch,
      * the end of the golden trace, any other debugger stop (breakpoint, watchpoint, halt) or {@code maxCycles}.
+     * When the run stops before the golden trace ends, the state it stopped in is compared with the next golden
+     * line ({@link GoldenTraceComparator#compareStoppedState}), so a divergence that makes the program stop early
+     * (e.g. jump to its exit address) is a mismatch rather than an incomplete match. Check both
+     * {@link GoldenTraceResult#matched()} and {@link GoldenTraceResult#complete()}: a run that stopped early in the
+     * expected state matches but is not complete.
      */
     public GoldenTraceResult compare(Debugger debugger, long maxCycles) {
         try (GoldenTraceComparator c = comparator()) {
@@ -122,6 +127,8 @@ public final class GoldenTrace {
             } finally {
                 debugger.removeTraceListener(c);
             }
+            // stopped with golden lines left: the next one describes the state the run should be in now
+            c.compareStoppedState(debugger.target());
             return new GoldenTraceResult(source, c.linesCompared(), c.exhausted(), stop, c.mismatch(),
                     c.exhausted() || c.mismatched() ? null : c.nextExpectedLine());
         }

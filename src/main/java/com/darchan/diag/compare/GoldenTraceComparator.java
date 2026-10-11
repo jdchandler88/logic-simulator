@@ -1,5 +1,8 @@
 package com.darchan.diag.compare;
 
+import com.darchan.diag.Field;
+import com.darchan.diag.Snapshot;
+import com.darchan.diag.run.DebugTarget;
 import com.darchan.diag.trace.TraceEvent;
 import com.darchan.diag.trace.TraceFormatter;
 import com.darchan.diag.trace.TraceLine;
@@ -11,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -138,6 +142,91 @@ public final class GoldenTraceComparator implements TraceListener, AutoCloseable
         }
         return new TraceMismatch(source, line, instruction, expected, actual, marks.toString(),
                 differingColumns(e, a), new ArrayList<>(context), following);
+    }
+
+    /**
+     * Compares the state a run stopped in with the next expected golden line, for runs that stop (breakpoint,
+     * watchpoint, halt, cycle limit) before the golden trace ends. A golden line shows the state <em>before</em> an
+     * instruction, so it must match the stopped target: the {@code cycle}, {@code instruction} and {@code pc}
+     * columns are compared with the target's counters and PC, and every register column with the snapshot field of
+     * the same name, formatted like the golden text. Columns that cannot be rebuilt from the state (the instruction
+     * bytes, the disassembly, flag groups such as {@code SZAPC}, registers the snapshot lacks) and ignored columns
+     * are skipped. Does nothing if a mismatch was already found, the golden trace is used up, or no column could be
+     * compared.
+     *
+     * @return true if this recorded a mismatch
+     */
+    public boolean compareStoppedState(DebugTarget target) {
+        if (mismatch != null || nextExpected == null) {
+            return false;
+        }
+        String expected = nextExpected;
+        TraceLine golden = TraceLine.parse(expected);
+        if (!golden.isTrace()) {
+            return false;
+        }
+        Snapshot state = target.snapshot();
+        StringBuilder actual = new StringBuilder(expected.length());
+        StringBuilder marks = new StringBuilder(expected.length());
+        List<String> differing = new ArrayList<>();
+        int comparable = 0;
+        int prev = 0;
+        for (TraceLine.Column c : golden.columns()) {
+            actual.append(expected, prev, c.start());
+            pad(marks, actual.length());
+            String live = liveText(c, target, state);
+            if (live == null) {
+                actual.append("?".repeat(c.text().length()));
+            } else {
+                boolean ignore = ignored.contains(c.name());
+                if (!ignore) {
+                    comparable++;
+                }
+                int start = actual.length();
+                actual.append(live);
+                if (!ignore && !live.equals(c.text())) {
+                    differing.add(c.name() + ": expected " + (c.text().isEmpty() ? "<empty>" : c.text())
+                            + ", actual " + live);
+                    pad(marks, start);
+                    marks.append("^".repeat(Math.max(1, live.length())));
+                }
+            }
+            prev = c.end();
+        }
+        actual.append(expected, prev, expected.length());
+        if (comparable == 0 || differing.isEmpty()) {
+            return false;
+        }
+        TraceMismatch m = describe(nextLineNumber, target.instructionCount(), expected, actual.toString());
+        mismatch = new TraceMismatch(m.source(), m.lineNumber(), m.instruction(), m.expected(), m.actual(),
+                marks.toString(), differing, m.context(), m.following(),
+                "the live run stopped before this line; 'actual' is rebuilt from the stopped state");
+        return true;
+    }
+
+    /** the live value for a golden column, formatted like the golden text, or null if it cannot be rebuilt */
+    private static String liveText(TraceLine.Column c, DebugTarget target, Snapshot state) {
+        int digits = c.text().length();
+        return switch (c.name()) {
+            case "cycle" -> padded(Long.toString(target.cycleCount()), digits);
+            case "instruction" -> padded(Long.toString(target.instructionCount()), digits);
+            case "pc" -> padded(Integer.toHexString(target.programCounter()).toUpperCase(Locale.ROOT), digits);
+            case "bytes", "disassembly" -> null;
+            default -> state.field(c.name())
+                    .filter(f -> f.format() == Field.Format.HEX)
+                    .map(f -> padded(Long.toHexString(f.value()).toUpperCase(Locale.ROOT), digits))
+                    .orElse(null);
+        };
+    }
+
+    private static String padded(String digits, int width) {
+        return digits.length() >= width ? digits : "0".repeat(width - digits.length()) + digits;
+    }
+
+    private static void pad(StringBuilder sb, int length) {
+        while (sb.length() < length) {
+            sb.append(' ');
+        }
     }
 
     private boolean inIgnoredColumn(TraceLine line, int index) {

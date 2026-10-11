@@ -121,4 +121,43 @@ class GoldenTraceTest {
         assertTrue(r.matched() && r.complete(), r::report);
         assertEquals(2, r.linesCompared());
     }
+    @Test
+    void aLiveRunThatStopsEarlyInTheWrongStateIsAMismatch() {
+        Path golden = recordTiny(30);
+        TinyMachine m = new TinyMachine();
+        m.faultAtStep = 9; // the last instruction before the breakpoint produces a wrong ACC
+        m.faultMask = 0x01;
+        Debugger dbg = new Debugger(m, null);
+        dbg.addBreakpoint(10);
+        GoldenTraceResult r = GoldenTrace.of(golden).contextLines(2).compare(dbg, 1_000_000);
+        assertFalse(r.matched(), r::report);
+        assertFalse(r.complete());
+        assertEquals(StopReason.Kind.BREAKPOINT, r.stop().kind());
+        assertEquals(10, r.linesCompared());
+        TraceMismatch mm = r.mismatch();
+        assertEquals(12, mm.lineNumber(), "header + 10 matching lines, then the line the run stopped before");
+        assertEquals(10, mm.instruction());
+        assertEquals(List.of("ACC: expected 2D, actual 2C"), mm.differingColumns());
+        assertEquals("000000000040 000000000010 0A: 0A  ADD PC ACC=2D", mm.expected());
+        assertEquals("000000000040 000000000010 0A: ??  ?????? ACC=2C", mm.actual());
+        assertEquals(" ".repeat(mm.actual().length() - 2) + "^^", mm.markers());
+        assertNotNull(mm.note());
+        assertTrue(r.report().contains("stopped before this line"), r::report);
+        assertEquals(2, mm.context().size());
+    }
+
+    @Test
+    void ignoredColumnsAreNotComparedAtTheStop() {
+        Path golden = recordTiny(30);
+        TinyMachine m = new TinyMachine();
+        m.faultAtStep = 9;
+        m.faultMask = 0x01;
+        Debugger dbg = new Debugger(m, null);
+        dbg.addBreakpoint(10);
+        GoldenTraceResult r = GoldenTrace.of(golden).ignoreColumns("ACC").compare(dbg, 1_000_000);
+        assertTrue(r.matched(), r::report);
+        assertFalse(r.complete());
+        assertFalse(r.verified());
+        assertTrue(r.report().contains("before the golden trace ended"), r::report);
+    }
 }

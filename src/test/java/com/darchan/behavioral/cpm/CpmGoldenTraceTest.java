@@ -66,4 +66,29 @@ class CpmGoldenTraceTest {
                     Files.readString(file));
         }
     }
+    /** 0100: LXI H,0010; PUSH H; RET (to 0010) -- 0010: JMP 0000 (exit) */
+    private static CpmMachine smallProgram() {
+        CpmMachine m = new CpmMachine(new byte[]{0x21, 0x10, 0x00, (byte) 0xE5, (byte) 0xC9});
+        m.ram().write(0x10, 0xC3);
+        m.ram().write(0x11, 0x00);
+        m.ram().write(0x12, 0x00);
+        return m;
+    }
+
+    @Test
+    void aDivergenceThatExitsEarlyIsAMismatch(@TempDir Path dir) {
+        Path golden = dir.resolve("small.trace");
+        GoldenTrace.record(smallProgram().debugger(), golden, 1000);
+        CpmMachine bad = smallProgram();
+        // RET (instruction 2) pops 0010 ^ 0010 = 0000: the program "exits" before the golden trace ends
+        FaultInjectingBus.install(bad, FaultInjectingBus.Kind.READ, 2, 0x10);
+        GoldenTraceResult r = GoldenTrace.of(golden).compare(bad.debugger(), 1000);
+        assertTrue(bad.exited());
+        assertFalse(r.matched(), r::report);
+        assertFalse(r.complete());
+        assertEquals(List.of("pc: expected 0010, actual 0000"), r.mismatch().differingColumns(), r::report);
+
+        GoldenTraceResult good = GoldenTrace.of(golden).compare(smallProgram().debugger(), 1000);
+        assertTrue(good.verified(), good::report);
+    }
 }
