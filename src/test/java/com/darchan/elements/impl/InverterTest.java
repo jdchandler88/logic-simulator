@@ -3,17 +3,20 @@ package com.darchan.elements.impl;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.comp.Inverter;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InverterTest {
 
+    private final Simulator sim = new Simulator();
+
     @Test
     void initialStateShouldBeFalseIfInputIsTrue() {
         ISignal in = ConstantSignal.ON;
         IBus inputBus = new Bus(in);
-        Inverter cut = new Inverter(inputBus);
+        Inverter cut = new Inverter(sim, inputBus);
         assertFalse(cut.getOutputBus().getSignals().get(0).isOn());
     }
 
@@ -21,7 +24,7 @@ public class InverterTest {
     void initialStateShouldBeTrueIfInputIsFalse() {
         ISignal in = ConstantSignal.OFF;
         IBus inputBus = new Bus(in);
-        Inverter cut = new Inverter(inputBus);
+        Inverter cut = new Inverter(sim, inputBus);
         assertTrue(cut.getOutputBus().getSignals().get(0).isOn());
     }
 
@@ -29,7 +32,7 @@ public class InverterTest {
     void inputBusShouldHaveSameSignals() {
         ISignal in = ConstantSignal.ON;
         IBus inputBus = new Bus(in);
-        Inverter cut = new Inverter(inputBus);
+        Inverter cut = new Inverter(sim, inputBus);
         assertAll(
                 () -> assertEquals(1, cut.getInputBus().getSignals().size()),
                 () -> assertTrue(cut.getInputBus().getSignals().get(0).isOn())
@@ -44,7 +47,7 @@ public class InverterTest {
     void outputBusShouldHaveAppropriateNumberOfSignals() {
         ISignal in = ConstantSignal.ON;
         IBus inputBus = new Bus(in);
-        Inverter cut = new Inverter(inputBus);
+        Inverter cut = new Inverter(sim, inputBus);
         assertEquals(1, cut.getOutputBus().getSignals().size());
     }
 

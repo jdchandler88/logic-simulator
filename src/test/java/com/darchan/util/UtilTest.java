@@ -6,6 +6,7 @@ import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.SimpleSignal;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -26,10 +27,11 @@ class UtilTest {
 
         //create bus of width 64 with random values
         Random r = new Random();
+        Simulator sim = new Simulator();
         int busWidth = 32;
         ISignal[] sigs = new ISignal[busWidth];
         for (int i=0; i<busWidth; i++) {
-            sigs[i] = new SimpleSignal(r.nextBoolean());
+            sigs[i] = new SimpleSignal(sim, r.nextBoolean());
         }
         IBus busToSlice = new Bus(sigs);
 

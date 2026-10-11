@@ -6,25 +6,26 @@ import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.Clock;
 import com.darchan.elements.impl.SimpleSignal;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RegisterTest {
 
+    private final Simulator sim = new Simulator();
+
     @ParameterizedTest
     @CsvSource(value = {"2", "4", "8", "16"})
     void outputBusShouldBeLengthN(int width) {
-        IClock clk = new Clock(false);
+        IClock clk = new Clock(sim, false);
         IBus inputBus = creatEBusOfWidthWithValue(width, false);
-        Register reg = new Register(clk, inputBus, false);
+        Register reg = new Register(sim, clk, inputBus, false);
         assertEquals(width, reg.getOutputBus().getSignals().size());
     }
 
@@ -32,19 +33,20 @@ class RegisterTest {
     @CsvSource(value = {"true", "false"})
     void eachOutputShouldHaveSuppliedInitialValueWith16BitRegister(boolean initialValue) {
         int width = 16;
-        IClock clk = new Clock(false);
+        IClock clk = new Clock(sim, false);
         IBus inputBus = creatEBusOfWidthWithValue(width, initialValue);
-        Register reg = new Register(clk, inputBus, initialValue);
+        Register reg = new Register(sim, clk, inputBus, initialValue);
         assertEquals(collectBusValues(inputBus), collectBusValues(reg.getOutputBus()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInputBuses")
-    void outputBusShouldReflectRespectiveInputsAfterClockGoesHigh(IBus inputBus) {
+    @ValueSource(ints = {2, 4, 8, 16})
+    void outputBusShouldReflectRespectiveInputsAfterClockGoesHigh(int width) {
+        IBus inputBus = createBusOfWidthWithAlternatingValues(width);
         //initialize inputs
         boolean initialValue = false;
-        IClock clk = new Clock(false);
-        Register reg = new Register(clk, inputBus, initialValue);
+        IClock clk = new Clock(sim, false);
+        Register reg = new Register(sim, clk, inputBus, initialValue);
 
         //clock goes low to high
         clk.tick();
@@ -54,29 +56,21 @@ class RegisterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getInputBuses")
-    void outputBusShouldNOTReflectRespectiveInputsAfterClockGoesLow(IBus inputBus) {
+    @ValueSource(ints = {2, 4, 8, 16})
+    void outputBusShouldNOTReflectRespectiveInputsAfterClockGoesLow(int width) {
+        IBus inputBus = createBusOfWidthWithAlternatingValues(width);
         //initialize inputs
         boolean initialValue = false;
-        IClock clk = new Clock(true);
-        Register reg = new Register(clk, inputBus, initialValue);
+        IClock clk = new Clock(sim, true);
+        Register reg = new Register(sim, clk, inputBus, initialValue);
 
-        //clock goes low to high
+        //clock goes high to low
         clk.tick();
 
-        //inputs and outputs should equal
+        //outputs keep their initial value
         int inputWidth = inputBus.getSignals().size();
         IBus expectedValues = creatEBusOfWidthWithValue(inputWidth, initialValue);
         assertEquals(collectBusValues(expectedValues), collectBusValues(reg.getOutputBus()));
-    }
-
-    static Stream<Arguments> getInputBuses() {
-        return Stream.of(
-                Arguments.of(createBusOfWidthWithAlternatingValues(2)),
-                Arguments.of(createBusOfWidthWithAlternatingValues(4)),
-                Arguments.of(createBusOfWidthWithAlternatingValues(8)),
-                Arguments.of(createBusOfWidthWithAlternatingValues(16))
-        );
     }
 
 
@@ -84,19 +78,19 @@ class RegisterTest {
     HELPER SECTION
      */
 
-    private static IBus creatEBusOfWidthWithValue(int width, boolean value) {
+    private IBus creatEBusOfWidthWithValue(int width, boolean value) {
         ISignal[] sigs = new ISignal[width];
         for (int i=0; i<width; i++) {
-            sigs[i] = new SimpleSignal(value);
+            sigs[i] = new SimpleSignal(sim, value);
         }
         return new Bus(sigs);
     }
 
-    private static IBus createBusOfWidthWithAlternatingValues(int width) {
+    private IBus createBusOfWidthWithAlternatingValues(int width) {
         ISignal[] sigs = new ISignal[width];
         for (int i=0; i<width; i++) {
             //even signals will be true, odd will be false
-            sigs[i] = new SimpleSignal(i%2==0);
+            sigs[i] = new SimpleSignal(sim, i%2==0);
         }
         return new Bus(sigs);
     }

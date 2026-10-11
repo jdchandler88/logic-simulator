@@ -3,6 +3,7 @@ package com.darchan.elements.impl.comp;
 import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
+import com.darchan.sim.Simulator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,11 +40,12 @@ public class Register implements IComponent {
 
     /**
      * Create register of length equal to inputBus width
+     * @param sim simulator
      * @param clk input clock
      * @param inputBus input bus
      * @param initialValue initial value for each flip-flopp
      */
-    public Register(ISignal clk, IBus inputBus, boolean initialValue) {
+    public Register(Simulator sim, ISignal clk, IBus inputBus, boolean initialValue) {
         this.clk = clk;
         this.inputBus = inputBus;
         //create 'register' of flip flops. direct each input signal on this component's bus to each flipflop
@@ -51,7 +53,7 @@ public class Register implements IComponent {
         this.flipFlops = new ArrayList<>();
         List<ISignal> outputSignals = new ArrayList<>();
         for (int i=0; i<this.inputBus.getSignals().size(); i++) {
-            FlipFlop ff = new FlipFlop(clk, new Bus(inputBus.getSignals().get(i)), initialValue);
+            FlipFlop ff = new FlipFlop(sim, clk, new Bus(inputBus.getSignals().get(i)), initialValue);
             flipFlops.add(ff);
             outputSignals.add(ff.getOutputBus().getSignals().get(0));
         }

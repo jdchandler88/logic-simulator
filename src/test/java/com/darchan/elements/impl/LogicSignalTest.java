@@ -6,6 +6,7 @@ import com.darchan.elements.iface.IRange;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.logic.LogicalFalseLogicUnit;
 import com.darchan.elements.impl.logic.LogicalTrueLogicUnit;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
@@ -14,12 +15,14 @@ import static org.mockito.Mockito.*;
 
 class LogicSignalTest {
 
+    private final Simulator sim = new Simulator();
+
     @Test
     void constructorShouldInitializeToTrueWithLogicUnitStateTrue() {
         ISignal sig1 = ConstantSignal.ON;
         ISignal sig2 = ConstantSignal.OFF;
         Bus bus = new Bus(sig1, sig2);
-        LogicSignal cut = new LogicSignal(bus, new LogicalTrueLogicUnit());
+        LogicSignal cut = new LogicSignal(sim, bus, new LogicalTrueLogicUnit());
         assertTrue(cut.isOn());
     }
 
@@ -28,7 +31,7 @@ class LogicSignalTest {
         ISignal sig1 = ConstantSignal.ON;
         ISignal sig2 = ConstantSignal.OFF;
         Bus bus = new Bus(sig1, sig2);
-        LogicSignal cut = new LogicSignal(bus, new LogicalFalseLogicUnit());
+        LogicSignal cut = new LogicSignal(sim, bus, new LogicalFalseLogicUnit());
         assertFalse(cut.isOn());
     }
 
@@ -37,7 +40,7 @@ class LogicSignalTest {
         ISignal sig1 = mock(ISignal.class);
         ISignal sig2 = mock(ISignal.class);
         Bus bus = new Bus(sig1, sig2);
-        LogicSignal cut = new LogicSignal(bus, new LogicalTrueLogicUnit());
+        LogicSignal cut = new LogicSignal(sim, bus, new LogicalTrueLogicUnit());
         assertAll(
                 () -> verify(sig1, times(1)).addSignalChangeListener(ArgumentMatchers.any()),
                 () -> verify(sig2, times(1)).addSignalChangeListener(ArgumentMatchers.any())
@@ -46,7 +49,7 @@ class LogicSignalTest {
 
     @Test
     void shouldReflectSignalChangeWhenInputSignalChanges() {
-        Clock clock = new Clock(false);
+        Clock clock = new Clock(sim, false);
         Bus bus = new Bus(clock);
         ILogicUnit logicUnit = new ILogicUnit() {
             @Override
@@ -61,7 +64,7 @@ class LogicSignalTest {
                 return null;
             }
         };
-        LogicSignal cut = new LogicSignal(bus, logicUnit);
+        LogicSignal cut = new LogicSignal(sim, bus, logicUnit);
         assertAll(
                 () -> assertFalse(cut.isOn()),
                 () -> {

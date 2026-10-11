@@ -4,6 +4,7 @@ import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleSignal;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RegisterFileTest {
 
+    private final Simulator sim = new Simulator();
+
     @Test
     void registersHaveInitialValue() {
         //set up expected value (all registers should be set to all 0)
@@ -25,10 +28,10 @@ class RegisterFileTest {
         //create register file with input bus
         ISignal[] inputSignals = new ISignal[24];
         for (int i=0; i<24; i++) {
-            inputSignals[i] = new SimpleSignal(false);
+            inputSignals[i] = new SimpleSignal(sim, false);
         }
         IBus inputBus = new Bus(inputSignals);
-        RegisterFile rf = new RegisterFile(inputBus);
+        RegisterFile rf = new RegisterFile(sim, inputBus);
 
         //make sure each register is initialized to false
         assertAll(

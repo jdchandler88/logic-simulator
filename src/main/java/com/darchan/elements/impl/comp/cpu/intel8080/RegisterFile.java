@@ -7,6 +7,7 @@ import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.comp.Register;
+import com.darchan.sim.Simulator;
 
 /**
  * Module containing registers.
@@ -42,7 +43,7 @@ public class RegisterFile implements IComponent {
     final Register L;
 
 
-    public RegisterFile(IBus inputBus) {
+    public RegisterFile(Simulator sim, IBus inputBus) {
         //validate that input bus is the correct width
 
         this.inputBus = inputBus;
@@ -52,14 +53,14 @@ public class RegisterFile implements IComponent {
         IBus lowBus = inputBus.slice(new SimpleRange(0, 7));
 
         //initialize registers
-        this.F = new Register(inputBus.getSignal(23), highBus, false);
-        this.A = new Register(inputBus.getSignal(22), lowBus, false);
-        this.B = new Register(inputBus.getSignal(21), highBus, false);
-        this.C = new Register(inputBus.getSignal(20), lowBus, false);
-        this.D = new Register(inputBus.getSignal(19), highBus, false);
-        this.E = new Register(inputBus.getSignal(18), lowBus, false);
-        this.H = new Register(inputBus.getSignal(17), highBus, false);
-        this.L = new Register(inputBus.getSignal(16), lowBus, false);
+        this.F = new Register(sim, inputBus.getSignal(23), highBus, false);
+        this.A = new Register(sim, inputBus.getSignal(22), lowBus, false);
+        this.B = new Register(sim, inputBus.getSignal(21), highBus, false);
+        this.C = new Register(sim, inputBus.getSignal(20), lowBus, false);
+        this.D = new Register(sim, inputBus.getSignal(19), highBus, false);
+        this.E = new Register(sim, inputBus.getSignal(18), lowBus, false);
+        this.H = new Register(sim, inputBus.getSignal(17), highBus, false);
+        this.L = new Register(sim, inputBus.getSignal(16), lowBus, false);
 
         //output is F/A?
         ISignal[] outputSignals = new ISignal[16];

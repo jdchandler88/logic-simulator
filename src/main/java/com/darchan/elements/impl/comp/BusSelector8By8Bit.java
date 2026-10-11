@@ -4,6 +4,7 @@ import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.SimpleSignal;
+import com.darchan.sim.Simulator;
 
 import java.util.Collections;
 import java.util.stream.IntStream;
@@ -89,9 +90,10 @@ public class BusSelector8By8Bit implements IComponent {
 
     /**
      * Creates selector using the specified input bus
+     * @param sim simulator
      * @param inputBus input bus
      */
-    public BusSelector8By8Bit(IBus inputBus) {
+    public BusSelector8By8Bit(Simulator sim, IBus inputBus) {
         this.inputBus = inputBus;
         //wire select bits to selection logic
         for (int i=SELECT_BITS_RANGE.getMin(); i<=SELECT_BITS_RANGE.getMax(); i++) {
@@ -103,7 +105,7 @@ public class BusSelector8By8Bit implements IComponent {
         //create output bus
         ISignal[] outputSignals = new ISignal[8];
         for (int i=0; i<8; i++) {
-            outputSignals[i] = new SimpleSignal(false);
+            outputSignals[i] = new SimpleSignal(sim, false);
         }
         this.outputBus = new Bus(outputSignals);
 

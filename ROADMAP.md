@@ -39,7 +39,7 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       (Deleted; real RegisterFile tests are Phase 1.)
 
 ## Phase 1 – Make the gate-level simulator correct
-- [ ] **Event scheduler with delta cycles.** Today `setState` notifies listeners
+- [x] **Event scheduler with delta cycles.** Today `setState` notifies listeners
       synchronously and depth-first. Results:
       - Three flip-flops chained as a shift register all load the input on a
         single clock edge (`a=b=c=true` after one tick), because A's output
@@ -49,6 +49,8 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       Fix: signals schedule changes into a queue; edge-triggered elements sample
       in one phase and commit in the next (VHDL/Verilog delta-cycle semantics).
       Optional per-gate propagation delay.
+      (Done: `com.darchan.sim.Simulator`, `settle()`/`runUntil()`, `OscillationException`,
+      `Wire` for feedback, optional transport delay on `LogicSignal`.)
 - [ ] Validate bus widths once, at construction, in every component (`AndGate`,
       `BusSelector8By8Bit` return `null` ranges; `Register`/`RegisterFile` never validate).
 - [ ] Tri-state / high-Z signals and bus resolution (needed for a shared data bus).

@@ -7,6 +7,7 @@ import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.LogicSignal;
 import com.darchan.elements.impl.logic.InverterLogicUnit;
+import com.darchan.sim.Simulator;
 
 public class Inverter implements IComponent {
 
@@ -19,9 +20,9 @@ public class Inverter implements IComponent {
 	
 	private IBus outputBus;
 	
-	public Inverter(IBus input) {
+	public Inverter(Simulator sim, IBus input) {
 		this.inputBus = input;
-		this.outputBus = new Bus(new LogicSignal(this.inputBus, new InverterLogicUnit()));
+		this.outputBus = new Bus(new LogicSignal(sim, this.inputBus, new InverterLogicUnit()));
 	}
 	
 	@Override
