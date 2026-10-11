@@ -48,6 +48,13 @@ class LogicSignalTest {
     }
 
     @Test
+    void constructorShouldRejectInputBusOfWrongWidth() {
+        Bus bus = new Bus(ConstantSignal.ON);
+        assertThrows(com.darchan.validation.UnexpectedBusWidthException.class,
+                () -> new LogicSignal(sim, bus, new com.darchan.elements.impl.logic.AndGate()));
+    }
+
+    @Test
     void shouldReflectSignalChangeWhenInputSignalChanges() {
         Clock clock = new Clock(sim, false);
         Bus bus = new Bus(clock);
@@ -61,7 +68,7 @@ class LogicSignalTest {
 
             @Override
             public IRange getAllowedInputBusWidth() {
-                return null;
+                return new SimpleRange(1, 1);
             }
         };
         LogicSignal cut = new LogicSignal(sim, bus, logicUnit);

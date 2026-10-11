@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.comp;
 
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
@@ -50,6 +51,7 @@ public class FlipFlop implements IComponent {
      * @param initialValue output value before the first clock edge
      */
     public FlipFlop(Simulator sim, ISignal clk, IBus inputBus, boolean initialValue) {
+        Validation.validateInputWidth(ALLOWABLE_BUS_WIDTH, inputBus);
         this.clk = clk;
         this.inputBus = inputBus;
         //initialize outputs

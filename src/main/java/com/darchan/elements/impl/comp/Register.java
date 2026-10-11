@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.comp;
 
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
@@ -46,6 +47,7 @@ public class Register implements IComponent {
      * @param initialValue initial value for each flip-flopp
      */
     public Register(Simulator sim, ISignal clk, IBus inputBus, boolean initialValue) {
+        Validation.validateInputWidth(ALLOWABLE_BUS_WIDTH, inputBus);
         this.clk = clk;
         this.inputBus = inputBus;
         //create 'register' of flip flops. direct each input signal on this component's bus to each flipflop

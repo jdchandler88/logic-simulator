@@ -3,12 +3,14 @@ package com.darchan.elements.impl.logic;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.ConstantSignal;
+import com.darchan.validation.UnexpectedBusWidthException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class LogicalFalseLogicUnitTest {
@@ -28,5 +30,9 @@ public class LogicalFalseLogicUnitTest {
         );
     }
 
+    @org.junit.jupiter.api.Test
+    public void emptyBusIsRejected() {
+        assertThrows(UnexpectedBusWidthException.class, () -> new LogicalFalseLogicUnit().validateInputBus(new Bus()));
+    }
 
 }

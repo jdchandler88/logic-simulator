@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.comp;
 
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.*;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
@@ -94,6 +95,7 @@ public class BusSelector8By8Bit implements IComponent {
      * @param inputBus input bus
      */
     public BusSelector8By8Bit(Simulator sim, IBus inputBus) {
+        Validation.validateInputWidth(ALLOWED_INPUT_BUS_WIDTH, inputBus);
         this.inputBus = inputBus;
         //wire select bits to selection logic
         for (int i=SELECT_BITS_RANGE.getMin(); i<=SELECT_BITS_RANGE.getMax(); i++) {
@@ -126,7 +128,7 @@ public class BusSelector8By8Bit implements IComponent {
 
     @Override
     public IRange getAllowedInputBusWidth() {
-        return null;
+        return ALLOWED_INPUT_BUS_WIDTH;
     }
 
     @Override
@@ -136,7 +138,7 @@ public class BusSelector8By8Bit implements IComponent {
 
     @Override
     public IRange getAllowedOutputBusWidth() {
-        return null;
+        return ALLOWED_OUTPUT_BUS_WIDTH;
     }
 
     private void selectOutput() {

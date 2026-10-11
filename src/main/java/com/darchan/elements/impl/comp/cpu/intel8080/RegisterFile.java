@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.comp.cpu.intel8080;
 
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.iface.IRange;
@@ -20,7 +21,7 @@ public class RegisterFile implements IComponent {
     private static final IRange ALLOWED_INPUT_BUS_WIDTH = new SimpleRange(24, 24);
 
     //output bus should be exactly 16 bits wide. 8 bits for flags and 8 bits from the accumulator
-    private static final IRange ALLOWED_OUTPUT_BUS_WIDTH = new SimpleRange(8, 8);
+    private static final IRange ALLOWED_OUTPUT_BUS_WIDTH = new SimpleRange(16, 16);
 
     private final IBus inputBus;
 
@@ -44,7 +45,7 @@ public class RegisterFile implements IComponent {
 
 
     public RegisterFile(Simulator sim, IBus inputBus) {
-        //validate that input bus is the correct width
+        Validation.validateInputWidth(ALLOWED_INPUT_BUS_WIDTH, inputBus);
 
         this.inputBus = inputBus;
 

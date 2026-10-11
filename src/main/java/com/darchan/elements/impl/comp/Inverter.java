@@ -1,5 +1,6 @@
 package com.darchan.elements.impl.comp;
 
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.iface.IRange;
@@ -21,6 +22,7 @@ public class Inverter implements IComponent {
 	private IBus outputBus;
 	
 	public Inverter(Simulator sim, IBus input) {
+		Validation.validateInputWidth(ALLOWED_BUS_WIDTH, input);
 		this.inputBus = input;
 		this.outputBus = new Bus(new LogicSignal(sim, this.inputBus, new InverterLogicUnit()));
 	}

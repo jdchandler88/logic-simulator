@@ -4,6 +4,8 @@ import com.darchan.validation.UnexpectedBusWidthException;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.ConstantSignal;
+import com.darchan.elements.impl.LogicSignal;
+import com.darchan.sim.Simulator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,9 +50,21 @@ class OrGateTest {
     }
 
     @Test
+    void allowedWidthIsTwoOrMore() {
+        assertAll(
+                () -> assertEquals(2, cut.getAllowedInputBusWidth().getMin()),
+                () -> assertEquals(Integer.MAX_VALUE, cut.getAllowedInputBusWidth().getMax())
+        );
+    }
+
+    //width is validated once, when the gate is wired up, not on every evaluate
+    @Test
     void shouldThrowExceptionIfInputBusIsSmallerThanTwo() {
         IBus smallBus = new Bus(ConstantSignal.ON);
-        assertThrows(UnexpectedBusWidthException.class, () -> cut.evaluate(smallBus));
+        assertAll(
+                () -> assertThrows(UnexpectedBusWidthException.class, () -> cut.validateInputBus(smallBus)),
+                () -> assertThrows(UnexpectedBusWidthException.class, () -> new LogicSignal(new Simulator(), smallBus, cut))
+        );
     }
 
 }

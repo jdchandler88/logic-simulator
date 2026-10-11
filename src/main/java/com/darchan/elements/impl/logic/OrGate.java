@@ -1,10 +1,11 @@
 package com.darchan.elements.impl.logic;
 
-import com.darchan.validation.Validation;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ILogicUnit;
 import com.darchan.elements.iface.IRange;
 import com.darchan.elements.iface.ISignal;
+
+import java.util.List;
 import com.darchan.elements.impl.SimpleRange;
 
 public class OrGate implements ILogicUnit {
@@ -13,8 +14,13 @@ public class OrGate implements ILogicUnit {
 
     @Override
     public boolean evaluate(IBus inputBus) {
-        Validation.validateInputWidth(ALLOWABLE_BUS_WIDTH, inputBus);
-        return inputBus.getSignals().stream().anyMatch(ISignal::isOn);
+        List<ISignal> signals = inputBus.getSignals();
+        for (int i = 0; i < signals.size(); i++) {
+            if (signals.get(i).isOn()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

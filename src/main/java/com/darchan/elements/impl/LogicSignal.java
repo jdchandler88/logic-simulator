@@ -11,7 +11,9 @@ import com.darchan.sim.Simulator;
  * result is scheduled onto this signal, either in the next delta cycle (zero delay, the default) or after a
  * propagation delay in simulated time units (transport delay).
  *
- * <p>The initial value is the unit evaluated on the inputs' values at construction time.
+ * <p>The input width is validated against the unit at construction
+ * ({@link com.darchan.validation.UnexpectedBusWidthException}). The initial value is the unit evaluated on the
+ * inputs' values at construction time.
  */
 public class LogicSignal extends AbstractSignal {
 
@@ -37,7 +39,7 @@ public class LogicSignal extends AbstractSignal {
      * @param delay propagation delay in simulated time units; 0 means the output changes in the next delta cycle
      */
     public LogicSignal(Simulator sim, IBus inputBus, ILogicUnit logicUnit, long delay) {
-        super(sim, logicUnit.evaluate(inputBus));
+        super(sim, validateAndEvaluate(inputBus, logicUnit));
         if (delay < 0) {
             throw new IllegalArgumentException("delay must not be negative but was " + delay);
         }
@@ -47,6 +49,11 @@ public class LogicSignal extends AbstractSignal {
         for (ISignal inputSignal : this.inputBus.getSignals()) {
             inputSignal.addSignalChangeListener(this.inputListener);
         }
+    }
+
+    private static boolean validateAndEvaluate(IBus inputBus, ILogicUnit logicUnit) {
+        logicUnit.validateInputBus(inputBus);
+        return logicUnit.evaluate(inputBus);
     }
 
     private void listenForSignalChange(boolean oldValue, boolean newValue) {
