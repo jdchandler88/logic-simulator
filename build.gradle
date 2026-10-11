@@ -32,8 +32,27 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Tests tagged "slow" (e.g. the 8080EXM instruction exerciser, ~24 billion emulated cycles) are left out of
+// the normal build; run them with ./gradlew slowTest
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'slow'
+    }
+}
+
+tasks.register('slowTest', Test) {
+    description = 'Runs the long-running tests tagged "slow".'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'slow'
+    }
+    testLogging {
+        showStandardStreams = true
+        events 'passed', 'skipped', 'failed'
+    }
+    shouldRunAfter test
 }
 
 // Define the main class for the application
