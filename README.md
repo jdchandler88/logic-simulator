@@ -70,7 +70,9 @@ the same golden model the gate-level `Alu` is tested against. Memory and I/O are
 interfaces in `com.darchan.behavioral.bus` (`Ram` is 64 KiB of plain RAM). It passes the classic CP/M
 diagnostics 8080PRE, TST8080, CPUTEST and 8080EXM with cycle counts identical to a reference emulator
 (`./gradlew build` runs the first three; the ~24-billion-cycle 8080EXM is tagged `slow` and runs with
-`./gradlew slowTest`).
+`./gradlew slowTest`). The diagnostics' binaries live in `src/test/resources/cpm/`; if one is missing, the tests
+that need it are skipped locally but fail when the environment variable `CI` is `true` (GitHub Actions sets it),
+so CI cannot pass by silently skipping them.
 
 The CPU-agnostic diagnostics live in `com.darchan.diag` (implemented by the 8080 and, through probes and
 `ClockedTarget`, by gate-level circuits; the SM83 will implement them too):
@@ -86,7 +88,10 @@ The CPU-agnostic diagnostics live in `com.darchan.diag` (implemented by the 8080
   step N cycles / run / run-until, breakpoints on PC and cycle count, watchpoints on memory read/write/fetch and
   I/O ports, dumps on stop / every N cycles / on demand, and an `ExecutionFailure` carrying recent trace +
   registers + memory dumps if the model throws. Watchpoints come from bus decorators
-  (`ObservedMemoryBus`/`ObservedIoBus`), so the CPU's fast path is untouched without a debugger.
+  (`ObservedMemoryBus`/`ObservedIoBus`), so the CPU's fast path is untouched without a debugger. PC
+  breakpoints (and PC checkpoints) fire only at real instruction boundaries: not right after `HLT` nor during
+  the idle steps that follow, but again once execution resumes (e.g. when an interrupt handler returns).
+  Budgets such as `run(Long.MAX_VALUE)` saturate (`Budgets.saturatedAdd`) instead of overflowing.
 - `diag.compare` — lockstep comparison of two live models (`Lockstep`), of a live run against a recorded trace
   file (`GoldenTrace`) and against saved snapshot files at checkpoints (`SnapshotCheckpoints`); see below.
 - `diag.repl` — `DebuggerRepl`, the interactive command-line debugger, over any `ReplTarget`.
@@ -167,8 +172,10 @@ report that says where, what differs, and what the model(s) executed just before
 
 **Live against live** (`Lockstep`): step a trusted *reference* and a *candidate* side by side and compare
 snapshots after every instruction, every N instructions, or at the first instruction boundary after every N
-cycles (`Granularity`). Fields can be ignored, reduced to a common set for different machines
-(`compareOnly`), and memory regions of both sides included.
+cycles (`Granularity`); a call never executes more than its `maxSteps` reference steps, in either
+granularity. Fields can be ignored, reduced to a common set for different machines (`compareOnly`, which keeps
+each field's `NAME.Z` / `NAME.X` masks so a floating gate-level bus does not compare equal to 00, and throws
+`IllegalArgumentException` for a name neither snapshot has), and memory regions of both sides included.
 
 ```java
 CpmMachine golden = CpmMachine.load(rom), candidate = CpmMachine.load(rom);
@@ -208,7 +215,7 @@ later run against it line by line:
 ```bash
 # record (or GoldenTrace.record(debugger, path, maxCycles) in code)
 build/install/logic-simulator/bin/logic-simulator run-com TST8080.COM --trace tst8080.trace
-# compare later; exit code 1 and a report on the first mismatch
+# compare later; exit code 1 and a report on the first mismatch (or if the run stops before the trace ends)
 build/install/logic-simulator/bin/logic-simulator run-com TST8080.COM --golden tst8080.trace
 build/install/logic-simulator/bin/logic-simulator run-com X.COM --golden other-emulator.trace --ignore-columns cycle
 ```
@@ -237,6 +244,15 @@ GOLDEN TRACE MISMATCH at line 440 of TST8080.trace (instruction 438)
 ```
 
 A line shows the state *before* its instruction, so the culprit is the last context line (here `LDA 06BFH`).
+
+If the live run stops (breakpoint, watchpoint, halt, the program's exit, the cycle limit) before the golden trace
+ends, the state it stopped in is compared with the next golden line: `pc`, `cycle`, `instruction` and every
+register column with a snapshot field of the same name (bytes, disassembly and flag groups cannot be rebuilt
+from the state and are skipped, as are ignored columns). A difference is reported as a mismatch whose `actual`
+line is rebuilt from the stopped state, so a fault that sends the program to its exit early is caught. Otherwise
+the result is `matched()` but not `complete()` (`verified()` is both). `run-com --golden` exits 0 only when the
+trace was verified, or when the only reason it was not reached to the end is `--max-cycles` (a deliberately
+shortened check, which the output says); a mismatch or any other early stop exits 1, and bad arguments exit 2.
 
 **Against saved snapshot files** (`SnapshotCheckpoints`): named checkpoints (after N instructions, at cycle N,
 or the k-th time the PC reaches an address), one `SnapshotJson` file each. Record them once, verify later:
@@ -345,8 +361,10 @@ Commands: `step [n]`, `next-cycles <n>`, `cont [max-cycles]`, `until cycle|instr
 `mem <addr> [len]`, `dis [addr] [n]`, `history [n]`, `dump`, `trace on [file]` / `trace off`,
 `save|load|diff <file.json>` (registers + all memory), `help`, `quit`. Addresses and ports are hex (`0100`,
 `0x100`, `100H`), counts decimal. Every stop shows the reason, the next instruction and the registers. Ctrl-C
-stops a running command; Ctrl-D or `quit` leaves. The REPL reads from any `Reader` and writes to any
-`PrintStream`, so sessions are scripted in tests (`CpmReplTest`).
+stops a running command; Ctrl-D or `quit` leaves. A command that fails (bad argument, malformed snapshot
+file...) prints `error: ...` and the session goes on; a `trace on FILE` file is closed however the session
+ends. The REPL reads from any `Reader` and writes to any `PrintStream`, so sessions are scripted in tests
+(`CpmReplTest`).
 
 ```
 i8080 debugger. Type 'help' for commands.

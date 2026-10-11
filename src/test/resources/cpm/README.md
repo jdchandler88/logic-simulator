@@ -1,7 +1,9 @@
 # CP/M 8080 CPU diagnostics
 
 Test inputs for `CpmRomTest` (run by `CpmMachine`: loaded at 0100h, BDOS stub at 0005h, exit on a jump to
-0000h). If a file is missing, its test is skipped with a message rather than failing.
+0000h). If a file is missing, its tests are skipped with a message rather than failing, except in CI: when the
+environment variable `CI` is `true` (GitHub Actions sets it) a missing file fails the tests that need it, so the
+suites cannot silently turn into skips there.
 
 | File          | Size   | Banner / author                                                                                         |
 |---------------|--------|---------------------------------------------------------------------------------------------------------|

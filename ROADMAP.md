@@ -54,7 +54,7 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       Fix: signals schedule changes into a queue; edge-triggered elements sample
       in one phase and commit in the next (VHDL/Verilog delta-cycle semantics).
       Optional per-gate propagation delay.
-      (Done: `com.darchan.sim.Simulator`, `settle()`/`runUntil()`, `OscillationException`,
+      (Done: `com.darchan.physical.sim.Simulator`, `settle()`/`runUntil()`, `OscillationException`,
       `Wire` for feedback, optional transport delay on `LogicSignal`.)
 - [x] Validate bus widths once, at construction, in every component (`AndGate`,
       `BusSelector8By8Bit` return `null` ranges; `Register`/`RegisterFile` never validate).
@@ -94,8 +94,8 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       (`CpmMachine`; cycle counts match superzazu/8080 exactly. 8080EXM is tagged `slow`: `./gradlew slowTest`.)
 - [x] Diagnostics core (`com.darchan.diag`): named state snapshots for both layers; run control (step instruction / N cycles / run-until, breakpoints on PC, memory read/write watchpoints, I/O port, cycle count); per-instruction text trace in a fixed diffable format; ring buffer of last N trace lines dumped on failure; register + memory hex dumps at breakpoints / every N cycles / on exception; JSON snapshot save/load.
       (`Snapshot`/`SnapshotDiff`/`SnapshotJson`/`HexDump`, `diag.trace` (`TraceFormatter`, `TraceRingBuffer`,
-      `TextTraceWriter`), `diag.run` (`DebugTarget`, `Debugger`, `Watchpoint`). Implemented by the 8080 so far;
-      the gate-level layer has not implemented `DebugTarget` yet.)
+      `TextTraceWriter`), `diag.run` (`DebugTarget`, `Debugger`, `Watchpoint`). Implemented by the 8080 and,
+      through `ProbeSet`/`ClockedTarget`, by the gate-level layer.)
 - [x] Lockstep comparison: two live models, recorded golden trace logs, and saved snapshot files; stop on first divergence with a field diff plus recent trace.
       (`diag.compare`: `Lockstep` (every N steps or N cycles, ignore set, `compareOnly` across machines, memory
       regions), `GoldenTrace` (record/compare, line number + `^` markers + named differing columns + context;

@@ -12,6 +12,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -173,19 +175,33 @@ class CpmReplTest {
         machine = new CpmMachine(CpmRomTest.rom("CPUTEST.COM"));
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
-        DebuggerRepl repl = new DebuggerRepl(machine.replTarget(), new BufferedReader(new StringReader("")), out);
+        DebuggerRepl repl = new DebuggerRepl(machine.replTarget(), new StringReader(""), out);
+        // deterministic: the run pauses inside instruction 10,000 until another thread has called interrupt()
+        CountDownLatch reached = new CountDownLatch(1);
+        CountDownLatch interrupted = new CountDownLatch(1);
+        machine.debugger().addTraceListener(event -> {
+            if (event.instruction() == 9_999) {
+                reached.countDown();
+                try {
+                    assertTrue(interrupted.await(10, TimeUnit.SECONDS));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
         Thread t = new Thread(() -> repl.execute("cont"));
         t.start();
-        while (!repl.isRunning() && t.isAlive()) {
-            Thread.onSpinWait();
-        }
-        Thread.sleep(50);
+        assertTrue(reached.await(10, TimeUnit.SECONDS));
+        assertTrue(repl.isRunning());
         repl.interrupt();
+        interrupted.countDown();
         t.join(10_000);
         assertFalse(t.isAlive());
         String text = bytes.toString(StandardCharsets.UTF_8);
         assertTrue(text.startsWith("[interrupted] at cycle "), text);
+        assertEquals(10_000, machine.cpu().instructionCount(), "stops right after the interrupted instruction");
         assertFalse(machine.exited());
+        assertFalse(repl.isRunning());
     }
 
     /** a session on a tiny program (no ROM needed): 0100: MVI A,41; NOP; ...; JMP 0000 */

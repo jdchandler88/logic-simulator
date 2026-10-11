@@ -35,11 +35,27 @@ class CpmRomTest {
         }
     }
 
+    /**
+     * The named diagnostic from {@code src/test/resources/cpm/}. A missing file skips the calling test locally but
+     * fails it in CI (environment variable {@code CI=true}, which GitHub Actions sets), so a lost ROM cannot turn
+     * the suites that use it into silent skips there.
+     */
     static byte[] rom(String name) throws IOException {
         try (InputStream in = CpmRomTest.class.getResourceAsStream("/cpm/" + name)) {
-            assumeTrue(in != null, "CP/M test ROM " + name + " is not in src/test/resources/cpm/ (see the README there); skipping");
+            if (in == null) {
+                String message = "CP/M test ROM " + name + " is not in src/test/resources/cpm/ (see the README there)";
+                if (romsRequired()) {
+                    fail(message + "; CI=true, so missing ROMs fail instead of skipping");
+                }
+                assumeTrue(false, message + "; skipping");
+            }
             return in.readAllBytes();
         }
+    }
+
+    /** true in CI, where every ROM must be present */
+    static boolean romsRequired() {
+        return "true".equalsIgnoreCase(System.getenv("CI"));
     }
 
     static Run run(String name, long maxCycles) throws IOException {
@@ -100,5 +116,16 @@ class CpmRomTest {
         assertFalse(out.contains("ERROR"), r::report);
         assertEquals(25, out.split("PASS!", -1).length - 1, r::report);
         assertEquals(23_803_381_161L, r.machine().cpu().cycleCount(), r::report);
+    }
+
+    @Test
+    void aMissingRomSkipsLocallyAndFailsInCi() {
+        Throwable t = assertThrows(Throwable.class, () -> rom("NO-SUCH-ROM.COM"));
+        if (romsRequired()) {
+            assertInstanceOf(org.opentest4j.AssertionFailedError.class, t);
+        } else {
+            assertInstanceOf(org.opentest4j.TestAbortedException.class, t);
+        }
+        assertTrue(t.getMessage().contains("NO-SUCH-ROM.COM"), t.getMessage());
     }
 }
