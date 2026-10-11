@@ -27,12 +27,10 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule diagDoesNotDependOnPhysical = noClasses()
             .that().resideInAPackage("com.darchan.diag..")
-            .should().dependOnClassesThat().resideInAPackage("com.darchan.physical..")
-            .allowEmptyShould(true); // com.darchan.diag does not exist yet
+            .should().dependOnClassesThat().resideInAPackage("com.darchan.physical..");
 
     @ArchTest
     static final ArchRule diagDoesNotDependOnBehavioral = noClasses()
             .that().resideInAPackage("com.darchan.diag..")
-            .should().dependOnClassesThat().resideInAPackage("com.darchan.behavioral..")
-            .allowEmptyShould(true);
+            .should().dependOnClassesThat().resideInAPackage("com.darchan.behavioral..");
 }
