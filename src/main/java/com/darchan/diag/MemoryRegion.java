@@ -18,6 +18,11 @@ public final class MemoryRegion {
         if (start < 0) {
             throw new IllegalArgumentException("start must be >= 0: " + start);
         }
+        if ((long) start + data.length > Integer.MAX_VALUE) {
+            // end() would overflow int, so contains(), diffs and the JSON loader (which rejects it) would disagree
+            throw new IllegalArgumentException("region " + name + " of " + data.length + " bytes at " + start
+                    + " extends past the largest address " + Integer.MAX_VALUE);
+        }
         this.start = start;
         this.data = data.clone();
     }
