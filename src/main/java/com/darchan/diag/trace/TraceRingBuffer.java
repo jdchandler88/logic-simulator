@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Keeps the last N trace events, cheaply: each event's values are copied into preallocated primitive arrays (no
- * allocation, no formatting per instruction). Lines are formatted only when {@link #lines()} or {@link #dump()} is
- * called, typically after a failure. The disassembly is recomputed then from the stored bytes, so it reflects the
- * instruction as executed even if the code was later overwritten.
+ * Keeps the last N trace events, cheaply: each event's values are copied into two preallocated primitive arrays
+ * (no allocation, no formatting per instruction). Lines are formatted only when {@link #lines()} or {@link #dump()}
+ * is called, typically after a failure. The disassembly is recomputed then from the stored bytes, so it reflects
+ * the instruction as executed even if the code was later overwritten.
  */
 public final class TraceRingBuffer implements TraceListener {
 
@@ -17,13 +17,11 @@ public final class TraceRingBuffer implements TraceListener {
     private int maxLen;
     private int regCount;
 
-    private final long[] cycles;
-    private final long[] instructions;
-    private final int[] pcs;
-    private final boolean[] interrupts;
-    private final int[] lengths;
-    private int[] bytes = new int[0];
-    private int[] registers = new int[0];
+    /** per slot: cycle, instruction */
+    private final long[] counters;
+    /** per slot ({@code stride} ints): pc, length (negative for an interrupt), bytes, registers */
+    private int[] data = new int[0];
+    private int stride;
 
     private int next;   // slot for the next event
     private long total; // events seen since the last clear
@@ -33,11 +31,7 @@ public final class TraceRingBuffer implements TraceListener {
             throw new IllegalArgumentException("capacity must be >= 1: " + capacity);
         }
         this.capacity = capacity;
-        this.cycles = new long[capacity];
-        this.instructions = new long[capacity];
-        this.pcs = new int[capacity];
-        this.interrupts = new boolean[capacity];
-        this.lengths = new int[capacity];
+        this.counters = new long[2 * capacity];
     }
 
     @Override
@@ -46,14 +40,24 @@ public final class TraceRingBuffer implements TraceListener {
             adopt(e);
         }
         int slot = next;
-        cycles[slot] = e.cycle();
-        instructions[slot] = e.instruction();
-        pcs[slot] = e.pc();
-        interrupts[slot] = e.isInterrupt();
+        counters[2 * slot] = e.cycle();
+        counters[2 * slot + 1] = e.instruction();
+        int[] d = data;
+        int base = slot * stride;
         int len = e.length();
-        lengths[slot] = len;
-        System.arraycopy(e.rawBytes(), 0, bytes, slot * maxLen, len);
-        System.arraycopy(e.rawRegisters(), 0, registers, slot * regCount, regCount);
+        d[base] = e.pc();
+        d[base + 1] = e.isInterrupt() ? -1 - len : len;
+        // plain loops: for these tiny arrays they are cheaper than System.arraycopy
+        int[] src = e.rawBytes();
+        int at = base + 2;
+        for (int i = 0; i < len; i++) {
+            d[at + i] = src[i];
+        }
+        src = e.rawRegisters();
+        at = base + 2 + maxLen;
+        for (int i = 0; i < regCount; i++) {
+            d[at + i] = src[i];
+        }
         next = slot + 1 == capacity ? 0 : slot + 1;
         total++;
     }
@@ -63,8 +67,8 @@ public final class TraceRingBuffer implements TraceListener {
         decoder = e.decoder();
         maxLen = layout.maxInstructionLength();
         regCount = layout.registers().size();
-        bytes = new int[capacity * maxLen];
-        registers = new int[capacity * regCount];
+        stride = 2 + maxLen + regCount;
+        data = new int[capacity * stride];
         next = 0;
         total = 0;
     }
@@ -96,11 +100,15 @@ public final class TraceRingBuffer implements TraceListener {
         StringBuilder sb = new StringBuilder(128);
         for (int i = 0; i < n; i++) {
             int slot = Math.floorMod(next - n + i, capacity);
-            System.arraycopy(bytes, slot * maxLen, scratch, 0, lengths[slot]);
-            String disassembly = decoder.disassemble(pcs[slot], scratch, lengths[slot]);
+            int base = slot * stride;
+            int pc = data[base];
+            boolean interrupt = data[base + 1] < 0;
+            int len = interrupt ? -1 - data[base + 1] : data[base + 1];
+            System.arraycopy(data, base + 2, scratch, 0, len);
+            String disassembly = decoder.disassemble(pc, scratch, len);
             sb.setLength(0);
-            TraceFormatter.append(sb, layout, cycles[slot], instructions[slot], pcs[slot], interrupts[slot],
-                    bytes, slot * maxLen, lengths[slot], disassembly, registers, slot * regCount);
+            TraceFormatter.append(sb, layout, counters[2 * slot], counters[2 * slot + 1], pc, interrupt,
+                    data, base + 2, len, disassembly, data, base + 2 + maxLen);
             out.add(sb.toString());
         }
         return out;
