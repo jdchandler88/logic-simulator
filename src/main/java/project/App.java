@@ -13,7 +13,10 @@ import com.darchan.physical.signal.Bus;
 import com.darchan.physical.signal.Clock;
 import com.darchan.physical.signal.SignalNameDecorator;
 import com.darchan.physical.comp.Inverter;
+import com.darchan.physical.comp.Counter;
+import com.darchan.physical.probe.ProbeSet;
 import com.darchan.physical.sim.Simulator;
+import com.darchan.physical.wave.VcdWriter;
 
 import java.nio.file.Path;
 
@@ -25,6 +28,9 @@ import java.nio.file.Path;
  *       runs a CP/M .COM program on the behavioral 8080, printing its console output, optionally writing a
  *       per-instruction trace or comparing every instruction against a recorded golden trace (exit code 1 on the
  *       first mismatch, with a report).</li>
+ *   <li>{@code vcd-demo FILE [--cycles N] [--timing settle|delta|sim-time]}: simulates a gate-level 4-bit counter
+ *       and writes its clock, count and next-state logic to a VCD file for GTKWave or Surfer, then prints the
+ *       simulator statistics.</li>
  * </ul>
  */
 public class App {
@@ -36,6 +42,9 @@ public class App {
     public static void main(String[] args) {
         if (args.length > 0 && args[0].equals("run-com")) {
             System.exit(runCom(args));
+        }
+        if (args.length > 0 && args[0].equals("vcd-demo")) {
+            System.exit(vcdDemo(args));
         }
     	Simulator sim = new Simulator();
 
@@ -117,4 +126,44 @@ public class App {
         return 0;
     }
 
+    private static int vcdDemo(String[] args) {
+        if (args.length < 2) {
+            System.err.println("usage: vcd-demo FILE [--cycles N] [--timing settle|delta|sim-time]");
+            return 2;
+        }
+        Path file = Path.of(args[1]);
+        int cycles = 20;
+        VcdWriter.Timing timing = VcdWriter.Timing.SETTLE;
+        for (int i = 2; i < args.length; i++) {
+            switch (args[i]) {
+                case "--cycles" -> cycles = Integer.parseInt(args[++i]);
+                case "--timing" -> timing = VcdWriter.Timing.valueOf(args[++i].toUpperCase().replace('-', '_'));
+                default -> {
+                    System.err.println("unknown option " + args[i]);
+                    return 2;
+                }
+            }
+        }
+        Simulator sim = new Simulator();
+        Clock clk = new Clock(sim, false);
+        Counter counter = new Counter(sim, clk, 4);
+        sim.settle();
+        ProbeSet probes = new ProbeSet(sim);
+        probes.add("clk", clk);
+        probes.add("counter.q", counter.getOutputBus());
+        probes.add("counter.next", counter.getNextState());
+        for (int bit = 0; bit < 4; bit++) {
+            probes.add("counter.bits.q" + bit, counter.getOutputBus().getSignal(bit));
+        }
+        sim.resetStats();
+        try (VcdWriter vcd = VcdWriter.builder(probes).timing(timing).topScope("counter4").open(file)) {
+            for (int i = 0; i < 2 * cycles; i++) {
+                clk.tick();
+            }
+        }
+        System.out.println("wrote " + file + " (" + cycles + " clock cycles, timing " + timing + ")");
+        System.out.println(sim.stats().report());
+        System.out.println("open it with: gtkwave " + file + "   or   surfer " + file);
+        return 0;
+    }
 }

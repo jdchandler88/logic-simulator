@@ -1,6 +1,7 @@
 package com.darchan.physical.sim;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -63,6 +64,21 @@ public final class Simulator {
 
     private boolean running;
 
+    private SimulationObserver[] observers = new SimulationObserver[0];
+
+    //statistics
+    private long statRuns;
+    private long statDeltas;
+    private long statEvents;
+    private long statUpdates;
+    private long statTimeSteps;
+    private long statMinDeltas = Long.MAX_VALUE;
+    private long statMaxDeltas;
+    private long statMinEvents = Long.MAX_VALUE;
+    private long statMaxEvents;
+    private long runStartDeltas;
+    private long runStartEvents;
+
     public Simulator() {
         this(DEFAULT_MAX_DELTA_CYCLES);
     }
@@ -95,6 +111,51 @@ public final class Simulator {
      */
     public long deltaCycle() {
         return deltaCycle;
+    }
+
+    /**
+     * Adds an observer (e.g. a waveform writer). Observers may be added and removed between runs.
+     */
+    public void addObserver(SimulationObserver observer) {
+        if (observer == null) {
+            throw new IllegalArgumentException("observer must not be null");
+        }
+        SimulationObserver[] grown = Arrays.copyOf(observers, observers.length + 1);
+        grown[observers.length] = observer;
+        observers = grown;
+    }
+
+    public void removeObserver(SimulationObserver observer) {
+        observers = Arrays.stream(observers).filter(o -> o != observer).toArray(SimulationObserver[]::new);
+    }
+
+    /**
+     * @return activity counters since creation or the last {@link #resetStats()}
+     */
+    public SimulatorStats stats() {
+        return new SimulatorStats(statRuns, statDeltas, statRuns == 0 ? 0 : statMinDeltas, statMaxDeltas, statEvents,
+                statRuns == 0 ? 0 : statMinEvents, statMaxEvents, statUpdates, statTimeSteps);
+    }
+
+    /**
+     * Zeroes the {@link #stats()} counters (not {@link #deltaCycle()} or {@link #now()}).
+     */
+    public void resetStats() {
+        statRuns = 0;
+        statDeltas = 0;
+        statEvents = 0;
+        statUpdates = 0;
+        statTimeSteps = 0;
+        statMinDeltas = Long.MAX_VALUE;
+        statMaxDeltas = 0;
+        statMinEvents = Long.MAX_VALUE;
+        statMaxEvents = 0;
+    }
+
+    /** time, delta count and the {@link #stats()} report */
+    @Override
+    public String toString() {
+        return "Simulator at time " + now + ", delta " + deltaCycle + "\n" + stats().report();
     }
 
     /**
@@ -137,6 +198,7 @@ public final class Simulator {
             while (true) {
                 if (pending.isEmpty()) {
                     if (timed.isEmpty()) {
+                        completed();
                         return;
                     }
                     advanceTo(timed.firstKey());
@@ -184,7 +246,11 @@ public final class Simulator {
                 deltasAtThisTime++;
                 runDelta();
             }
+            if (time > now) {
+                timeAdvancing(time);
+            }
             now = time;
+            completed();
         } finally {
             running = false;
         }
@@ -195,10 +261,33 @@ public final class Simulator {
             throw new IllegalStateException("Simulator is not re-entrant: settle/runUntil called from a listener");
         }
         running = true;
+        runStartDeltas = statDeltas;
+        runStartEvents = statEvents;
+    }
+
+    private void completed() {
+        statRuns++;
+        long d = statDeltas - runStartDeltas;
+        long e = statEvents - runStartEvents;
+        statMinDeltas = Math.min(statMinDeltas, d);
+        statMaxDeltas = Math.max(statMaxDeltas, d);
+        statMinEvents = Math.min(statMinEvents, e);
+        statMaxEvents = Math.max(statMaxEvents, e);
+        for (SimulationObserver o : observers) {
+            o.runCompleted(this);
+        }
+    }
+
+    private void timeAdvancing(long to) {
+        statTimeSteps++;
+        for (SimulationObserver o : observers) {
+            o.timeAdvancing(this, now, to);
+        }
     }
 
     private void advanceTo(long time) {
         Map.Entry<Long, ArrayList<Runnable>> entry = timed.pollFirstEntry();
+        timeAdvancing(time);
         now = time;
         for (Runnable action : entry.getValue()) {
             action.run();
@@ -207,8 +296,10 @@ public final class Simulator {
 
     private void runDelta() {
         deltaCycle++;
+        statDeltas++;
         ArrayList<Schedulable> current = pending;
         pending = spare;
+        statUpdates += current.size();
         try {
             //update phase
             for (int i = 0; i < current.size(); i++) {
@@ -217,9 +308,15 @@ public final class Simulator {
                     changed.add(net);
                 }
             }
+            statEvents += changed.size();
             //evaluate phase: writes made here land in 'pending' for the next delta
             for (int i = 0; i < changed.size(); i++) {
                 changed.get(i).fireEvent();
+            }
+            if (observers.length != 0) {
+                for (SimulationObserver o : observers) {
+                    o.deltaCompleted(this);
+                }
             }
         } finally {
             current.clear();
