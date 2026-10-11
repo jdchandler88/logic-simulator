@@ -41,7 +41,7 @@ class ComponentWidthTest {
                 Arguments.of(Named.of("TriStateBuffer",
                         new Spec((sim, bus) -> new TriStateBuffer(sim, bus, ConstantSignal.ON), 8, 0))),
                 Arguments.of(Named.of("RegisterFile",
-                        new Spec((sim, bus) -> new RegisterFile(sim, bus), 24, 16, 23, 25)))
+                        new Spec((sim, bus) -> new RegisterFile(sim, new Clock(sim, false), bus), 16, 0, 15, 17, 24)))
         );
     }
 

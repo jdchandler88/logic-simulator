@@ -99,5 +99,31 @@ class RegisterTest {
         return bus.getSignals().stream().map(ISignal::isOn).collect(Collectors.toList());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {2, 8, 16})
+    void registerWithWriteEnableLoadsOnlyWhenEnabled(int width) {
+        int mask = (1 << width) - 1;
+        IBus inputBus = com.darchan.testutil.Buses.simpleBus(sim, width, 0x5555 & mask);
+        SimpleSignal enable = new SimpleSignal(sim, false);
+        IClock clk = new Clock(sim, false);
+        Register reg = new Register(sim, clk, inputBus, enable, false);
+        sim.settle();
+
+        clk.tick();
+        assertEquals(0, com.darchan.testutil.Buses.toInt(reg.getOutputBus()), "disabled: hold");
+        clk.tick();
+
+        enable.setOn(true);
+        sim.settle();
+        clk.tick();
+        assertEquals(0x5555 & mask, com.darchan.testutil.Buses.toInt(reg.getOutputBus()), "enabled: load");
+        clk.tick();
+
+        enable.setOn(false);
+        com.darchan.testutil.Buses.drive(inputBus, 0xAAAA & mask);
+        sim.settle();
+        clk.tick();
+        assertEquals(0x5555 & mask, com.darchan.testutil.Buses.toInt(reg.getOutputBus()), "disabled: hold");
+    }
 
 }

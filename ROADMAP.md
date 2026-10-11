@@ -58,10 +58,13 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
 - [x] Tri-state / high-Z signals and bus resolution (needed for a shared data bus).
       (`LogicValue` 0/1/Z/X, multi-driver resolved `Wire`, `TriStateBuffer`; `isOn()` reads Z/X
       as false. Deferred: X-propagation through gates — `ILogicUnit` is still boolean.)
-- [ ] Fix `RegisterFile`: docs say `[15:0]` data and F in the high bits; code wires
+- [x] Fix `RegisterFile`: docs say `[15:0]` data and F in the high bits; code wires
       F/B/D/H to bits 8–15, A/C/E/L to bits 0–7, puts F on output `[7:0]`, and declares
       an 8-bit output width for a 16-bit bus. Gated clocks via latch lines should
       become clock + write-enable.
+      (Now: one clock, shared 8-bit data-in `[7:0]`, per-register write enables `[15:8]`,
+      64-bit output with slot order L,H,E,D,C,B,F,A so pairs HL/DE/BC/PSW are 16-bit slices.
+      Write enable is a gate mux in front of each flip-flop's D input.)
 - [ ] Build an 8-bit ripple-carry adder and ALU from gates; test against the
       behavioral ALU for all 256×256×carry inputs.
 

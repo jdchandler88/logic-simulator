@@ -47,6 +47,19 @@ public class Register implements IComponent {
      * @param initialValue initial value for each flip-flopp
      */
     public Register(Simulator sim, ISignal clk, IBus inputBus, boolean initialValue) {
+        this(sim, clk, inputBus, null, initialValue);
+    }
+
+    /**
+     * Create register with a write enable: it loads on a rising clock edge only while {@code writeEnable} is high
+     * and holds its value otherwise (see {@link FlipFlop}).
+     * @param sim simulator
+     * @param clk input clock
+     * @param inputBus input bus
+     * @param writeEnable write enable shared by all bits; {@code null} to load on every rising edge
+     * @param initialValue initial value for each flip-flop
+     */
+    public Register(Simulator sim, ISignal clk, IBus inputBus, ISignal writeEnable, boolean initialValue) {
         Validation.validateInputWidth(ALLOWABLE_BUS_WIDTH, inputBus);
         this.clk = clk;
         this.inputBus = inputBus;
@@ -55,7 +68,7 @@ public class Register implements IComponent {
         this.flipFlops = new ArrayList<>();
         List<ISignal> outputSignals = new ArrayList<>();
         for (int i=0; i<this.inputBus.getSignals().size(); i++) {
-            FlipFlop ff = new FlipFlop(sim, clk, new Bus(inputBus.getSignals().get(i)), initialValue);
+            FlipFlop ff = new FlipFlop(sim, clk, new Bus(inputBus.getSignals().get(i)), writeEnable, initialValue);
             flipFlops.add(ff);
             outputSignals.add(ff.getOutputBus().getSignals().get(0));
         }

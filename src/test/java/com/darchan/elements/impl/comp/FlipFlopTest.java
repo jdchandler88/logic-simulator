@@ -92,4 +92,37 @@ class FlipFlopTest {
         assertEquals(data, ff.getOutputBus().getSignal(0).getValue());
     }
 
+    @ParameterizedTest
+    //initialValue, data
+    @CsvSource(value={"false, false", "false, true", "true, false", "true, true"})
+    void flipFlopWithWriteEnableLoadsOnlyWhenEnabled(boolean initialValue, boolean data) {
+        Clock clk = new Clock(sim, false);
+        SimpleSignal in = new SimpleSignal(sim, data);
+        SimpleSignal enable = new SimpleSignal(sim, false);
+        FlipFlop ff = new FlipFlop(sim, clk, new Bus(in), enable, initialValue);
+        sim.settle();
+
+        //disabled: rising edge holds
+        clk.tick();
+        assertEquals(initialValue, ff.getOutputBus().getSignal(0).isOn());
+        clk.tick();
+
+        //toggling enable without a clock edge does not load
+        enable.setOn(true);
+        sim.settle();
+        assertEquals(initialValue, ff.getOutputBus().getSignal(0).isOn());
+
+        //enabled: rising edge loads
+        clk.tick();
+        assertEquals(data, ff.getOutputBus().getSignal(0).isOn());
+        clk.tick();
+
+        //disabled again: holds while data changes and clock runs
+        enable.setOn(false);
+        in.setOn(!data);
+        sim.settle();
+        clk.tick();
+        assertEquals(data, ff.getOutputBus().getSignal(0).isOn());
+    }
+
 }
