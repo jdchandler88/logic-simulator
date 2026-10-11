@@ -29,13 +29,14 @@ helpers but are separate cores. The SM83 has a different F layout (Z N H C in
 the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
 
 ## Phase 0 – Housekeeping
-- [ ] Gradle wrapper 8.x, Java 21 toolchain, JUnit 5.10 + `junit-platform-launcher`,
+- [x] Gradle wrapper 8.x, Java 21 toolchain, JUnit 5.10 + `junit-platform-launcher`,
       pin Mockito (no `2.+`), `application { mainClass = ... }`.
-- [ ] Stop tracking `out/`, `bin/`, `.idea/workspace.xml`, `*.iws`, `*.ipr`, `*.iml`.
-- [ ] Replace Jenkinsfile with a GitHub Actions workflow (`gradle build`).
-- [ ] Fix package names: `com.darchan.com.darchan.validation` → `com.darchan.validation`;
+- [x] Stop tracking `out/`, `bin/`, `.idea/workspace.xml`, `*.iws`, `*.ipr`, `*.iml`.
+- [x] Replace Jenkinsfile with a GitHub Actions workflow (`gradle build`).
+- [x] Fix package names: `com.darchan.com.darchan.validation` → `com.darchan.validation`;
       tests under `.../impl/com/darchan/...` → mirror main packages.
-- [ ] Delete or implement the 8 empty `RegisterFileTest` methods (they pass vacuously).
+- [x] Delete or implement the 8 empty `RegisterFileTest` methods (they pass vacuously).
+      (Deleted; real RegisterFile tests are Phase 1.)
 
 ## Phase 1 – Make the gate-level simulator correct
 - [ ] **Event scheduler with delta cycles.** Today `setState` notifies listeners
