@@ -179,6 +179,27 @@ class CheckpointEdgeCasesTest {
         assertEquals("cycle budget used up", none.stop().detail());
     }
 
+    @Test
+    void whenRunningOnPastAMismatchTheUnreachedCheckpointsSayTheRunEnded() {
+        TinyMachine good = new TinyMachine();
+        SnapshotCheckpoints cps = SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("m", 3))
+                .add(Checkpoint.atInstruction("far", 400)).stopAtFirstMismatch(false);
+        cps.record(new Debugger(good, null), 1000);
+        TinyMachine bad = new TinyMachine();
+        bad.faultAtStep = 1;
+        bad.faultMask = 1;
+        CheckpointReport r = cps.verify(new Debugger(bad, null), 30);
+        assertEquals(MISMATCH, r.result("m").orElseThrow().status());
+        assertEquals("run ended first", r.result("far").orElseThrow().detail());
+        // with the default (stop at the first mismatch) the reason is the earlier mismatch
+        TinyMachine bad2 = new TinyMachine();
+        bad2.faultAtStep = 1;
+        bad2.faultMask = 1;
+        CheckpointReport stopped = SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("m", 3))
+                .add(Checkpoint.atInstruction("far", 400)).verify(new Debugger(bad2, null), 30);
+        assertEquals("not run: an earlier checkpoint mismatched", stopped.result("far").orElseThrow().detail());
+    }
+
     // ---- state savers ---------------------------------------------------------------------------------------------------
 
     @Test

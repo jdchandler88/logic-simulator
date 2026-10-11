@@ -218,8 +218,8 @@ class GoldenTraceComparatorTest {
         assertNotNull(mm.note());
         assertEquals(2, mm.instruction());
         // 'cycle' and 'ACC' are marked, with alignment under their values
-        assertEquals("^".repeat(12), mm.markers().substring(0, 12));
-        assertEquals('^', mm.markers().charAt(mm.markers().length() - 1));
+        int acc = mm.actual().indexOf("ACC=") + 4;
+        assertEquals("^".repeat(12) + " ".repeat(acc - 12) + "^^", mm.markers());
         // the same call again keeps the first mismatch and reports nothing new
         assertFalse(c.compareStoppedState(m));
     }
@@ -285,6 +285,40 @@ class GoldenTraceComparatorTest {
         GoldenTraceComparator c = comparator(L2 + "\n", Set.of("cycle"), 0);
         assertTrue(c.compareStoppedState(m));
         assertEquals(List.of("ACC: expected 01, actual 66"), c.mismatch().differingColumns());
+    }
+
+    @Test
+    void anEmptyGoldenValueAtTheStopIsNamedAsEmpty() {
+        TinyMachine m = machineAt(2);
+        GoldenTraceComparator c = comparator("000000000008 000000000002 02: 02  ADD PC ACC=\n", Set.of(), 0);
+        assertTrue(c.compareStoppedState(m));
+        assertEquals(List.of("ACC: expected <empty>, actual 1"), c.mismatch().differingColumns());
+    }
+
+    @Test
+    void onlyHexFieldsRebuildAGoldenColumnAtTheStop() {
+        // CYCLES is a decimal field of the machine: a golden column of that name is not compared
+        TinyMachine m = machineAt(2);
+        GoldenTraceComparator c = comparator(L2 + " CYCLES=5\n", Set.of(), 0);
+        assertFalse(c.compareStoppedState(m));
+        assertFalse(c.mismatched());
+        // while a hex field of the same shape is
+        GoldenTraceComparator hex = comparator(L2.replace("ACC=01", "ACC=01 PC=77") + "\n", Set.of(), 0);
+        assertTrue(hex.compareStoppedState(m));
+        assertEquals(List.of("PC: expected 77, actual 02"), hex.mismatch().differingColumns());
+    }
+
+    @Test
+    void withoutIgnoredColumnsLinesMustBeIdenticalIncludingSpacing() {
+        // the same columns with different spacing parse equal, but a strict comparison still calls it a mismatch
+        String spaced = "000000000003 000000000001 01: 01  ADD PC  ACC=00";
+        GoldenTraceComparator strict = comparator(spaced + "\n", Set.of(), 0);
+        strict.onInstruction(event(3, 1, 1, 0));
+        assertTrue(strict.mismatched(), "extra space is a difference");
+        assertEquals(List.of(), strict.mismatch().differingColumns(), "every column reads the same");
+        GoldenTraceComparator loose = comparator(spaced + "\n", Set.of("cycle"), 0);
+        loose.onInstruction(event(3, 1, 1, 0));
+        assertFalse(loose.mismatched(), "with a column comparison only the columns count");
     }
 
     // ---- reading ---------------------------------------------------------------------------------------------------

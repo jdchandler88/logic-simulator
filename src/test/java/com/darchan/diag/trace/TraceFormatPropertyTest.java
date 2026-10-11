@@ -86,6 +86,7 @@ class TraceFormatPropertyTest {
         String line = TraceFormatter.format(c.event());
         assertFalse(line.contains("\n") || line.contains("\r"), "one line");
         assertFalse(line.endsWith(" "), "no trailing space: '" + line + "'");
+        assertTrue(line.chars().allMatch(ch -> ch >= 0x20 && ch < 0x7F), "plain printable ASCII: '" + line + "'");
         assertEquals(line, c.event().toString());
         StringBuilder appended = new StringBuilder("prefix");
         TraceFormatter.append(appended, c.event());

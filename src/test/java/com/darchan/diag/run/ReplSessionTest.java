@@ -357,4 +357,113 @@ class ReplSessionTest {
         repl.execute("step 3");
         assertEquals(3, cpu.instructions);
     }
+
+    // ---- exact transcripts and edge arguments ----------------------------------------------------------------------
+
+    private static final String BANNER = "toy debugger. Type 'help' for commands.\n" + START;
+
+    @Test
+    void breakAndWatchCommandsAnswerWithTheirIdAndDescription() {
+        assertEquals(BANNER + "dbg> #1 break 06 (the OUT)\ndbg> #2 break 04\ndbg> #3 watch [WRITE] 0080\ndbg> ",
+                session("break 06\nbreak 04\nwatch w 80\n").replace("\ndbg> \n", "\ndbg> "));
+        dbg.clearBreakpointsAndWatchpoints();
+        assertEquals(BANNER + "dbg> #1 break 04\ndbg> breakpoint already set: #1\ndbg> #2 break 05\ndbg> ",
+                session("break 4\nbreak 04\nb 5\nquit\n"));
+    }
+
+    @Test
+    void watchRangesNeedBothEndsAndCountsAcceptUpperCaseHexPrefixes() {
+        String out = session("watch r -80\nwatch r 80-\nbreak 0X10\nstep 0X2\nmem 0X0 0X4\nq\n");
+        assertTrue(out.contains("error: not a hex address: \n"), out);
+        assertTrue(out.contains("#1 break 10\n"), out);
+        assertTrue(out.contains("[STEPPED] 2 step(s)"), out);
+        assertTrue(out.contains("0000: 00 03 02 80  "), out);
+        assertEquals(0, dbg.watchpoints().size());
+    }
+
+    @Test
+    void memAndDisAreExactAboutLengthsAndWrapAround() {
+        // an explicit length, a default length clamped to the end of the address space, and zero
+        String two = session("mem 0 2\nq\n");
+        assertEquals(BANNER + "dbg> 0000: 00 03" + " ".repeat(3 * 14 + 1) + "  |..|\ndbg> ", two);
+        String clamped = session("mem F0\nq\n");
+        assertEquals(1, clamped.lines().filter(l -> l.contains("00F0:")).count(), clamped);
+        assertEquals(0, clamped.lines().filter(l -> l.contains("0100:")).count(), clamped);
+        long defaultLines = session("mem 0\nq\n").lines().filter(l -> l.matches("(dbg> )?[0-9A-F]{4}: .*")).count();
+        assertEquals(4, defaultLines, "64 bytes by default: four lines");
+        assertEquals(10, session("dis\nq\n").lines().filter(l -> l.matches("(dbg> )?(-> |   )[0-9A-F]{2}: .*")).count() - 1,
+                "ten instructions by default (the banner shows the first one too)");
+        assertEquals(1, session("dis 0 1\nq\n").lines().filter(l -> l.contains("-> 00:") || l.contains("   00:")).count()
+                - 1);
+        // the listing wraps from the last address back to 00
+        String wrap = session("dis FF 3\nq\n");
+        assertTrue(wrap.contains("   FF: 00     NOP\n-> 00: 00     NOP\n   01: 03     INC\n"), wrap);
+        assertFalse(wrap.contains("100:"), wrap);
+    }
+
+    @Test
+    void untilAtTheCurrentCycleIsRejected() {
+        String out = session("step 2\nuntil cycle 8\nq\n");
+        assertTrue(out.contains("error: already at cycle 8\n"), out);
+        assertEquals(2, cpu.instructions);
+    }
+
+    @Test
+    void deletingAWatchpointThatWasThereBeforeTheSessionRemovesItFromTheDebugger() {
+        dbg.addWatchpoint(Watchpoint.memoryWrite(0x80));
+        dbg.addBreakpoint(0x04);
+        session("delete 1\nq\n");
+        assertEquals(0, dbg.watchpoints().size() + dbg.breakpoints().size() - 1, "the first entry (the breakpoint) went");
+        assertEquals(1, dbg.watchpoints().size());
+        session("delete 1\nq\n");
+        assertEquals(0, dbg.watchpoints().size());
+    }
+
+    @Test
+    void thePromptIsFlushedBeforeWaitingForInput() {
+        ByteArrayOutputStream sink = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(new java.io.BufferedOutputStream(sink, 8192), false, StandardCharsets.UTF_8);
+        boolean[] promptVisible = {false};
+        java.io.Reader in = new java.io.Reader() {
+            private boolean done;
+
+            @Override
+            public int read(char[] buf, int off, int len) {
+                if (done) {
+                    return -1;
+                }
+                promptVisible[0] = sink.toString(StandardCharsets.UTF_8).endsWith("dbg> ");
+                done = true;
+                return -1;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        new DebuggerRepl(machine, in, out).run();
+        assertTrue(promptVisible[0], "the prompt must have reached the stream before the REPL blocks on input");
+    }
+
+    @Test
+    void anInterruptEndsAnyLongRunningCommand() throws InterruptedException {
+        cpu.load(0x06, 0x00); // JMP 0 forever
+        for (String command : new String[]{"cont", "nc 1000000000000", "until cycle 1000000000000",
+                "until instr 1000000000000", "step 1000000000000"}) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+            DebuggerRepl repl = new DebuggerRepl(machine, new StringReader(""), out);
+            Thread t = new Thread(() -> repl.execute(command));
+            t.start();
+            long deadline = System.nanoTime() + 5_000_000_000L;
+            while (!repl.isRunning() && System.nanoTime() < deadline) {
+                Thread.onSpinWait();
+            }
+            Thread.sleep(20);
+            repl.interrupt();
+            t.join(10_000);
+            assertFalse(t.isAlive(), command + " did not stop");
+            assertTrue(bytes.toString(StandardCharsets.UTF_8).contains("[interrupted] at cycle"), command + ": " + bytes);
+        }
+    }
 }

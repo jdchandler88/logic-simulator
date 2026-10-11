@@ -113,6 +113,8 @@ class JsonParserTest {
         assertTrue(rejects("\"\\u00").getMessage().contains("truncated"));
         assertTrue(rejects("\"\\u004").getMessage().contains("truncated"));
         assertEquals("\u0041", Json.parse("\"\\u0041\""), "the escape may be the last thing before the closing quote");
+        // exactly four digits and then the end of the text: the string is unterminated, not a truncated escape
+        assertTrue(rejects("\"\\u0041").getMessage().contains("unexpected end of input"));
     }
 
     @Test

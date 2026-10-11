@@ -33,6 +33,21 @@ final class TinyMachine implements DebugTarget {
     /** the fault fires only the first time its step is executed (like a one-shot glitch): not reproducible */
     boolean faultOnce;
     private boolean faultFired;
+    /** like {@link #faultAtStep} but fires only the first time the step is executed (never on a re-run) */
+    long oneShotFaultAtStep = -1;
+    int oneShotFaultMask;
+    private boolean oneShotFaultFired;
+    /** set to 1 when the one-shot fault fired; cleared by {@link #restore}, so a re-run does not see it */
+    int oneShotMarker;
+    /** at this step throw the first time only */
+    long oneShotThrowAtStep = -1;
+    private boolean oneShotThrown;
+    /** at this step throw, but only when the step is executed again after it ran once (a re-run) */
+    long reexecuteThrowAtStep = -1;
+    private long highestStep = -1;
+    /** the thrown message counts the throws, so two throws never read alike */
+    boolean varyingMessage;
+    private int throwCount;
     /** what {@link #isSnapshotComplete()} reports (the snapshot does hold this machine's whole state) */
     boolean snapshotComplete = true;
     private TraceListener trace;
@@ -55,9 +70,22 @@ final class TinyMachine implements DebugTarget {
             trace.onInstruction(event);
         }
         if (steps == throwAtStep) {
+            throw new IllegalStateException(varyingMessage ? "boom #" + ++throwCount : "boom at step " + steps);
+        }
+        if (steps == oneShotThrowAtStep && !oneShotThrown) {
+            oneShotThrown = true;
             throw new IllegalStateException("boom at step " + steps);
         }
+        if (steps == reexecuteThrowAtStep && steps <= highestStep) {
+            throw new IllegalStateException("re-run boom at step " + steps);
+        }
+        highestStep = Math.max(highestStep, steps);
         acc = (acc + pc) & 0xFF;
+        if (steps == oneShotFaultAtStep && !oneShotFaultFired) {
+            oneShotFaultFired = true;
+            oneShotMarker = 1;
+            acc ^= oneShotFaultMask;
+        }
         if (steps == faultAtStep && !(faultOnce && faultFired)) {
             acc ^= faultMask;
             faultFired = true;
@@ -106,5 +134,6 @@ final class TinyMachine implements DebugTarget {
         acc = (int) s.value("ACC");
         cycles = s.value("CYCLES");
         steps = s.value("INSTRUCTIONS");
+        oneShotMarker = 0;
     }
 }

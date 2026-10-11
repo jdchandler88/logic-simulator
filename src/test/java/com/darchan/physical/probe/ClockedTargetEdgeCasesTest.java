@@ -60,14 +60,13 @@ class ClockedTargetEdgeCasesTest {
         p.add("input", new SimpleSignal(s, false));
         new ClockedTarget("m", new Clock(s, false), p);
         // a probe added after construction is checked when a snapshot is taken
-        ProbeSet late = new ProbeSet(sim);
         Simulator s2 = new Simulator();
         Clock c2 = new Clock(s2, false);
         ProbeSet p2 = new ProbeSet(s2);
         ClockedTarget t2 = new ClockedTarget("m", c2, p2);
         p2.add("CYCLES", new SimpleSignal(s2, false));
-        assertThrows(IllegalArgumentException.class, t2::snapshot);
-        assertNotNull(late);
+        IllegalArgumentException late = assertThrows(IllegalArgumentException.class, t2::snapshot);
+        assertTrue(late.getMessage().contains("a probe may not be called CYCLES"), late.getMessage());
     }
 
     @Test
@@ -97,6 +96,34 @@ class ClockedTargetEdgeCasesTest {
         assertThrows(IllegalArgumentException.class, () -> target.addInputs("gate", gates));
         assertThrows(IllegalArgumentException.class, () -> target.addInputs("none", new Bus()));
         assertEquals(List.of("in", "r", "state.r", "in.ctl", "CYCLES", "INSTRUCTIONS"), target.snapshot().fieldNames());
+    }
+
+    @Test
+    void severalTestbenchStatesAndInputsAreEachSavedAndRestored() {
+        AtomicLong first = new AtomicLong(0x11);
+        AtomicLong second = new AtomicLong(0x22);
+        IBus other = Buses.simpleBus(sim, 3, 0b101);
+        target.addState("one", 8, first::get, first::set);
+        target.addState("two", 8, second::get, second::set);
+        target.addInputs("a", in);
+        target.addInputs("b", other);
+        Buses.drive(in, 0b0110);
+        sim.settle();
+        Snapshot s = target.snapshot();
+        assertEquals(0x11, s.value("tb.one"));
+        assertEquals(0x22, s.value("tb.two"));
+        assertEquals(0b0110, s.value("in.a"));
+        assertEquals(0b101, s.value("in.b"));
+        first.set(0);
+        second.set(0);
+        Buses.drive(in, 0);
+        Buses.drive(other, 0);
+        sim.settle();
+        target.restore(s);
+        assertEquals(0x11, first.get());
+        assertEquals(0x22, second.get());
+        assertEquals(0b0110, Buses.toInt(in));
+        assertEquals(0b101, Buses.toInt(other));
     }
 
     @Test
