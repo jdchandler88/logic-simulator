@@ -37,11 +37,39 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Code coverage (JaCoCo). `./gradlew test` writes the HTML/XML report to build/reports/jacoco/test/, and `check`
+// (so `build`) fails when coverage drops below the thresholds further down.
+jacoco {
+    toolVersion = '0.8.13'
+}
+
+// Coverage thresholds: a floor slightly under what the tests achieve (measured with this tree: see the README's
+// Testing section), so a regression fails the build without a single new line of untested code doing so. They are
+// enforced per top-level package, plus one overall rule, as part of `check`. `project` is `project.App`, the command
+// line front end: its main() and System.exit paths are driven by a few smoke tests only, hence the lower floor.
+def coverageFloors = [
+        physical  : [classes: 'com/darchan/physical/**',   line: 0.97, branch: 0.97],
+        behavioral: [classes: 'com/darchan/behavioral/**', line: 0.98, branch: 0.95],
+        diag      : [classes: 'com/darchan/diag/**',       line: 0.97, branch: 0.94],
+        cosim     : [classes: 'com/darchan/cosim/**',      line: 0.98, branch: 0.98],
+        project   : [classes: 'project/**',                line: 0.60, branch: 0.60],
+]
+
 // Tests tagged "slow" (e.g. the 8080EXM instruction exerciser, ~24 billion emulated cycles) are left out of
 // the normal build; run them with ./gradlew slowTest
 test {
     useJUnitPlatform {
         excludeTags 'slow'
+    }
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
     }
 }
 
@@ -58,6 +86,59 @@ tasks.register('slowTest', Test) {
         events 'passed', 'skipped', 'failed'
     }
     shouldRunAfter test
+}
+
+tasks.named('jacocoTestCoverageVerification') {
+    description = 'Fails if overall line or branch coverage is below the floor.'
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.96
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.94
+            }
+        }
+    }
+}
+
+coverageFloors.each { name, floor ->
+    def verify = tasks.register("jacocoVerify${name.capitalize()}", JacocoCoverageVerification) {
+        group = 'verification'
+        description = "Fails if ${name} line coverage is below ${floor.line} or branch coverage below ${floor.branch}."
+        dependsOn test
+        executionData(tasks.named('test').get())
+        sourceDirectories.setFrom(sourceSets.main.allJava.srcDirs)
+        classDirectories.setFrom(files(sourceSets.main.output.classesDirs).asFileTree.matching {
+            include floor.classes
+        })
+        violationRules {
+            rule {
+                limit {
+                    counter = 'LINE'
+                    value = 'COVEREDRATIO'
+                    minimum = floor.line as BigDecimal
+                }
+                limit {
+                    counter = 'BRANCH'
+                    value = 'COVEREDRATIO'
+                    minimum = floor.branch as BigDecimal
+                }
+            }
+        }
+    }
+    tasks.named('check') {
+        dependsOn verify
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('jacocoTestCoverageVerification')
 }
 
 // Define the main class for the application

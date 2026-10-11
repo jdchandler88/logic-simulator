@@ -14,5 +14,13 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+      # `build` runs the tests, writes the JaCoCo report and fails if coverage is below the floors in build.gradle
       - name: Build
         run: ./gradlew build
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test/
+          if-no-files-found: warn

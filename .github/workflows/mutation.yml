@@ -1,9 +1,15 @@
 name: mutation
 
-# Mutation testing with PIT (./gradlew pitest). A full run takes about 10 minutes, so it is not part of the
-# normal build: run it by hand (Actions -> mutation -> Run workflow) or let the weekly schedule do it.
+# Mutation testing with PIT (./gradlew pitest). A full run takes 10-15 minutes, so it is not part of the normal build:
+# run it by hand (Actions -> mutation -> Run workflow) or let the weekly schedule do it. Scheduled runs always start
+# from scratch, so the score is an honest measure of the current tests.
 on:
   workflow_dispatch:
+    inputs:
+      incremental:
+        description: 'Reuse the PIT history of the previous run (quicker; only changed code and tests are re-examined)'
+        type: boolean
+        default: false
   schedule:
     - cron: '17 4 * * 1'   # Mondays 04:17 UTC
 
@@ -18,8 +24,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      # PIT's history file lets a rerun skip mutants whose class and covering tests did not change
       - name: Restore PIT history
+        if: ${{ inputs.incremental }}
         uses: actions/cache@v4
         with:
           path: .gradle/pitest-history.bin
