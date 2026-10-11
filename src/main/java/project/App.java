@@ -1,6 +1,8 @@
 package project;
 
 import com.darchan.behavioral.cpm.CpmMachine;
+import com.darchan.diag.compare.GoldenTrace;
+import com.darchan.diag.compare.GoldenTraceResult;
 import com.darchan.diag.run.StopReason;
 import com.darchan.diag.trace.TextTraceWriter;
 import com.darchan.diag.trace.TraceFormatter;
@@ -19,8 +21,10 @@ import java.nio.file.Path;
  * Entry point.
  * <ul>
  *   <li>no arguments: small gate-level demo, a clock driving an inverter;</li>
- *   <li>{@code run-com FILE [--trace TRACEFILE] [--max-cycles N]}: runs a CP/M .COM program on the behavioral
- *       8080, printing its console output, optionally writing a per-instruction trace.</li>
+ *   <li>{@code run-com FILE [--trace TRACEFILE] [--golden GOLDENTRACE [--ignore-columns COL,...]] [--max-cycles N]}:
+ *       runs a CP/M .COM program on the behavioral 8080, printing its console output, optionally writing a
+ *       per-instruction trace or comparing every instruction against a recorded golden trace (exit code 1 on the
+ *       first mismatch, with a report).</li>
  * </ul>
  */
 public class App {
@@ -54,15 +58,20 @@ public class App {
 
     private static int runCom(String[] args) {
         if (args.length < 2) {
-            System.err.println("usage: run-com FILE [--trace TRACEFILE] [--max-cycles N]");
+            System.err.println("usage: run-com FILE [--trace TRACEFILE] [--golden GOLDENTRACE [--ignore-columns COL,...]]"
+                    + " [--max-cycles N]");
             return 2;
         }
         Path program = Path.of(args[1]);
         Path traceFile = null;
+        Path goldenFile = null;
+        String[] ignoreColumns = new String[0];
         long maxCycles = 50_000_000_000L;
         for (int i = 2; i < args.length; i++) {
             switch (args[i]) {
                 case "--trace" -> traceFile = Path.of(args[++i]);
+                case "--golden" -> goldenFile = Path.of(args[++i]);
+                case "--ignore-columns" -> ignoreColumns = args[++i].split(",");
                 case "--max-cycles" -> maxCycles = Long.parseLong(args[++i].replace("_", ""));
                 default -> {
                     System.err.println("unknown option " + args[i]);
@@ -77,6 +86,16 @@ public class App {
             trace = TextTraceWriter.toFile(traceFile);
             trace.writeLine(TraceFormatter.header(Cpu8080.TRACE_LAYOUT));
             machine.debugger().addTraceListener(trace);
+        }
+        if (goldenFile != null) {
+            GoldenTraceResult result = GoldenTrace.of(goldenFile).ignoreColumns(ignoreColumns)
+                    .compare(machine.debugger(), maxCycles);
+            System.out.println();
+            System.out.println(result.report());
+            if (trace != null) {
+                trace.close();
+            }
+            return result.matched() ? 0 : 1;
         }
         long t0 = System.nanoTime();
         StopReason stop;
