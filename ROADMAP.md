@@ -78,13 +78,24 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       8 ops × 256 × 256 × CY takes ~2.5 s.)
 
 ## Phase 2 – Behavioral Intel 8080
-- [ ] Registers, flags (S Z AC P CY), SP/PC, `MemoryBus`, `IN`/`OUT` port interface.
-- [ ] All 256 opcodes (including undocumented duplicates) with cycle counts.
-- [ ] Interrupts: `EI`/`DI`, `RST n` injection, `HLT`.
-- [ ] Disassembler and a step/trace debugger (registers + disassembly per step).
-- [ ] Pass the CP/M diagnostics: `8080PRE`, `TST8080`, `CPUTEST`, `8080EXM`
+- [x] Registers, flags (S Z AC P CY), SP/PC, `MemoryBus`, `IN`/`OUT` port interface.
+      (`com.darchan.behavioral.bus`: `MemoryBus` with `fetch`/`peek`, `IoBus`, 64 KiB `Ram`; `Cpu8080` keeps F in
+      the `S Z 0 AC 0 P 1 CY` layout and takes every flag from `Alu8080`, which gained INR/DCR/DAA/rotate/DAD.)
+- [x] All 256 opcodes (including undocumented duplicates) with cycle counts.
+      (Data-sheet states incl. conditional CALL 17/11 and RET 11/5; every opcode checked taken/not taken.)
+- [x] Interrupts: `EI`/`DI`, `RST n` injection, `HLT`.
+      (EI enables after the next instruction; a held request injects a single-byte instruction at the next
+      boundary with INTE set; HLT idles 4 cycles per step.)
+- [x] Disassembler and a step/trace debugger (registers + disassembly per step).
+      (`Disassembler8080`, Intel mnemonics, `*` marks undocumented opcodes; tracing and stepping through
+      `com.darchan.diag`, wired by `Debug8080.attach`.)
+- [x] Pass the CP/M diagnostics: `8080PRE`, `TST8080`, `CPUTEST`, `8080EXM`
       (stub BDOS call 5, functions 2 and 9, to print output).
-- [ ] Diagnostics core (`com.darchan.diag`): named state snapshots for both layers; run control (step instruction / N cycles / run-until, breakpoints on PC, memory read/write watchpoints, I/O port, cycle count); per-instruction text trace in a fixed diffable format; ring buffer of last N trace lines dumped on failure; register + memory hex dumps at breakpoints / every N cycles / on exception; JSON snapshot save/load.
+      (`CpmMachine`; cycle counts match superzazu/8080 exactly. 8080EXM is tagged `slow`: `./gradlew slowTest`.)
+- [x] Diagnostics core (`com.darchan.diag`): named state snapshots for both layers; run control (step instruction / N cycles / run-until, breakpoints on PC, memory read/write watchpoints, I/O port, cycle count); per-instruction text trace in a fixed diffable format; ring buffer of last N trace lines dumped on failure; register + memory hex dumps at breakpoints / every N cycles / on exception; JSON snapshot save/load.
+      (`Snapshot`/`SnapshotDiff`/`SnapshotJson`/`HexDump`, `diag.trace` (`TraceFormatter`, `TraceRingBuffer`,
+      `TextTraceWriter`), `diag.run` (`DebugTarget`, `Debugger`, `Watchpoint`). Implemented by the 8080 so far;
+      the gate-level layer has not implemented `DebugTarget` yet.)
 - [ ] Lockstep comparison: two live models, recorded golden trace logs, and saved snapshot files; stop on first divergence with a field diff plus recent trace.
 - [ ] VCD waveform output for the physical layer (GTKWave/Surfer) plus simulator stats (deltas per settle, events per tick).
 - [ ] Interactive CLI debugger (REPL): step, continue, break/watch, regs, mem, trace on/off, dump, save/load snapshot.

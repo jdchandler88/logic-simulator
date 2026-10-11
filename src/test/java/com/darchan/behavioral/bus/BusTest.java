@@ -23,6 +23,18 @@ class BusTest {
     }
 
     @Test
+    void ramRestoresACapturedRegion() {
+        Ram ram = new Ram();
+        ram.write(0x100, 0x11);
+        com.darchan.diag.MemoryRegion saved = com.darchan.diag.MemoryRegion.capture("ram", ram::peek, 0x100, 2);
+        ram.write(0x100, 0x22);
+        ram.write(0x101, 0x33);
+        ram.restore(saved);
+        assertEquals(0x11, ram.read(0x100));
+        assertEquals(0x00, ram.read(0x101));
+    }
+
+    @Test
     void observedBusesReportEveryAccessButPeek() {
         Ram ram = new Ram();
         ram.write(0x10, 0xAB);
