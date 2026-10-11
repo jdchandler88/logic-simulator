@@ -155,7 +155,7 @@ public final class DebuggerRepl {
                 }
             }
         } finally {
-            closeTraceFile();
+            stopTrace(); // closes the file and takes its listener off the debugger, which outlives the session
         }
     }
 
@@ -175,7 +175,7 @@ public final class DebuggerRepl {
         try {
             switch (cmd) {
                 case "quit", "q", "exit" -> {
-                    closeTraceFile();
+                    stopTrace();
                     return false;
                 }
                 case "help", "h", "?" -> out.println(HELP);
