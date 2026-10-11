@@ -472,4 +472,13 @@ class ReplSessionTest {
             assertTrue(bytes.toString(StandardCharsets.UTF_8).contains("[interrupted] at cycle"), command + ": " + bytes);
         }
     }
+
+    @Test
+    void addressesMayHaveALowerOrUpperCaseHexSuffixAndBlankInputPrintsNothing() {
+        String out = session("break 6h\nbreak 8H\n\n   \n#nothing\nbreaks\nq\n");
+        assertTrue(out.contains("#1 break 06 (the OUT)\n"), out);
+        assertTrue(out.contains("#2 break 08\n"), out);
+        assertFalse(out.contains("error:"), "blank lines and comments are not errors: " + out);
+        assertFalse(out.contains("unknown command"), out);
+    }
 }

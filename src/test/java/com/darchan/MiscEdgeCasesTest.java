@@ -263,4 +263,22 @@ class MiscEdgeCasesTest {
         assertEquals("", RegisterSpec.of("A", 8).flagNames());
         assertEquals(0, trace.dropped());
     }
+
+    @Test
+    void onlyTheBdosStubsOutCountsAsABdosCall() {
+        // an OUT 1 in the program itself (not at the stub's address) is an ordinary port write
+        CpmMachine m = new CpmMachine(new byte[]{(byte) 0xD3, 0x01});
+        m.cpu().setC(2);
+        m.cpu().setE('Z');
+        m.cpu().step();
+        assertEquals("", m.output());
+        // an OUT to another port from the stub address is not a call either
+        CpmMachine other = new CpmMachine(new byte[0]);
+        other.ram().write(CpmMachine.BDOS_ENTRY + 1, 0x02); // the stub now reads OUT 2
+        other.cpu().setC(2);
+        other.cpu().setE('Z');
+        other.cpu().setPC(CpmMachine.BDOS_ENTRY);
+        other.cpu().step();
+        assertEquals("", other.output());
+    }
 }

@@ -53,4 +53,16 @@ class BusTest {
         assertEquals(List.of(AccessType.READ + " 16 171", AccessType.FETCH + " 16 171", AccessType.WRITE + " 17 7",
                 AccessType.IO_IN + " 3 255", AccessType.IO_OUT + " 4 5"), log);
     }
+
+    @org.junit.jupiter.api.Test
+    void ramLoadChecksTheWholeRange() {
+        Ram ram = new Ram();
+        ram.load(0, new byte[Ram.SIZE]);
+        ram.load(Ram.SIZE - 2, new byte[]{1, 2});
+        assertEquals(2, ram.peek(Ram.SIZE - 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ram.load(Ram.SIZE - 1, new byte[2]));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ram.load(-1, new byte[1]));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ram.load(0, new byte[Ram.SIZE + 1]));
+        ram.load(Ram.SIZE, new byte[0]);
+    }
 }

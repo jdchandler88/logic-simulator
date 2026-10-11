@@ -153,4 +153,16 @@ class GoldenTraceApiTest {
             return e;
         }
     }
+
+    @Test
+    void verifiedNeedsBothNoMismatchAndCompleteness() {
+        StopReason stop = new StopReason(StopReason.Kind.STEPPED, "x", 0, 0);
+        TraceMismatch mismatch = new TraceMismatch("g", 1, 0, "e", "a", "^", List.of(), List.of(), List.of());
+        assertTrue(new GoldenTraceResult("g", 1, true, stop, null, null).verified());
+        assertFalse(new GoldenTraceResult("g", 1, false, stop, null, "next").verified());
+        assertFalse(new GoldenTraceResult("g", 1, true, stop, mismatch, null).verified());
+        assertFalse(new GoldenTraceResult("g", 1, false, stop, mismatch, null).verified());
+        assertTrue(new GoldenTraceResult("g", 1, false, stop, null, "next").matched());
+        assertFalse(new GoldenTraceResult("g", 1, true, stop, mismatch, null).matched());
+    }
 }

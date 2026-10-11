@@ -220,4 +220,41 @@ class Cpu8080EdgeCasesTest {
         assertFalse(cpu.isHalted());
         assertEquals(0x42, cpu.a(), "registers are undefined after RESET: they keep their values");
     }
+
+    @Test
+    void ldaxAndStaxUseTheirOwnPair() {
+        cpu.setBC(0x2000);
+        cpu.setDE(0x3000);
+        ram.write(0x2000, 0x11);
+        ram.write(0x3000, 0x22);
+        ram.write(0, 0x0A); // LDAX B
+        ram.write(1, 0x1A); // LDAX D
+        cpu.step();
+        assertEquals(0x11, cpu.a());
+        cpu.step();
+        assertEquals(0x22, cpu.a());
+        cpu.setA(0x77);
+        ram.write(2, 0x02); // STAX B
+        cpu.step();
+        assertEquals(0x77, ram.peek(0x2000));
+        assertEquals(0x22, ram.peek(0x3000), "STAX B leaves the DE target alone");
+        cpu.setA(0x88);
+        ram.write(3, 0x12); // STAX D
+        cpu.step();
+        assertEquals(0x88, ram.peek(0x3000));
+        assertEquals(0x77, ram.peek(0x2000), "and STAX D leaves the BC target alone");
+    }
+
+    @Test
+    void restoreRejectsNegativeSixtyFourBitRegisterValues() {
+        Snapshot ok = cpu.snapshot();
+        for (String name : new String[]{"PC", "SP", "A", "F", "B", "C", "D", "E", "H", "L"}) {
+            Snapshot.Builder b = Snapshot.builder(Cpu8080.MACHINE);
+            for (Field f : ok.fields()) {
+                b.field(f.name().equals(name) ? new Field(name, 64, -1L, Field.Format.HEX) : f);
+            }
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> cpu.restore(b.build()), name);
+            assertTrue(e.getMessage().contains("out of range"), e.getMessage());
+        }
+    }
 }

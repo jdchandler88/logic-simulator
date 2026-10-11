@@ -287,4 +287,34 @@ class TraceBuffersTest {
         assertSame(DECODER, new TraceEvent(PLAIN, DECODER).decoder());
         assertSame(PLAIN, e.layout());
     }
+
+    @Test
+    void everyPartOfAnEventTakesPartInEquality() {
+        TraceEvent base = plain(4);
+        TraceEvent[] variants = new TraceEvent[6];
+        for (int i = 0; i < variants.length; i++) {
+            TraceEvent e = new TraceEvent(PLAIN, DECODER);
+            e.begin(i == 0 ? 41 : 40, i == 1 ? 5 : 4, i == 2 ? 0x105 : 0x104, i == 3);
+            e.setBytes(i == 5 ? 0x0205 : 0x0204, i == 4 ? 2 : 1);
+            e.setRegister(0, 4);
+            e.setRegister(1, 0x81);
+            variants[i] = e;
+        }
+        TraceEvent same = new TraceEvent(PLAIN, DECODER);
+        same.begin(40, 4, 0x104, false);
+        same.setBytes(0x0204, 1);
+        same.setRegister(0, 4);
+        same.setRegister(1, 0x81);
+        assertEquals(base, same);
+        String[] what = {"cycle", "instruction", "pc", "interrupt", "length", "bytes"};
+        for (int i = 0; i < variants.length; i++) {
+            assertNotEquals(base, variants[i], what[i] + " is part of the identity");
+        }
+        TraceEvent otherLayout = new TraceEvent(new TraceLayout("p2", 16, 2, 6, PLAIN.registers()), DECODER);
+        otherLayout.begin(40, 4, 0x104, false);
+        otherLayout.setBytes(0x0204, 1);
+        otherLayout.setRegister(0, 4);
+        otherLayout.setRegister(1, 0x81);
+        assertNotEquals(base, otherLayout, "the layout is part of the identity");
+    }
 }

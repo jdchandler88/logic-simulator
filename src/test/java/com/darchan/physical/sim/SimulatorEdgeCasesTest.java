@@ -281,4 +281,21 @@ class SimulatorEdgeCasesTest {
         sim.runUntil(4);
         assertTrue(sim.toString().startsWith("Simulator at time 4, delta 0\n"), sim.toString());
     }
+
+    @Test
+    void theMinimumEventsPerRunIsTrackedOverRunsThatHadEvents() {
+        SimpleSignal a = new SimpleSignal(sim, false);
+        new Inverter(sim, new Bus(a));
+        sim.resetStats();
+        a.setOn(true);
+        sim.settle(); // 2 events
+        SimpleSignal b = new SimpleSignal(sim, false);
+        b.setOn(true);
+        sim.settle(); // 1 event
+        SimulatorStats s = sim.stats();
+        assertEquals(1, s.minEventsPerRun());
+        assertEquals(2, s.maxEventsPerRun());
+        assertEquals(1, s.minDeltasPerRun());
+        assertEquals(2, s.maxDeltasPerRun());
+    }
 }

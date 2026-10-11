@@ -303,4 +303,25 @@ class CheckpointEdgeCasesTest {
         assertThrows(java.io.UncheckedIOException.class,
                 () -> com.darchan.diag.trace.TextTraceWriter.toFile(dir.resolve("no/such/dir/t.trace")));
     }
+
+    @Test
+    void aMismatchWithoutARingBufferHasNoTrace() {
+        TinyMachine good = new TinyMachine();
+        SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("m", 5)).record(new Debugger(good, null), 1000);
+        TinyMachine bad = new TinyMachine();
+        bad.faultAtStep = 1;
+        bad.faultMask = 1;
+        Debugger dbg = new Debugger(bad, null);
+        dbg.setRingBufferCapacity(0);
+        CheckpointReport r = SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("m", 5)).verify(dbg, 1000);
+        assertEquals(MISMATCH, r.result("m").orElseThrow().status());
+        assertTrue(r.result("m").orElseThrow().recentTrace().isEmpty());
+        assertFalse(r.report().contains("instruction(s) before it"));
+        TinyMachine bad2 = new TinyMachine();
+        bad2.faultAtStep = 1;
+        bad2.faultMask = 1;
+        CheckpointReport traced = SnapshotCheckpoints.in(dir).add(Checkpoint.atInstruction("m", 5))
+                .verify(new Debugger(bad2, null), 1000);
+        assertEquals(5, traced.result("m").orElseThrow().recentTrace().size());
+    }
 }

@@ -294,4 +294,26 @@ class DebuggerEdgeCasesTest {
         assertTrue(g.report().contains("failure report unavailable: java.lang.UnsupportedOperationException: no snapshot"),
                 g.report());
     }
+
+    @Test
+    void theFirstWatchedAccessOfAnInstructionIsTheOneReported() {
+        dbg.addWatchpoint(Watchpoint.memoryRead(0x81));
+        dbg.addWatchpoint(new Watchpoint(java.util.Set.of(AccessType.FETCH), 0x04, 0x05));
+        // LDA 81 at 04 fetches its opcode and operand (both in 04..05) before it reads 81
+        StopReason r = dbg.run(1000);
+        assertEquals(WATCHPOINT, r.kind());
+        assertTrue(r.detail().contains("FETCH 0004"), r.detail());
+        assertFalse(r.detail().contains("READ"), r.detail());
+    }
+
+    @Test
+    void aDumpOnStopCanBeSwitchedOff() {
+        java.util.List<String> dumps = new java.util.ArrayList<>();
+        dbg.setDumpSink(dumps::add);
+        dbg.setDumpOnStop(true);
+        dbg.setDumpOnStop(false);
+        dbg.addBreakpoint(0x04);
+        assertEquals(BREAKPOINT, dbg.run(1000).kind());
+        assertTrue(dumps.isEmpty());
+    }
 }

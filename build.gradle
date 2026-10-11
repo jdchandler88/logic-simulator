@@ -163,10 +163,11 @@ pitest {
     // diagnostics (8080PRE, TST8080) and the exhaustive ALU/opcode tests stay in: every other test is < 2 s.
     excludedGroups = ['slow', 'mutation-skip']
 
-    // DEFAULTS: the standard PIT set (conditionals boundary/negate, increments, invert negatives, math, void-method
-    // calls, empty/primitive/boolean/null returns). STRONGER only adds a switch mutator, and the one big switch
-    // (Cpu8080's opcode dispatch) is already covered by the exhaustive opcode tests.
-    mutators = ['DEFAULTS']
+    // DEFAULTS is PIT's standard set: invert negatives, math, void-method calls, conditional boundary, increments,
+    // the return-value mutators and "replace a conditional by false" (REMOVE_CONDITIONALS_*_ELSE). STRONGER adds
+    // the switch mutator and "replace a conditional by true" (REMOVE_CONDITIONALS_*_IF), roughly doubling the
+    // conditional mutants and the run time. `./gradlew pitest -PpitMutators=STRONGER` runs it.
+    mutators = [providers.gradleProperty('pitMutators').getOrElse('DEFAULTS')]
     // System.Logger calls only produce log text; mutating them is noise
     avoidCallsTo = ['java.lang.System$Logger', 'java.util.logging', 'org.slf4j']
 

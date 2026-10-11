@@ -1,11 +1,17 @@
 name: mutation
 
-# Mutation testing with PIT (./gradlew pitest). A full run takes 10-15 minutes, so it is not part of the normal build:
+# Mutation testing with PIT (./gradlew pitest). A full run takes 12-16 minutes, so it is not part of the normal build:
 # run it by hand (Actions -> mutation -> Run workflow) or let the weekly schedule do it. Scheduled runs always start
-# from scratch, so the score is an honest measure of the current tests.
+# from scratch with the DEFAULTS mutators, so the score is an honest measure of the current tests; a manual run can
+# choose the stricter STRONGER set.
 on:
   workflow_dispatch:
     inputs:
+      mutators:
+        description: 'PIT mutator set (STRONGER adds switch and "conditional is true" mutants; about 30% slower)'
+        type: choice
+        options: [DEFAULTS, STRONGER]
+        default: DEFAULTS
       incremental:
         description: 'Reuse the PIT history of the previous run (quicker; only changed code and tests are re-examined)'
         type: boolean
@@ -32,7 +38,7 @@ jobs:
           key: pitest-history-${{ github.run_id }}
           restore-keys: pitest-history-
       - name: Mutation testing
-        run: ./gradlew pitest
+        run: ./gradlew pitest -PpitMutators=${{ inputs.mutators || 'DEFAULTS' }}
       - name: Summary
         if: always()
         run: python3 .github/scripts/pit-summary.py build/reports/pitest >> "$GITHUB_STEP_SUMMARY"
