@@ -119,7 +119,27 @@ class TraceTest {
     }
 
     @Test
+    void bytesCanBeSetPackedAndAreMaskedToTheLength() {
+        TraceEvent e = event(0, 0, 0x100, 0x02);
+        e.setBytes(0xAA070031, 3); // 31 00 07 + a garbage fourth byte
+        assertEquals(3, e.length());
+        assertEquals(0x070031, e.packedBytes());
+        assertEquals(0x07, e.byteAt(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> e.byteAt(3));
+        assertEquals(TraceFormatter.format(event(0, 0, 0x100, 0x02, 0x31, 0x00, 0x07)), TraceFormatter.format(e));
+        assertThrows(IllegalArgumentException.class, () -> e.setBytes(0, 4));
+        e.setBytes(0, 0);
+        assertThrows(IllegalStateException.class, () -> {
+            e.addByte(1);
+            e.addByte(2);
+            e.addByte(3);
+            e.addByte(4);
+        });
+    }
+
+    @Test
     void layoutValidation() {
+        assertThrows(IllegalArgumentException.class, () -> new TraceLayout("x", 16, 5, 10, List.of()));
         assertThrows(IllegalArgumentException.class, () -> new RegisterSpec("F", 8, "SZ"));
         assertEquals("SZAPC", RegisterSpec.flags("F", "SZ.A.P.C").flagNames());
     }

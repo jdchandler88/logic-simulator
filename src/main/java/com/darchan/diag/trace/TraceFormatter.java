@@ -40,13 +40,13 @@ public final class TraceFormatter {
     }
 
     public static void append(StringBuilder sb, TraceEvent e) {
-        append(sb, e.layout(), e.cycle(), e.instruction(), e.pc(), e.isInterrupt(), e.rawBytes(), 0, e.length(),
+        append(sb, e.layout(), e.cycle(), e.instruction(), e.pc(), e.isInterrupt(), e.packedBytes(), e.length(),
                 e.disassembly(), e.rawRegisters(), 0);
     }
 
     /** Formats a line from raw values (used by {@link TraceRingBuffer}, which stores primitives). */
     static void append(StringBuilder sb, TraceLayout layout, long cycle, long instruction, int pc, boolean interrupt,
-                       int[] bytes, int bytesOffset, int length, String disassembly, int[] registers, int regOffset) {
+                       int packedBytes, int length, String disassembly, int[] registers, int regOffset) {
         int lineStart = sb.length();
         decimal(sb, cycle);
         sb.append(' ');
@@ -60,7 +60,7 @@ public final class TraceFormatter {
             if (i > 0) {
                 sb.append(' ');
             }
-            hex(sb, bytes[bytesOffset + i], 2);
+            hex(sb, packedBytes >>> (8 * i) & 0xFF, 2);
         }
         pad(sb, startLen + bytesColumn);
         sb.append("  ");

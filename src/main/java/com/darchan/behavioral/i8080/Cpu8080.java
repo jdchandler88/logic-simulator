@@ -527,18 +527,16 @@ public final class Cpu8080 implements DebugTarget {
         TraceEvent ev = traceEvent;
         ev.begin(cycles, instructions, pc, false);
         int opcode = memory.peek(pc);
-        int len = Disassembler8080.length(opcode);
-        ev.addByte(opcode);
-        for (int i = 1; i < len; i++) {
-            ev.addByte(memory.peek((pc + i) & 0xFFFF));
-        }
+        // always peek three bytes (no side effects) rather than loop over the instruction length
+        int packed = opcode | memory.peek((pc + 1) & 0xFFFF) << 8 | memory.peek((pc + 2) & 0xFFFF) << 16;
+        ev.setBytes(packed, Disassembler8080.length(opcode));
         fillRegistersAndSend(ev);
     }
 
     private void traceInterrupt() {
         TraceEvent ev = traceEvent;
         ev.begin(cycles, instructions, pc, true);
-        ev.addByte(interruptOpcode);
+        ev.setBytes(interruptOpcode, 1);
         fillRegistersAndSend(ev);
     }
 

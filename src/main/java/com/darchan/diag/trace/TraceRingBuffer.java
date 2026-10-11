@@ -14,12 +14,11 @@ public final class TraceRingBuffer implements TraceListener {
     private final int capacity;
     private TraceLayout layout;
     private InstructionDecoder decoder;
-    private int maxLen;
     private int regCount;
 
     /** per slot: cycle, instruction */
     private final long[] counters;
-    /** per slot ({@code stride} ints): pc, length (negative for an interrupt), bytes, registers */
+    /** per slot ({@code stride} ints): pc, length (negative for an interrupt), packed bytes, registers */
     private int[] data = new int[0];
     private int stride;
 
@@ -47,17 +46,10 @@ public final class TraceRingBuffer implements TraceListener {
         int len = e.length();
         d[base] = e.pc();
         d[base + 1] = e.isInterrupt() ? -1 - len : len;
-        // plain loops: for these tiny arrays they are cheaper than System.arraycopy
-        int[] src = e.rawBytes();
-        int at = base + 2;
-        for (int i = 0; i < len; i++) {
-            d[at + i] = src[i];
-        }
-        src = e.rawRegisters();
-        at = base + 2 + maxLen;
-        for (int i = 0; i < regCount; i++) {
-            d[at + i] = src[i];
-        }
+        d[base + 2] = e.packedBytes();
+        int[] src = e.rawRegisters();
+        int at = base + 3;
+        System.arraycopy(src, 0, d, at, regCount);
         next = slot + 1 == capacity ? 0 : slot + 1;
         total++;
     }
@@ -65,9 +57,8 @@ public final class TraceRingBuffer implements TraceListener {
     private void adopt(TraceEvent e) {
         layout = e.layout();
         decoder = e.decoder();
-        maxLen = layout.maxInstructionLength();
         regCount = layout.registers().size();
-        stride = 2 + maxLen + regCount;
+        stride = 3 + regCount;
         data = new int[capacity * stride];
         next = 0;
         total = 0;
@@ -96,7 +87,6 @@ public final class TraceRingBuffer implements TraceListener {
     public List<String> lines() {
         int n = size();
         List<String> out = new ArrayList<>(n);
-        int[] scratch = new int[Math.max(1, maxLen)];
         StringBuilder sb = new StringBuilder(128);
         for (int i = 0; i < n; i++) {
             int slot = Math.floorMod(next - n + i, capacity);
@@ -104,11 +94,11 @@ public final class TraceRingBuffer implements TraceListener {
             int pc = data[base];
             boolean interrupt = data[base + 1] < 0;
             int len = interrupt ? -1 - data[base + 1] : data[base + 1];
-            System.arraycopy(data, base + 2, scratch, 0, len);
-            String disassembly = decoder.disassemble(pc, scratch, len);
+            int packed = data[base + 2];
+            String disassembly = TraceEvent.decode(decoder, pc, packed, len);
             sb.setLength(0);
             TraceFormatter.append(sb, layout, counters[2 * slot], counters[2 * slot + 1], pc, interrupt,
-                    data, base + 2, len, disassembly, data, base + 2 + maxLen);
+                    packed, len, disassembly, data, base + 3);
             out.add(sb.toString());
         }
         return out;
