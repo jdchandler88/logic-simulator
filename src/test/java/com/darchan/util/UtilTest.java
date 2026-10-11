@@ -1,4 +1,4 @@
-package com.darchan.elements.impl.com.darchan.util;
+package com.darchan.util;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IRange;
@@ -6,7 +6,6 @@ import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleRange;
 import com.darchan.elements.impl.SimpleSignal;
-import com.darchan.util.Util;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

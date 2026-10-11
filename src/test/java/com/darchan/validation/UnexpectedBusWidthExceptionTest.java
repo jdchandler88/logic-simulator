@@ -1,6 +1,5 @@
-package com.darchan.elements.impl.validation;
+package com.darchan.validation;
 
-import com.darchan.com.darchan.validation.UnexpectedBusWidthException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

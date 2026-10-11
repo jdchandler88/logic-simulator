@@ -5,9 +5,9 @@ import com.darchan.elements.iface.ISignalChangeListener;
 
 public class ConstantSignal implements ISignal {
 
-    public static ISignal ON = new ConstantSignal(true);
+    public static final ISignal ON = new ConstantSignal(true);
 
-    public static ISignal OFF = new ConstantSignal(false);
+    public static final ISignal OFF = new ConstantSignal(false);
 
     private final boolean on;
 

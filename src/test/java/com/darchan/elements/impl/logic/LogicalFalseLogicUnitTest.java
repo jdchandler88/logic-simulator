@@ -1,9 +1,8 @@
-package com.darchan.elements.impl.com.darchan.elements.impl.logic;
+package com.darchan.elements.impl.logic;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.ConstantSignal;
-import com.darchan.elements.impl.logic.LogicalFalseLogicUnit;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;

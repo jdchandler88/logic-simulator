@@ -1,9 +1,8 @@
 package com.darchan.elements.impl;
 
-import com.darchan.elements.impl.AbstractSignal;
-
 /**
- * Class used for test. This signal can be used to set values explicitly
+ * A directly-settable signal: its state is changed explicitly via {@link #setOn(boolean)}.
+ * Used by components internally and handy for driving inputs in tests.
  */
 public class SimpleSignal extends AbstractSignal {
 

@@ -1,4 +1,4 @@
-package com.darchan.com.darchan.validation;
+package com.darchan.validation;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IRange;

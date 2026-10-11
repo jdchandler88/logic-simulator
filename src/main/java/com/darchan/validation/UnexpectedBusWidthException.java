@@ -1,4 +1,4 @@
-package com.darchan.com.darchan.validation;
+package com.darchan.validation;
 
 public class UnexpectedBusWidthException extends RuntimeException {
 

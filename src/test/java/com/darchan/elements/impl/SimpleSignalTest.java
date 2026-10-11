@@ -1,6 +1,5 @@
-package com.darchan.elements.impl.com.darchan;
+package com.darchan.elements.impl;
 
-import com.darchan.elements.impl.SimpleSignal;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

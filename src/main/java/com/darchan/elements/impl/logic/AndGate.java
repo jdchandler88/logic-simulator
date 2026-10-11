@@ -1,6 +1,6 @@
 package com.darchan.elements.impl.logic;
 
-import com.darchan.com.darchan.validation.Validation;
+import com.darchan.validation.Validation;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ILogicUnit;
 import com.darchan.elements.iface.IRange;

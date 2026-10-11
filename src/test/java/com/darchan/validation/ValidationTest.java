@@ -1,7 +1,5 @@
-package com.darchan.elements.impl.validation;
+package com.darchan.validation;
 
-import com.darchan.com.darchan.validation.UnexpectedBusWidthException;
-import com.darchan.com.darchan.validation.Validation;
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.impl.Bus;
