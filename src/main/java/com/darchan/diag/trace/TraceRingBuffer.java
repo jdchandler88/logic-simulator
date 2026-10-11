@@ -24,6 +24,7 @@ public final class TraceRingBuffer implements TraceListener {
 
     private int next;   // slot for the next event
     private long total; // events seen since the last clear
+    private int held;   // events held (at most the capacity)
 
     public TraceRingBuffer(int capacity) {
         if (capacity < 1) {
@@ -52,6 +53,9 @@ public final class TraceRingBuffer implements TraceListener {
         System.arraycopy(src, 0, d, at, regCount);
         next = slot + 1 == capacity ? 0 : slot + 1;
         total++;
+        if (held < capacity) {
+            held++;
+        }
     }
 
     private void adopt(TraceEvent e) {
@@ -62,6 +66,7 @@ public final class TraceRingBuffer implements TraceListener {
         data = new int[capacity * stride];
         next = 0;
         total = 0;
+        held = 0;
     }
 
     public int capacity() {
@@ -70,7 +75,7 @@ public final class TraceRingBuffer implements TraceListener {
 
     /** number of events held (at most the capacity) */
     public int size() {
-        return (int) Math.min(total, capacity);
+        return held;
     }
 
     /** events seen since creation or the last {@link #clear()} */
@@ -81,6 +86,26 @@ public final class TraceRingBuffer implements TraceListener {
     public void clear() {
         next = 0;
         total = 0;
+        held = 0;
+    }
+
+    /**
+     * Forgets the events recorded after the {@code mark}-th one ({@code mark} as returned by {@link #totalSeen()}
+     * earlier), as if they had never happened: used when a model is rewound to an earlier state and re-run, so the
+     * re-executed instructions are not shown twice. Events from before the mark that were already overwritten
+     * cannot come back, so fewer lines may be held afterwards.
+     *
+     * @throws IllegalArgumentException if {@code mark} is negative or after {@link #totalSeen()}
+     */
+    public void rollback(long mark) {
+        if (mark < 0 || mark > total) {
+            throw new IllegalArgumentException("mark " + mark + " is not in 0.." + total);
+        }
+        long dropped = total - mark;
+        int droppedHeld = (int) Math.min(dropped, held);
+        next = Math.floorMod(next - droppedHeld, capacity);
+        held -= droppedHeld; // 0 if the dropped events had overwritten everything from before the mark
+        total = mark;
     }
 
     /** the held events as trace lines, oldest first */

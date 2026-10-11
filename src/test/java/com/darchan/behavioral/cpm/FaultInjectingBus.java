@@ -8,6 +8,10 @@ import java.util.function.LongSupplier;
  * A deliberately faulty memory bus for testing divergence detection: during instruction number
  * {@code atInstruction} (0-based, as counted by the CPU) the first data read or write is corrupted by XOR-ing it
  * with {@code mask}. Fetches and peeks pass through untouched, so traces still show the real code.
+ *
+ * <p>The fault is deterministic: it fires every time instruction {@code atInstruction} executes, so a run that is
+ * restored to an earlier state (or replayed) and executes that instruction again sees the same corruption, as a
+ * real logic fault would.
  */
 final class FaultInjectingBus implements MemoryBus {
 
@@ -19,6 +23,8 @@ final class FaultInjectingBus implements MemoryBus {
     private final long atInstruction;
     private final int mask;
     private boolean fired;
+    /** the fault already fired during the current execution of instruction {@code atInstruction} */
+    private boolean firedThisTime;
 
     FaultInjectingBus(MemoryBus inner, LongSupplier instructionCounter, Kind kind, long atInstruction, int mask) {
         this.inner = inner;
@@ -41,8 +47,13 @@ final class FaultInjectingBus implements MemoryBus {
     }
 
     private boolean trigger(Kind k) {
-        if (!fired && k == kind && instructionCounter.getAsLong() == atInstruction) {
+        if (instructionCounter.getAsLong() != atInstruction) {
+            firedThisTime = false;
+            return false;
+        }
+        if (!firedThisTime && k == kind) {
             fired = true;
+            firedThisTime = true;
             return true;
         }
         return false;
@@ -61,6 +72,9 @@ final class FaultInjectingBus implements MemoryBus {
 
     @Override
     public int fetch(int address) {
+        if (instructionCounter.getAsLong() != atInstruction) {
+            firedThisTime = false;
+        }
         return inner.fetch(address);
     }
 

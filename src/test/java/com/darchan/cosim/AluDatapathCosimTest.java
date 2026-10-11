@@ -1,11 +1,16 @@
 package com.darchan.cosim;
 
 import com.darchan.diag.compare.Divergence;
+import com.darchan.diag.compare.Granularity;
 import com.darchan.diag.compare.LockstepResult;
+import com.darchan.diag.compare.Narrowing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -91,5 +96,71 @@ class AluDatapathCosimTest {
         assertFalse(AluDatapathCosim.supports(0x76)); // HLT
         assertTrue(AluDatapathCosim.supports(0xFE)); // CPI
         assertFalse(AluDatapathCosim.supports(0xC3)); // JMP
+    }
+
+    // ---- narrowing a coarse divergence -----------------------------------------------------------------------
+
+    /** instruction index (0-based) of the only instruction whose operand B has bit 3 set */
+    static final int FAULTY_INSTRUCTION = 437;
+
+    /**
+     * 600 random instructions whose operand B never has bit 3 set (immediates without bit 3, C only ever 05), except
+     * for an {@code ADI 08H} at {@link #FAULTY_INSTRUCTION}: a stuck-at-0 fault on operand bit 3 shows exactly there.
+     */
+    static byte[] programWithOneBit3Operand() {
+        int[][] fillers = {
+                {0xC6, 0x01},   // ADI 01H
+                {0xF6, 0x04},   // ORI 04H
+                {0xE6, 0xF7},   // ANI F7H
+                {0xEE, 0x02},   // XRI 02H
+                {0x00},         // NOP
+                {0x0E, 0x05},   // MVI C,05H
+                {0x51},         // MOV D,C
+                {0x81},         // ADD C
+        };
+        Random rnd = new Random(1979);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(0x0E);
+        out.write(0x05);       // MVI C,05H first, so C is 05 before any use
+        for (int i = 1; i < 600; i++) {
+            int[] insn = i == FAULTY_INSTRUCTION ? new int[]{0xC6, 0x08} : fillers[rnd.nextInt(fillers.length)];
+            for (int b : insn) {
+                out.write(b);
+            }
+        }
+        return out.toByteArray();
+    }
+
+    static Stream<Granularity> coarse() {
+        return Stream.of(Granularity.everyCycles(1000), Granularity.everySteps(50));
+    }
+
+    @Test
+    void theKnownStepProgramIsCleanWithoutTheFault() {
+        AluDatapathCosim cosim = new AluDatapathCosim(programWithOneBit3Operand());
+        LockstepResult r = cosim.lockstep().run(cosim.instructionCount());
+        assertFalse(r.diverged(), r::report);
+        assertEquals(cosim.behavioral().cycleCount(), cosim.gateLevel().cycleCount(),
+                "the gate level charges each instruction the 8080's cycle count");
+    }
+
+    @ParameterizedTest
+    @MethodSource("coarse")
+    void aCoarseDivergenceIsNarrowedToTheFaultyInstruction(Granularity granularity) {
+        byte[] program = programWithOneBit3Operand();
+        AluDatapathCosim cosim = new AluDatapathCosim(program, AluDatapathCosim.stuckAt(3, false));
+        LockstepResult r = cosim.lockstep(granularity).run(cosim.instructionCount());
+        System.out.println(r.report());
+        assertTrue(r.diverged());
+        Divergence d = r.divergence();
+        assertTrue(d.step() > FAULTY_INSTRUCTION + 1, "the coarse comparison sees it later: " + d.report());
+        Narrowing n = d.narrowing();
+        assertEquals(Narrowing.Status.NARROWED, n.status(), d::report);
+        assertEquals(FAULTY_INSTRUCTION + 1, n.step(), d::report);
+        assertEquals("A", n.diff().fieldDifferences().get(0).name(), d::report);
+        assertTrue(n.candidate().lastInstruction().orElseThrow().contains("C6 08     ADI 08H"), d::report);
+        assertTrue(n.reference().lastInstruction().orElseThrow().contains("C6 08     ADI 08H"), d::report);
+        assertTrue(d.report().startsWith("LOCKSTEP DIVERGENCE after step " + (FAULTY_INSTRUCTION + 1) + " (narrowed by "),
+                d::report);
     }
 }

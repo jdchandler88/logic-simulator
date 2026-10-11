@@ -4,9 +4,15 @@ import com.darchan.diag.compare.Divergence;
 import com.darchan.diag.compare.Granularity;
 import com.darchan.diag.compare.Lockstep;
 import com.darchan.diag.compare.LockstepResult;
+import com.darchan.diag.compare.Narrowing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,5 +90,99 @@ class CpmLockstepTest {
         // LDA 06BFH starts at cycle 3126: the first boundary after it is 3500
         assertTrue(d.reference().cycles() >= 3500 && d.reference().cycles() < 3520, d::report);
         assertTrue(d.lastMatchingStep() <= LDA_INSTRUCTION && d.step() > LDA_INSTRUCTION, d::report);
+    }
+
+    // ---- narrowing a coarse divergence -----------------------------------------------------------------------
+
+    static Stream<Granularity> coarse() {
+        return Stream.of(Granularity.everyCycles(1000), Granularity.everySteps(50));
+    }
+
+    private static CpmMachine tst8080() {
+        try {
+            return new CpmMachine(CpmRomTest.rom("TST8080.COM"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** fresh machines, the candidate with the same fault, for replay-based narrowing */
+    private static Supplier<Lockstep.Builder> freshPair(FaultInjectingBus.Kind kind, long at, int mask,
+                                                       boolean withMemory) {
+        return () -> {
+            CpmMachine r = tst8080();
+            CpmMachine c = tst8080();
+            FaultInjectingBus.install(c, kind, at, mask);
+            Lockstep.Builder b = Lockstep.builder("reference", r.debugger(), "faulty", c.debugger());
+            return withMemory ? b.compareMemory("ram", r.ram()::peek, c.ram()::peek, 0x0600, 0x200) : b;
+        };
+    }
+
+    private static void assertNarrowedToTheLda(Divergence d, Narrowing.Method method) {
+        Narrowing n = d.narrowing();
+        assertEquals(Narrowing.Status.NARROWED, n.status(), d::report);
+        assertEquals(method, n.method(), d::report);
+        assertEquals(LDA_INSTRUCTION + 1, n.step(), d::report);
+        assertEquals(LDA_INSTRUCTION + 1, d.firstStep().orElseThrow());
+        assertTrue(n.windowStart() < LDA_INSTRUCTION && n.windowEnd() > LDA_INSTRUCTION, d::report);
+        assertEquals(1, n.diff().fieldDifferences().size(), d::report);
+        assertEquals("A", n.diff().fieldDifferences().get(0).name());
+        assertTrue(n.candidate().lastInstruction().orElseThrow().contains("0508: 3A BF 06  LDA 06BFH"), d::report);
+        String report = d.report();
+        assertTrue(report.startsWith("LOCKSTEP DIVERGENCE after step 438 (narrowed by " + method.text()), report);
+        assertTrue(report.contains("A           expected=FF  actual=FE"), report);
+        assertTrue(report.contains("--- coarse comparison #"), report);
+    }
+
+    @ParameterizedTest
+    @MethodSource("coarse")
+    void aCoarseDivergenceIsNarrowedByRestore(Granularity granularity) {
+        FaultInjectingBus.install(candidate, FaultInjectingBus.Kind.READ, LDA_INSTRUCTION, 0x01);
+        LockstepResult r = lockstep().granularity(granularity)
+                .restoreWith(reference.stateSaver(), candidate.stateSaver())
+                .build().runUntil(reference::exited, 10_000);
+        System.out.println(r.report());
+        assertTrue(r.diverged());
+        assertNarrowedToTheLda(r.divergence(), Narrowing.Method.RESTORE);
+        assertTrue(r.divergence().step() > LDA_INSTRUCTION + 1, "the coarse comparison saw it later");
+        // both machines are left at the narrowed point, with the console output of that point
+        assertEquals(LDA_INSTRUCTION + 1, reference.cpu().instructionCount());
+        assertEquals(LDA_INSTRUCTION + 1, candidate.cpu().instructionCount());
+        assertEquals(reference.output(), candidate.output());
+    }
+
+    @ParameterizedTest
+    @MethodSource("coarse")
+    void aCoarseDivergenceIsNarrowedByReplay(Granularity granularity) {
+        FaultInjectingBus.install(candidate, FaultInjectingBus.Kind.READ, LDA_INSTRUCTION, 0x01);
+        LockstepResult r = lockstep().granularity(granularity)
+                .replayWith(freshPair(FaultInjectingBus.Kind.READ, LDA_INSTRUCTION, 0x01, false))
+                .build().runUntil(reference::exited, 10_000);
+        assertTrue(r.diverged());
+        assertNarrowedToTheLda(r.divergence(), Narrowing.Method.REPLAY);
+    }
+
+    @Test
+    void aCorruptedWriteIsNarrowedWithMemoryRestored() {
+        FaultInjectingBus.install(candidate, FaultInjectingBus.Kind.WRITE, MOV_M_A_INSTRUCTION, 0x80);
+        Divergence d = lockstep().granularity(Granularity.everySteps(50))
+                .compareMemory("ram", reference.ram()::peek, candidate.ram()::peek, 0x0600, 0x200)
+                .restoreWith(reference.stateSaver(), candidate.stateSaver())
+                .build().runUntil(reference::exited, 10_000).divergence();
+        Narrowing n = d.narrowing();
+        assertEquals(Narrowing.Status.NARROWED, n.status(), d::report);
+        assertEquals(MOV_M_A_INSTRUCTION + 1, n.step(), d::report);
+        assertTrue(n.diff().fieldDifferences().isEmpty(), d::report);
+        assertEquals(0x06BF, n.diff().byteDifferences().get(0).address());
+    }
+
+    @Test
+    void cpusAloneCannotBeRestoredBecauseMemoryIsOutsideTheirSnapshots() {
+        FaultInjectingBus.install(candidate, FaultInjectingBus.Kind.READ, LDA_INSTRUCTION, 0x01);
+        Divergence d = lockstep().granularity(Granularity.everySteps(50)).build()
+                .runUntil(reference::exited, 10_000).divergence();
+        assertEquals(Narrowing.Status.NOT_NARROWED, d.narrowing().status());
+        assertTrue(d.report().contains("NOT NARROWED: the first difference is somewhere in steps 401..450"),
+                d::report);
     }
 }

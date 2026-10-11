@@ -55,6 +55,7 @@ public final class AluDatapathCosim {
     private static final Reg[] REG_CODE = {Reg.B, Reg.C, Reg.D, Reg.E, Reg.H, Reg.L, null, Reg.A};
 
     private final byte[] program;
+    private final UnaryOperator<IBus> operandBTap;
     private final Simulator sim = new Simulator();
     private final Clock clock = new Clock(sim, false);
     private final IBus controls;
@@ -79,6 +80,7 @@ public final class AluDatapathCosim {
      */
     public AluDatapathCosim(byte[] program, UnaryOperator<IBus> operandBTap) {
         this.program = program.clone();
+        this.operandBTap = operandBTap;
         this.instructionCount = validate(this.program);
 
         ISignal[] in = new ISignal[30];
@@ -100,6 +102,7 @@ public final class AluDatapathCosim {
         gate = new ClockedTarget(MACHINE, clock, probes);
         gate.setStimulus(cycle -> decodeAndDrive());
         gate.setProgramCounter(() -> pc);
+        gate.setCyclesPerStep(() -> states(byteAt(pc)));
         gate.setInstruction(() -> packedBytes(pc), () -> Disassembler8080.length(byteAt(pc)), 3,
                 Disassembler8080.INSTANCE);
         gate.setTraceRegisters(List.of(RegisterSpec.of("A", 8), RegisterSpec.flags("F", "SZ.A.P.C"),
@@ -207,6 +210,20 @@ public final class AluDatapathCosim {
         pc = (pc + Disassembler8080.length(op)) & 0xFFFF;
     }
 
+    /**
+     * 8080 clock states of a supported instruction (data sheet): the gate level executes it in one clock but is
+     * charged this many cycles, so cycle-granularity lockstep compares at the same instructions on both sides.
+     */
+    static int states(int opcode) {
+        int hi = opcode >> 6;
+        return switch (hi) {
+            case 0 -> opcode == 0x00 ? 4 : 7; // NOP, MVI r,n
+            case 1 -> 5;                      // MOV r,r
+            case 2 -> 4;                      // ALU r
+            default -> 7;                     // ALU immediate
+        };
+    }
+
     private static int slotBit(int regCode) {
         return 1 << REG_CODE[regCode].slot();
     }
@@ -219,10 +236,26 @@ public final class AluDatapathCosim {
 
     /** A lockstep of the behavioral CPU (reference) against the gate-level datapath (candidate), every instruction. */
     public Lockstep lockstep() {
-        return Lockstep.builder("behavioral i8080", cpuDebugger, "gate-level datapath", gateDebugger)
-                .granularity(Granularity.everyStep())
-                .compareOnly(COMPARED.toArray(new String[0]))
+        return lockstep(Granularity.everyStep());
+    }
+
+    /**
+     * A lockstep of the behavioral CPU (reference) against the gate-level datapath (candidate) comparing at
+     * {@code granularity}. A coarse divergence is narrowed to the first diverging instruction by replaying a fresh
+     * co-simulation of the same program and fault (the control unit's stimulus depends only on the program, so the
+     * replay is deterministic).
+     */
+    public Lockstep lockstep(Granularity granularity) {
+        return lockstepBuilder(granularity)
+                .replayWith(() -> new AluDatapathCosim(program, operandBTap).lockstepBuilder(granularity))
                 .build();
+    }
+
+    /** the lockstep configuration without narrowing, to customise */
+    public Lockstep.Builder lockstepBuilder(Granularity granularity) {
+        return Lockstep.builder("behavioral i8080", cpuDebugger, "gate-level datapath", gateDebugger)
+                .granularity(granularity)
+                .compareOnly(COMPARED.toArray(new String[0]));
     }
 
     /** number of instructions in the program */

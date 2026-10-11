@@ -11,7 +11,8 @@ import java.util.List;
 
 /**
  * A deterministic test double for comparison tests: every step adds the PC to ACC and moves to the next PC.
- * Steps at even PCs take 3 cycles, odd ones 5. Faults can be injected at a given step (0-based).
+ * Steps at even PCs take 3 cycles, odd ones 5. Faults can be injected at a given step (0-based); they fire every
+ * time that step is executed (so a restored or replayed run reproduces them) unless {@link #faultOnce} is set.
  */
 final class TinyMachine implements DebugTarget {
 
@@ -29,6 +30,11 @@ final class TinyMachine implements DebugTarget {
     long throwAtStep = -1;
     /** extra cycles added to every step (a timing difference) */
     int extraCycles;
+    /** the fault fires only the first time its step is executed (like a one-shot glitch): not reproducible */
+    boolean faultOnce;
+    private boolean faultFired;
+    /** what {@link #isSnapshotComplete()} reports (the snapshot does hold this machine's whole state) */
+    boolean snapshotComplete = true;
     private TraceListener trace;
     private final TraceEvent event = new TraceEvent(LAYOUT, (address, bytes, length) -> "ADD PC");
 
@@ -52,8 +58,9 @@ final class TinyMachine implements DebugTarget {
             throw new IllegalStateException("boom at step " + steps);
         }
         acc = (acc + pc) & 0xFF;
-        if (steps == faultAtStep) {
+        if (steps == faultAtStep && !(faultOnce && faultFired)) {
             acc ^= faultMask;
+            faultFired = true;
         }
         int n = (pc % 2 == 0 ? 3 : 5) + extraCycles;
         pc = (pc + 1) & 0xFF;
@@ -86,6 +93,11 @@ final class TinyMachine implements DebugTarget {
     public Snapshot snapshot() {
         return Snapshot.builder(machine).hex("PC", 8, pc).hex("ACC", 8, acc).dec("CYCLES", cycles)
                 .dec("INSTRUCTIONS", steps).build();
+    }
+
+    @Override
+    public boolean isSnapshotComplete() {
+        return snapshotComplete;
     }
 
     @Override

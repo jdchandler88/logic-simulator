@@ -5,6 +5,9 @@ import com.darchan.behavioral.bus.Ram;
 import com.darchan.behavioral.i8080.Cpu8080;
 import com.darchan.behavioral.i8080.Debug8080;
 import com.darchan.behavioral.i8080.ReplTarget8080;
+import com.darchan.diag.MemoryRegion;
+import com.darchan.diag.Snapshot;
+import com.darchan.diag.compare.StateSaver;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.run.StopReason;
 
@@ -121,6 +124,43 @@ public final class CpmMachine {
     public ReplTarget8080 replTarget() {
         return new ReplTarget8080(cpu, ram, debugger, Map.of(0x0000, "program exit (CP/M warm boot)",
                 BDOS_ENTRY, "BDOS call"));
+    }
+
+    /** name of the console-output length field in {@link #stateSaver()} snapshots */
+    public static final String CONSOLE_CHARS = "CONSOLE_CHARS";
+
+    /**
+     * Saves and restores everything this machine's behaviour depends on: the CPU's registers, flags and counters,
+     * all 64 KiB of RAM (region {@code ram}), and the length of the console output (field {@link #CONSOLE_CHARS};
+     * restoring truncates the output to it, so re-executed BDOS calls do not print twice, though text already
+     * echoed to a stream cannot be taken back). Use it for lockstep narrowing by restore
+     * ({@code Lockstep.Builder.restoreWith}); the CPU's own snapshot leaves memory out.
+     */
+    public StateSaver stateSaver() {
+        return new StateSaver() {
+            @Override
+            public Snapshot save() {
+                Snapshot cpuState = cpu.snapshot();
+                return Snapshot.builder(cpuState.machine()).label(cpuState.label()).fields(cpuState.fields())
+                        .dec(CONSOLE_CHARS, output.length())
+                        .region("ram", ram::peek, 0, Ram.SIZE)
+                        .build();
+            }
+
+            @Override
+            public void restore(Snapshot saved) {
+                MemoryRegion memory = saved.region("ram").orElseThrow(
+                        () -> new IllegalArgumentException("not a CpmMachine state: no ram region"));
+                long chars = saved.value(CONSOLE_CHARS);
+                if (chars < 0 || chars > output.length()) {
+                    throw new IllegalArgumentException(CONSOLE_CHARS + " = " + chars + " but only " + output.length()
+                            + " character(s) were printed");
+                }
+                cpu.restore(saved);
+                ram.restore(memory);
+                output.setLength((int) chars);
+            }
+        };
     }
 
     /** Recent trace, registers and everything printed so far. */

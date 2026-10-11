@@ -15,4 +15,16 @@ public interface Snapshottable {
      * @throws IllegalArgumentException if the snapshot is from a different kind of machine or lacks a field
      */
     void restore(Snapshot snapshot);
+
+    /**
+     * Whether {@link #snapshot()} holds <em>everything</em> that influences the model's later behaviour, so that
+     * {@code restore(snapshot())} followed by running is indistinguishable from never having stopped. That is what
+     * rewinding (e.g. narrowing a lockstep divergence by restoring the last matching state and re-running) needs.
+     *
+     * <p>The default is {@code false}: be conservative. A CPU whose memory lives on an external bus is not complete
+     * on its own (restore its memory too, e.g. with {@code diag.compare.StateSaver#withMemory}).
+     */
+    default boolean isSnapshotComplete() {
+        return false;
+    }
 }

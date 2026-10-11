@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Run control and diagnostics for any {@link DebugTarget}:
@@ -99,6 +100,20 @@ public final class Debugger {
     /** the ring buffer, or {@code null} if disabled */
     public TraceRingBuffer ringBuffer() {
         return ringBuffer;
+    }
+
+    /**
+     * Runs {@code action} with only the ring buffer receiving trace events: the other trace listeners (trace files,
+     * golden-trace comparators...) see nothing of what the target executes meanwhile. Used to re-execute
+     * instructions that were already traced, e.g. when a lockstep divergence is narrowed by rewinding.
+     */
+    public <T> T withRingBufferOnly(Supplier<T> action) {
+        target.setTraceListener(ringBuffer);
+        try {
+            return action.get();
+        } finally {
+            installTrace();
+        }
     }
 
     private void installTrace() {

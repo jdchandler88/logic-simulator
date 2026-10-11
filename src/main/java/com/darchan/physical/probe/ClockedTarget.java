@@ -19,8 +19,9 @@ import java.util.function.IntSupplier;
  * lockstep comparison, snapshot checkpoints, traces) work on it the same way as on a behavioral CPU.
  *
  * <p><b>One step is one clock cycle</b>: the {@link Stimulus} drives the inputs for the cycle (with the clock low),
- * the circuit settles, then the clock rises and falls ({@link IClock#tick()} twice, each settling). Cycle count and
- * instruction count are both the number of clock cycles. The clock must be low initially.
+ * the circuit settles, then the clock rises and falls ({@link IClock#tick()} twice, each settling). The instruction
+ * count is the number of clock cycles, and so is the cycle count unless {@link #setCyclesPerStep} charges more per
+ * step. The clock must be low initially.
  *
  * <p>State is read through a {@link ProbeSet}: the {@link #snapshot()} holds every probe (see {@link ProbeSet} for
  * how Z and X are represented) followed by a decimal {@code CYCLES} field. Gate-level state cannot be written
@@ -57,10 +58,12 @@ public final class ClockedTarget implements DebugTarget {
     private IntSupplier instructionLength = () -> 0;
     private InstructionDecoder decoder = CLOCK_DECODER;
     private List<RegisterSpec> traceRegisters;
+    private IntSupplier cyclesPerStep = () -> 1;
     private int pcWidth = 16;
     private int maxInstructionLength = 1;
 
     private long cycles;
+    private long steps;
     private TraceListener trace;
     private TraceEvent traceEvent;
     private Probe[] traceProbes;
@@ -125,6 +128,17 @@ public final class ClockedTarget implements DebugTarget {
         resetTraceLayout();
     }
 
+    /**
+     * How many cycles {@link #cycleCount()} advances per step, asked just before each step (before the stimulus).
+     * The default is 1: a step is one clock cycle. A datapath that executes one instruction of a CPU per clock (as
+     * in a co-simulation) can charge the CPU's architectural cycle count for the instruction about to execute, so
+     * that cycle-granularity lockstep comparison against that CPU compares at the same instruction boundaries. The
+     * instruction count is always the number of clock cycles.
+     */
+    public void setCyclesPerStep(IntSupplier cyclesPerStep) {
+        this.cyclesPerStep = Objects.requireNonNull(cyclesPerStep);
+    }
+
     /** PC column width in bits (default 16) */
     public void setPcWidth(int bits) {
         this.pcWidth = bits;
@@ -144,12 +158,17 @@ public final class ClockedTarget implements DebugTarget {
         if (trace != null) {
             emitTrace();
         }
-        stimulus.apply(cycles);
+        int cost = cyclesPerStep.getAsInt();
+        if (cost < 1) {
+            throw new IllegalStateException("cycles per step must be at least 1: " + cost);
+        }
+        stimulus.apply(steps);
         probes.simulator().settle();
         clock.tick(); // rising edge
         clock.tick(); // falling edge
-        cycles++;
-        return 1;
+        steps++;
+        cycles += cost;
+        return cost;
     }
 
     private void resetTraceLayout() {
@@ -177,7 +196,7 @@ public final class ClockedTarget implements DebugTarget {
     private void emitTrace() {
         traceLayout();
         TraceEvent e = traceEvent;
-        e.begin(cycles, cycles, programCounter.getAsInt(), false);
+        e.begin(cycles, steps, programCounter.getAsInt(), false);
         e.setBytes(instructionBytes.getAsInt(), instructionLength.getAsInt());
         for (int i = 0; i < traceProbes.length; i++) {
             e.setRegister(i, (int) traceProbes[i].read().value());
@@ -190,10 +209,10 @@ public final class ClockedTarget implements DebugTarget {
         return cycles;
     }
 
-    /** same as {@link #cycleCount()}: every clock cycle is a step */
+    /** the number of steps (clock cycles) executed */
     @Override
     public long instructionCount() {
-        return cycles;
+        return steps;
     }
 
     @Override

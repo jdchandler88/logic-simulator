@@ -8,10 +8,13 @@ package com.darchan.diag.compare;
  *       side. A step is one instruction for a CPU core (or one idle period while halted) and one clock cycle for a
  *       gate-level {@code ClockedTarget}. With {@code n = 1} a divergence is pinned to the exact instruction.</li>
  *   <li>{@link Unit#CYCLES}: at the first instruction boundary at or after every {@code n} cycles (counted from
- *       where each side started). Much cheaper for long runs; a divergence is then known to lie somewhere in the
- *       last window of {@code n} cycles, so re-run with {@link #everyStep()} from the last matching point to pin
- *       it down. Two models whose instruction timings differ will (correctly) diverge at the first boundary.</li>
+ *       where each side started). Much cheaper for long runs; a divergence is first seen at the end of a window of
+ *       {@code n} cycles. Two models whose instruction timings differ will (correctly) diverge at the first
+ *       boundary.</li>
  * </ul>
+ * With either unit coarser than every step, {@link Lockstep} narrows a divergence to the first diverging step of the
+ * window when it can rewind or replay the models (see {@link Lockstep}), and otherwise reports the window as not
+ * narrowed.
  *
  * @param unit  what {@code every} counts
  * @param every comparison interval, at least 1

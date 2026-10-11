@@ -86,6 +86,36 @@ class TraceTest {
     }
 
     @Test
+    void ringBufferRollsBackToAMark() {
+        TraceRingBuffer ring = new TraceRingBuffer(4);
+        TraceEvent e = new TraceEvent(LAYOUT, DECODER);
+        for (int i = 0; i < 6; i++) {
+            e.begin(i, i, 0x100 + i, false);
+            ring.onInstruction(e);
+        }
+        ring.rollback(4); // forget instructions 4 and 5
+        assertEquals(4, ring.totalSeen());
+        assertEquals(2, ring.size(), "instructions 2 and 3 survive; 0 and 1 were overwritten");
+        assertTrue(ring.lines().get(1).contains(" 000000000003 0103:"), ring.lines().toString());
+        e.begin(4, 4, 0x200, false);
+        ring.onInstruction(e);
+        assertEquals(3, ring.size());
+        assertTrue(ring.lines().get(2).contains(" 000000000004 0200:"), ring.lines().toString());
+        ring.rollback(0);
+        assertEquals(0, ring.size());
+        assertThrows(IllegalArgumentException.class, () -> ring.rollback(1));
+        // more events after the mark than the capacity: nothing from before the mark survives
+        TraceRingBuffer small = new TraceRingBuffer(2);
+        for (int i = 0; i < 5; i++) {
+            e.begin(i, i, i, false);
+            small.onInstruction(e);
+        }
+        small.rollback(1);
+        assertEquals(0, small.size());
+        assertEquals(1, small.totalSeen());
+    }
+
+    @Test
     void ringBufferLinesMatchTheFormatter() {
         TraceRingBuffer ring = new TraceRingBuffer(2);
         TraceEvent e = event(4924, 651, 0x100, 0xD7, 0x31, 0x00, 0x07);
