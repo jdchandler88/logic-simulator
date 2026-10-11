@@ -4,6 +4,7 @@ import com.darchan.behavioral.bus.IoBus;
 import com.darchan.behavioral.bus.Ram;
 import com.darchan.behavioral.i8080.Cpu8080;
 import com.darchan.behavioral.i8080.Debug8080;
+import com.darchan.behavioral.i8080.ReplTarget8080;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.run.StopReason;
 
@@ -13,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 /**
  * Just enough CP/M to run {@code .COM} programs such as the classic 8080 CPU diagnostics: 64 KiB RAM, the program
@@ -113,6 +115,12 @@ public final class CpmMachine {
 
     public Debugger debugger() {
         return debugger;
+    }
+
+    /** A REPL target for this machine (address 0000 is labelled as the program exit). */
+    public ReplTarget8080 replTarget() {
+        return new ReplTarget8080(cpu, ram, debugger, Map.of(0x0000, "program exit (CP/M warm boot)",
+                BDOS_ENTRY, "BDOS call"));
     }
 
     /** Recent trace, registers and everything printed so far. */

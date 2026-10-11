@@ -1,6 +1,7 @@
 package com.darchan.behavioral.cpm;
 
 import com.darchan.diag.run.StopReason;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Runs the classic CP/M 8080 CPU diagnostics (see {@code src/test/resources/cpm/README.md}). Expected cycle and
  * instruction counts are those published for the superzazu/8080 reference emulator, which uses the same BDOS stub
  * bytes, minus its final {@code OUT 0} at 0000 (10 states, 1 instruction) that this harness does not execute.
+ *
+ * <p>Runs first ({@code @Order(1)}, see {@code junit-platform.properties}) so its timing is not affected by tests
+ * that add their own {@code MemoryBus} or {@code DebugTarget} implementations, which can make the CPU's call sites
+ * megamorphic in a shared test JVM. Production runs only see the production types.
  */
+@Order(1)
 class CpmRomTest {
 
     private static final long BILLION = 1_000_000_000L;

@@ -25,6 +25,17 @@ class DebuggerTest {
     }
 
     @Test
+    void breakpointsCanBeListed() {
+        dbg.addBreakpoint(0x09);
+        dbg.addBreakpoint(0x02);
+        dbg.addCycleBreakpoint(100);
+        assertEquals(List.of(0x02, 0x09), dbg.breakpoints());
+        assertEquals(List.of(100L), dbg.cycleBreakpoints());
+        dbg.removeBreakpoint(0x02);
+        assertEquals(List.of(0x09), dbg.breakpoints());
+    }
+
+    @Test
     void stepExecutesOneInstruction() {
         StopReason r = dbg.step();
         assertEquals(STEPPED, r.kind());

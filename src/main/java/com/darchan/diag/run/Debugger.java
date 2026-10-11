@@ -135,6 +135,16 @@ public final class Debugger {
         return breakpoints.get(pc);
     }
 
+    /** the PC breakpoints, in ascending order */
+    public List<Integer> breakpoints() {
+        return breakpoints.stream().boxed().toList();
+    }
+
+    /** the cycle breakpoints, in ascending order */
+    public List<Long> cycleBreakpoints() {
+        return List.copyOf(cycleBreakpoints);
+    }
+
     /** Stop after the instruction during which the cycle count reaches {@code cycle}. */
     public void addCycleBreakpoint(long cycle) {
         cycleBreakpoints.add(cycle);
