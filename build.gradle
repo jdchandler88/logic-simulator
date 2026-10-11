@@ -10,6 +10,9 @@ plugins {
 
     // intellij!
     id 'idea'
+
+    // mutation testing; explicit `./gradlew pitest` only, not part of `build`/`check`
+    id 'info.solidsoft.pitest' version '1.19.0'
 }
 
 java {
@@ -58,4 +61,39 @@ tasks.register('slowTest', Test) {
 // Define the main class for the application
 application {
     mainClass = 'project.App'
+}
+
+// Mutation testing (PIT): `./gradlew pitest`, reports in build/reports/pitest/. Deliberately NOT wired into
+// `check`/`build` (a full run takes several minutes); the weekly/manual .github/workflows/mutation.yml runs it.
+pitest {
+    // 1.22.1 is the last PIT release with the built-in history files; 1.23+ moved incremental analysis to the
+    // commercial arcmutate plugin and fails when `withHistory` is set.
+    pitestVersion = '1.22.1'
+    junit5PluginVersion = '1.2.3'
+
+    targetClasses = ['com.darchan.physical.*', 'com.darchan.behavioral.*', 'com.darchan.diag.*', 'com.darchan.cosim.*']
+    // all tests, including project.AppTest (it drives App end to end), may kill a mutant
+    targetTests = ['com.darchan.*', 'project.*']
+
+    // `slow` (8080EXM, ~24 billion emulated cycles) cannot run once per mutant; `mutation-skip` is CPUTEST
+    // (255 M cycles, ~2 s per run, and a mutant that loops makes it run to its cycle budget). The fast CP/M
+    // diagnostics (8080PRE, TST8080) and the exhaustive ALU/opcode tests stay in: every other test is < 2 s.
+    excludedGroups = ['slow', 'mutation-skip']
+
+    // DEFAULTS: the standard PIT set (conditionals boundary/negate, increments, invert negatives, math, void-method
+    // calls, empty/primitive/boolean/null returns). STRONGER only adds a switch mutator, and the one big switch
+    // (Cpu8080's opcode dispatch) is already covered by the exhaustive opcode tests.
+    mutators = ['DEFAULTS']
+    // System.Logger calls only produce log text; mutating them is noise
+    avoidCallsTo = ['java.lang.System$Logger', 'java.util.logging', 'org.slf4j']
+
+    threads = 4
+    outputFormats = ['HTML', 'XML']
+    timestampedReports = false
+
+    // Incremental reruns: results of unchanged classes/tests are reused. Kept outside build/ so `clean` keeps it;
+    // delete .gradle/pitest-history.bin for a from-scratch measurement.
+    withHistory = true
+    historyInputLocation = layout.projectDirectory.file('.gradle/pitest-history.bin')
+    historyOutputLocation = layout.projectDirectory.file('.gradle/pitest-history.bin')
 }

@@ -96,6 +96,7 @@ class CpmRomTest {
     }
 
     @Test
+    @Tag("mutation-skip") // 255 M cycles: too slow to run once per PIT mutant, see build.gradle
     void supersoftDiagnostic() throws IOException {
         Run r = run("CPUTEST.COM", 1 * BILLION);
         assertExited(r);
