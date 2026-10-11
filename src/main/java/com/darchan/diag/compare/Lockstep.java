@@ -65,7 +65,10 @@ import java.util.function.Supplier;
  * results. Input stimulus (I/O devices, interrupts, a gate-level testbench) must be a function of the saved or
  * replayed state, not of wall-clock time or call order; anything a step changes outside the saved state (a console
  * buffer, a file) sees the re-executed steps again. A re-run that finds no difference is reported as not
- * reproduced, never guessed. The window is re-run with both sides taking equal numbers of steps, so with
+ * reproduced, never guessed. A step that is found is <b>cross-checked</b>: both sides continue to where the coarse
+ * comparison saw the divergence and must arrive in exactly the states it compared (or throw the same exception);
+ * otherwise the re-run was not the run that diverged (an incomplete {@link StateSaver}, a non-deterministic side)
+ * and the step is not reported. The window is re-run with both sides taking equal numbers of steps, so with
  * cycle granularity and models whose instruction timings differ the per-step re-run may not reproduce a difference
  * that is only one of timing. While re-running, only each debugger's ring buffer is traced (other trace listeners
  * do not see instructions twice), and the ring buffer is first rolled back to the restored point.
@@ -95,6 +98,20 @@ public final class Lockstep {
     private long lastMatchingStep = -1;
     /** why states could not be saved for narrowing by restore, or null */
     private String saveProblem;
+    /** what the comparison that saw the divergence saw, for cross-checking a narrowing */
+    private Coarse coarse;
+
+    /**
+     * The coarse divergence as seen: each side's step count and compared snapshot (null if a side threw), or the
+     * failure and which side threw.
+     */
+    private record Coarse(long step, long referenceSteps, long candidateSteps, Snapshot expected, Snapshot actual,
+                          String failure, boolean referenceFailed) {
+    }
+
+    /** both sides' compared snapshots (reduced to compareOnly fields) and their diff */
+    private record Comparison(Snapshot expected, Snapshot actual, SnapshotDiff diff) {
+    }
     private Divergence divergence;
 
     private static final class Side {
@@ -108,8 +125,9 @@ public final class Lockstep {
         long boundary;
         /** steps completed since the lockstep was built */
         long steps;
-        /** complete state at the last matching comparison (narrowing by restore) */
+        /** complete state at the last matching comparison (narrowing by restore), and the steps at that point */
         Snapshot saved;
+        long savedSteps;
         /** the ring buffer and its event count at the last matching comparison */
         TraceRingBuffer savedRing;
         long savedRingMark;
@@ -187,7 +205,7 @@ public final class Lockstep {
                 executed = advance(reference, quota);
             } catch (RuntimeException e) {
                 // the reference threw during its next step
-                failed(reference.steps + 1, reference.quoted("reference") + " threw " + e);
+                failed(reference.steps + 1, reference.quoted("reference") + " threw " + e, true);
                 return new LockstepResult(reference.steps - startSteps, comparisons - comparisonsBefore, null,
                         divergence);
             }
@@ -200,7 +218,7 @@ public final class Lockstep {
             try {
                 advance(candidate, granularity.unit() == Granularity.Unit.STEPS ? executed : Long.MAX_VALUE);
             } catch (RuntimeException e) {
-                failed(reference.steps, candidate.quoted("candidate") + " threw " + e);
+                failed(reference.steps, candidate.quoted("candidate") + " threw " + e, false);
                 return new LockstepResult(reference.steps - startSteps, comparisons - comparisonsBefore, null,
                         divergence);
             }
@@ -249,20 +267,21 @@ public final class Lockstep {
     private boolean compare() {
         long step = reference.steps;
         comparisons++;
-        SnapshotDiff diff = diffNow(step);
-        if (diff.isEmpty()) {
+        Comparison c = compareNow(step);
+        if (c.diff().isEmpty()) {
             lastMatchingStep = step;
             saveForNarrowing();
             return false;
         }
-        divergence = new Divergence(step, comparisons - 1, lastMatchingStep, state(reference), state(candidate), diff,
-                null);
+        divergence = new Divergence(step, comparisons - 1, lastMatchingStep, state(reference), state(candidate),
+                c.diff(), null);
+        coarse = new Coarse(step, reference.steps, candidate.steps, c.expected(), c.actual(), null, false);
         narrow();
         return true;
     }
 
-    /** the comparison of both sides' current states (empty if they match) */
-    private SnapshotDiff diffNow(long step) {
+    /** the comparison of both sides' current states */
+    private Comparison compareNow(long step) {
         Snapshot expected = prepare(reference, true, step);
         Snapshot actual = prepare(candidate, false, step);
         if (!only.isEmpty()) {
@@ -276,14 +295,15 @@ public final class Lockstep {
             expected = project(expected, machine);
             actual = project(actual, machine);
         }
-        return expected.diff(actual, ignored);
+        return new Comparison(expected, actual, expected.diff(actual, ignored));
     }
 
     /** @param step reference steps executed when (or, for the reference, during which) a side threw */
-    private void failed(long step, String failure) {
+    private void failed(long step, String failure, boolean referenceFailed) {
         comparisons++;
         divergence = new Divergence(step, comparisons - 1, lastMatchingStep, state(reference), state(candidate), null,
                 failure);
+        coarse = new Coarse(step, reference.steps, candidate.steps, null, null, failure, referenceFailed);
         narrow();
     }
 
@@ -314,6 +334,7 @@ public final class Lockstep {
 
     private static void save(Side side) {
         side.saved = side.saver.save();
+        side.savedSteps = side.steps;
         side.savedRing = side.debugger.ringBuffer();
         side.savedRingMark = side.savedRing == null ? 0 : side.savedRing.totalSeen();
     }
@@ -326,14 +347,14 @@ public final class Lockstep {
         if (!narrowingNeeded() || d.comparison() == 0 || d.lastMatchingStep() < 0) {
             return;
         }
-        String coarse = granularity.toString();
+        String coarseText = granularity.toString();
         long windowStart = d.lastMatchingStep();
         long windowEnd = d.step();
         List<String> problems = new ArrayList<>();
         if (saveProblem != null) {
             problems.add(saveProblem);
         } else if (canRestore() && reference.saved != null && candidate.saved != null) {
-            Narrowing n = narrowByRestore(coarse, windowStart, windowEnd, problems);
+            Narrowing n = narrowByRestore(coarseText, windowStart, windowEnd, problems);
             if (n != null) {
                 divergence = d.withNarrowing(n);
                 return;
@@ -350,7 +371,7 @@ public final class Lockstep {
                     + " and no StateSaver given with Builder.restoreWith)");
         }
         if (replay != null) {
-            Narrowing n = narrowByReplay(coarse, windowStart, windowEnd, problems);
+            Narrowing n = narrowByReplay(coarseText, windowStart, windowEnd, problems);
             if (n != null) {
                 divergence = d.withNarrowing(n);
                 return;
@@ -358,11 +379,12 @@ public final class Lockstep {
         } else {
             problems.add("replay: no replay factory given (Builder.replayWith)");
         }
-        divergence = d.withNarrowing(Narrowing.notNarrowed(coarse, windowStart, windowEnd, String.join("; ", problems)));
+        divergence = d.withNarrowing(Narrowing.notNarrowed(coarseText, windowStart, windowEnd,
+                String.join("; ", problems)));
     }
 
     /** @return the narrowing, or null after adding the reason it failed to {@code problems} */
-    private Narrowing narrowByRestore(String coarse, long windowStart, long windowEnd, List<String> problems) {
+    private Narrowing narrowByRestore(String coarseText, long windowStart, long windowEnd, List<String> problems) {
         try {
             reference.saver.restore(reference.saved);
             candidate.saver.restore(candidate.saved);
@@ -370,63 +392,197 @@ public final class Lockstep {
             problems.add("restore: restoring the last matching state threw " + e);
             return null;
         }
-        rollbackRing(reference);
-        rollbackRing(candidate);
-        Narrowing found = reference.debugger.withRingBufferOnly(() -> candidate.debugger.withRingBufferOnly(
-                () -> reRun(this, Narrowing.Method.RESTORE, coarse, windowStart, windowEnd, problems)));
-        if (found == null) {
-            problems.add("restore: re-running steps " + (windowStart + 1) + ".." + windowEnd + " from the restored"
-                    + " last match did not reproduce the divergence (a side is not deterministic, its saved state is"
-                    + " incomplete, or the sides differ only in timing)");
-        }
-        return found;
+        rollbackRing(reference, reference.savedRing, reference.savedRingMark);
+        rollbackRing(candidate, candidate.savedRing, candidate.savedRingMark);
+        return reference.debugger.withRingBufferOnly(() -> candidate.debugger.withRingBufferOnly(
+                () -> reRun(this, Narrowing.Method.RESTORE, coarseText, windowStart, windowEnd,
+                        reference.savedSteps, candidate.savedSteps, problems)));
     }
 
-    private static void rollbackRing(Side side) {
+    private static void rollbackRing(Side side, TraceRingBuffer savedRing, long mark) {
         TraceRingBuffer ring = side.debugger.ringBuffer();
         if (ring == null) {
             return;
         }
-        if (ring == side.savedRing && side.savedRingMark <= ring.totalSeen()) {
-            ring.rollback(side.savedRingMark);
+        if (ring == savedRing && mark <= ring.totalSeen()) {
+            ring.rollback(mark);
         } else {
             ring.clear();
         }
     }
 
     /**
-     * Steps both sides of {@code ls} one step at a time from step {@code windowStart} through {@code windowEnd},
-     * comparing after each.
+     * Steps both sides of {@code ls} (this lockstep after a restore, or a replica) one step at a time from step
+     * {@code windowStart} through {@code windowEnd}, comparing after each. At the first difference or exception the
+     * run is cross-checked: both sides continue to where the coarse comparison saw the divergence and must arrive
+     * in exactly the states it saw (or throw the same exception), otherwise the re-run is not the run that diverged
+     * (an incomplete saved state, a non-deterministic side) and its step is not reported. For a restore the sides
+     * are then put back at the step found.
      *
-     * @return the narrowing at the first difference or exception, or null if there was none
+     * @param refAt  the reference's step count at {@code windowStart} (counted the way the coarse run counted)
+     * @param candAt the candidate's step count at {@code windowStart}
+     * @return the narrowing, or null after adding the reason it failed to {@code problems}
      */
-    private static Narrowing reRun(Lockstep ls, Narrowing.Method method, String coarse, long windowStart,
-                                   long windowEnd, List<String> notes) {
-        for (long s = windowStart + 1; s <= windowEnd; s++) {
+    private Narrowing reRun(Lockstep ls, Narrowing.Method method, String coarseText, long windowStart,
+                            long windowEnd, long refAt, long candAt, List<String> problems) {
+        String prefix = method.text() + ": ";
+        Narrowing found = null;
+        for (long s = windowStart + 1; s <= windowEnd && found == null; s++) {
             String failure = null;
             try {
                 ls.reference.target.step();
+                refAt++;
             } catch (RuntimeException e) {
                 failure = ls.reference.quoted("reference") + " threw " + e;
             }
             if (failure == null) {
                 try {
                     ls.candidate.target.step();
+                    candAt++;
                 } catch (RuntimeException e) {
                     failure = ls.candidate.quoted("candidate") + " threw " + e;
                 }
             }
-            SnapshotDiff diff = failure == null ? ls.diffNow(s) : null;
+            SnapshotDiff diff = failure == null ? ls.compareNow(s).diff() : null;
             if (failure != null || !diff.isEmpty()) {
-                return new Narrowing(Narrowing.Status.NARROWED, method, coarse, windowStart, windowEnd, s,
-                        ls.state(ls.reference), ls.state(ls.candidate), diff, failure, String.join("; ", notes));
+                found = new Narrowing(Narrowing.Status.NARROWED, method, coarseText, windowStart, windowEnd, s,
+                        ls.state(ls.reference), ls.state(ls.candidate), diff, failure, "");
             }
         }
-        return null;
+        if (found == null) {
+            String window = (windowStart + 1) + ".." + windowEnd;
+            problems.add(prefix + (method == Narrowing.Method.RESTORE
+                    ? "re-running steps " + window + " from the restored last match did not reproduce the divergence"
+                    : "the replay did not reproduce the divergence in steps " + window)
+                    + " (a side or its input stimulus is not deterministic, a saved state is incomplete, or the sides"
+                    + " differ only in timing)");
+            return null;
+        }
+        // keep the state at the step found, to come back to it after the cross-check (restore only)
+        boolean rewind = method == Narrowing.Method.RESTORE;
+        Snapshot refFound = null;
+        Snapshot candFound = null;
+        TraceRingBuffer refRing = ls.reference.debugger.ringBuffer();
+        TraceRingBuffer candRing = ls.candidate.debugger.ringBuffer();
+        long refMark = refRing == null ? 0 : refRing.totalSeen();
+        long candMark = candRing == null ? 0 : candRing.totalSeen();
+        if (rewind && found.failure() == null) {
+            refFound = ls.reference.saver.save();
+            candFound = ls.candidate.saver.save();
+        }
+        String note;
+        try {
+            note = crossCheck(ls, found, refAt, candAt);
+        } catch (RuntimeException e) {
+            note = "!the cross-check threw " + e;
+        }
+        if (refFound != null) {
+            ls.reference.saver.restore(refFound);
+            ls.candidate.saver.restore(candFound);
+            rollbackRing(ls.reference, refRing, refMark);
+            rollbackRing(ls.candidate, candRing, candMark);
+        }
+        if (note.startsWith("!")) {
+            problems.add(prefix + "the re-run differed after step " + found.step() + " but did not reproduce the coarse"
+                    + " comparison after step " + coarse.step() + " (" + note.substring(1) + "), so the run it"
+                    + " re-created is not the one that diverged: a saved state is incomplete or a side or its input"
+                    + " stimulus is not deterministic");
+            return null;
+        }
+        List<String> notes = new ArrayList<>(problems);
+        if (!note.isEmpty()) {
+            notes.add(note);
+        }
+        return new Narrowing(found.status(), method, coarseText, windowStart, windowEnd, found.step(),
+                found.reference(), found.candidate(), found.diff(), found.failure(), String.join("; ", notes));
+    }
+
+    /**
+     * Continues both sides of {@code ls} from the step found to where the coarse comparison saw the divergence and
+     * checks they arrive in the states it saw.
+     *
+     * @return "" if they do; a note if the check is impossible; "!" and what differed if they do not
+     */
+    private String crossCheck(Lockstep ls, Narrowing found, long refAt, long candAt) {
+        Coarse c = coarse;
+        if (found.failure() != null) {
+            if (c.failure() == null) {
+                return "!the re-run threw (" + found.failure() + ") where the coarse run compared states";
+            }
+            return found.failure().equals(c.failure()) ? ""
+                    : "!the re-run threw (" + found.failure() + ") but the coarse run saw: " + c.failure();
+        }
+        if (refAt > c.referenceSteps() || candAt > c.candidateSteps()) {
+            return "not cross-checked against the coarse comparison: the step-by-step re-run had already taken a side"
+                    + " past the steps it had executed when the coarse comparison saw the difference (the sides"
+                    + " execute different numbers of steps per window)";
+        }
+        String thrown = null;
+        try {
+            for (; refAt < c.referenceSteps(); refAt++) {
+                ls.reference.target.step();
+            }
+        } catch (RuntimeException e) {
+            thrown = ls.reference.quoted("reference") + " threw " + e;
+        }
+        if (thrown == null) {
+            try {
+                for (; candAt < c.candidateSteps(); candAt++) {
+                    ls.candidate.target.step();
+                }
+            } catch (RuntimeException e) {
+                thrown = ls.candidate.quoted("candidate") + " threw " + e;
+            }
+        }
+        if (c.failure() != null) {
+            if (thrown == null) {
+                // the coarse run's failing side threw during the step after the ones it completed
+                Side failing = c.referenceFailed() ? ls.reference : ls.candidate;
+                try {
+                    failing.target.step();
+                } catch (RuntimeException e) {
+                    thrown = failing.quoted(c.referenceFailed() ? "reference" : "candidate") + " threw " + e;
+                }
+            }
+            return c.failure().equals(thrown) ? ""
+                    : "!" + (thrown == null ? "the coarse run's exception did not recur" : thrown)
+                    + "; the coarse run saw: " + c.failure();
+        }
+        if (thrown != null) {
+            return "!" + thrown;
+        }
+        Comparison now = ls.compareNow(c.step());
+        String refDiff = firstDifference(c.expected(), now.expected());
+        if (refDiff != null) {
+            return "!" + reference.quoted("reference") + ": " + refDiff;
+        }
+        String candDiff = firstDifference(c.actual(), now.actual());
+        if (candDiff != null) {
+            return "!" + candidate.quoted("candidate") + ": " + candDiff;
+        }
+        return "";
+    }
+
+    /** null if {@code now} has the state {@code then} recorded (ignored fields aside), else the first difference */
+    private String firstDifference(Snapshot then, Snapshot now) {
+        SnapshotDiff d = then.diff(now, ignored);
+        if (d.isEmpty()) {
+            return null;
+        }
+        if (!d.fieldDifferences().isEmpty()) {
+            SnapshotDiff.FieldDifference f = d.fieldDifferences().get(0);
+            return f.name() + " was " + f.expected().map(Field::formattedValue).orElse("<missing>") + ", is now "
+                    + f.actual().map(Field::formattedValue).orElse("<missing>");
+        }
+        if (!d.byteDifferences().isEmpty()) {
+            SnapshotDiff.ByteDifference b = d.byteDifferences().get(0);
+            return String.format("%s[%04X] was %02X, is now %02X", b.region(), b.address(), b.expected(), b.actual());
+        }
+        return d.report();
     }
 
     /** @return the narrowing, or null after adding the reason it failed to {@code problems} */
-    private Narrowing narrowByReplay(String coarse, long windowStart, long windowEnd, List<String> problems) {
+    private Narrowing narrowByReplay(String coarseText, long windowStart, long windowEnd, List<String> problems) {
         Builder fresh;
         try {
             fresh = Objects.requireNonNull(replay.get(), "the replay factory returned null");
@@ -459,20 +615,17 @@ public final class Lockstep {
                 return null;
             }
             replica.granularity = Granularity.everyStep();
-            LockstepResult window = replica.run(windowEnd - windowStart);
-            if (!window.diverged()) {
-                problems.add("replay: the replay did not reproduce the divergence in steps " + (windowStart + 1) + ".."
-                        + windowEnd + " (the models or their input stimulus are not deterministic, or the sides"
-                        + " differ only in timing)");
-                return null;
-            }
-            Divergence d = window.divergence();
-            return new Narrowing(Narrowing.Status.NARROWED, Narrowing.Method.REPLAY, coarse, windowStart, windowEnd,
-                    d.step(), d.reference(), d.candidate(), d.diff(), d.failure(), String.join("; ", problems));
+            return replica.debuggersRun(() -> reRun(replica, Narrowing.Method.REPLAY, coarseText, windowStart,
+                    windowEnd, replica.reference.steps, replica.candidate.steps, problems));
         } catch (RuntimeException e) {
             problems.add("replay: the replay threw " + e);
             return null;
         }
+    }
+
+    /** runs {@code action} with nothing but the ring buffers tracing (the replica's re-run of the window) */
+    private <T> T debuggersRun(Supplier<T> action) {
+        return reference.debugger.withRingBufferOnly(() -> candidate.debugger.withRingBufferOnly(action));
     }
 
     /** null if {@code b} compares the same way as this lockstep, else what differs */

@@ -176,6 +176,35 @@ class LockstepNarrowingTest {
     }
 
     @Test
+    void anIncompleteSaverCannotProduceAWrongStep() {
+        // the candidate's saver forgets ACC: the re-run starts from a state that never existed and differs at
+        // once (step 41, one too early); continuing to the end of the window does not reproduce the coarse
+        // comparison, so the step is not reported
+        cand.faultAtStep = 41;
+        cand.faultMask = 1;
+        StateSaver leaky = new StateSaver() {
+            @Override
+            public com.darchan.diag.Snapshot save() {
+                return cand.snapshot();
+            }
+
+            @Override
+            public void restore(com.darchan.diag.Snapshot saved) {
+                int acc = cand.acc;
+                cand.restore(saved);
+                cand.acc = acc;
+            }
+        };
+        Divergence d = lockstep().granularity(Granularity.everySteps(10)).restoreWith(StateSaver.of(ref), leaky)
+                .build().run(1000).divergence();
+        Narrowing n = d.narrowing();
+        assertEquals(Narrowing.Status.NOT_NARROWED, n.status(), d::report);
+        assertTrue(n.reason().contains("restore: the re-run differed after step 41 but did not reproduce the coarse"
+                + " comparison after step 50"), n.reason());
+        assertTrue(n.reason().contains("candidate \"cand\": ACC"), n.reason());
+    }
+
+    @Test
     void aWindowIsNarrowedByReplayingFreshModels() {
         ref.snapshotComplete = false;
         cand.snapshotComplete = false;
