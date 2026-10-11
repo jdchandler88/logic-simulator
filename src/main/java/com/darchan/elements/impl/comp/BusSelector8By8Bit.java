@@ -12,7 +12,11 @@ import java.util.stream.IntStream;
 
 /**
  * Class that is a multiplexer for 8-bit buses. The input consists of an 8-bit select signal and 8 8-bit buses. The
- * output consists of one 8-bit bus that is the selected 8-bit input
+ * output consists of one 8-bit bus that is the selected 8-bit input.
+ *
+ * <p>Input bus (72 bits): data bus {@code n} at {@code [8n+7:8n]} for n = 0..7, one-hot select at {@code [71:64]}
+ * (bit {@code 64+n} selects data bus {@code n}; if several are set, the highest wins). Output bus (8 bits): the
+ * selected data bus, or high impedance ({@link LogicValue#Z}) when no select bit is set.
  */
 public class BusSelector8By8Bit implements IComponent {
 
@@ -107,7 +111,7 @@ public class BusSelector8By8Bit implements IComponent {
         //create output bus
         ISignal[] outputSignals = new ISignal[8];
         for (int i=0; i<8; i++) {
-            outputSignals[i] = new SimpleSignal(sim, false);
+            outputSignals[i] = new SimpleSignal(sim, LogicValue.Z);
         }
         this.outputBus = new Bus(outputSignals);
 
@@ -179,15 +183,14 @@ public class BusSelector8By8Bit implements IComponent {
 
     private void updateOutputBus() {
         if (this.currentDataSelection == DATA_SELECTOR.FLOATING) {
-            //in reality, floating is a specific value. but, we're just going to assign to false for now
-            IntStream.range(0, 8)
-                    .mapToObj(i -> this.outputBus.getSignal(i))
-                    .map(sig -> (SimpleSignal)sig)
-                    .forEach(sig -> sig.setOn(false));
+            //nothing selected: the outputs float (high impedance)
+            for (int i=0; i<8; i++) {
+                ((SimpleSignal)this.outputBus.getSignal(i)).setValue(LogicValue.Z);
+            }
         } else {
             IBus toAssign = inputBus.slice(this.currentDataSelection.getRange());
             for (int i=0; i<8; i++) {
-                ((SimpleSignal)this.outputBus.getSignal(i)).setOn(toAssign.getSignal(i).isOn());
+                ((SimpleSignal)this.outputBus.getSignal(i)).setValue(toAssign.getSignal(i).getValue());
             }
         }
     }

@@ -35,5 +35,17 @@ VHDL/Verilog-style **delta cycles**.
 - **Clocking rule.** Keep logic off the clock path. A clock that passes through a gate
   arrives one delta later than the raw clock and races with flip-flops on the raw clock,
   exactly as in an HDL simulator. Use write-enables instead of gated clocks.
-- **Listeners** may add or remove listeners while being notified; each event is delivered
+- **Four-valued signals, tri-state and shared buses.** Every signal has a `LogicValue`:
+  `ZERO`, `ONE`, `Z` (high impedance: nothing drives it) or `X` (unknown, e.g. two drivers
+  fighting). `getValue()` returns it. `isOn()` is `true` only for `ONE`; **Z and X read as
+  `false`**, so boolean code and all gates (`ILogicUnit`) stay simple — but gates do not
+  propagate X (a Z/X input counts as 0). A `Wire` may have any number of drivers and
+  resolves them: no driver (or all drivers Z) → `Z`, one driver or agreeing drivers → that
+  value, conflicting drivers → `X`. `TriStateBuffer` (data bus + enable) drives its data
+  when enabled and `Z` otherwise; connect several to the same wires to share a bus
+  (`Wire.createBus`, `Wire.connect(wires, drivers)`). A flip-flop's rising edge is any
+  change to `ONE` from a value that is not `ONE`, and it captures Z/X data as-is.
+- **Listeners** are notified on every change of the four-valued level (a change between
+  0, Z and X reaches boolean-only listeners as `(false, false)`; override
+  `ISignalChangeListener.valueChanged` to see the levels). They may add or remove listeners while being notified; each event is delivered
   to the listeners registered when delivery started.

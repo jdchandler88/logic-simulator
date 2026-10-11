@@ -15,7 +15,7 @@ public class Clock extends AbstractSignal implements IClock {
 
 	@Override
 	public void tick() {
-		this.setState(!state);
+		this.setState(!isOn());
 		this.sim.settle();
 	}
 

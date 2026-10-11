@@ -2,14 +2,17 @@ package com.darchan.elements.impl.comp;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
+import com.darchan.elements.iface.LogicValue;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.Clock;
+import com.darchan.elements.impl.ConstantSignal;
 import com.darchan.elements.impl.SimpleSignal;
 import com.darchan.sim.Simulator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FlipFlopTest {
 
@@ -67,6 +70,26 @@ class FlipFlopTest {
 
         //assert that clock has the new value
         assertEquals(initialValue, ff.getOutputBus().getSignals().get(0).isOn());
+    }
+
+    /** A rising edge is any transition to 1 from a value that is not 1 (so Z->1 counts, 1->Z->1 too). */
+    @org.junit.jupiter.api.Test
+    void transitionFromFloatingToHighIsARisingEdge() {
+        SimpleSignal clk = new SimpleSignal(sim, LogicValue.Z);
+        FlipFlop ff = new FlipFlop(sim, clk, new Bus(ConstantSignal.ON), false);
+        clk.setOn(true);
+        sim.settle();
+        assertTrue(ff.getOutputBus().getSignal(0).isOn());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"X", "Z"})
+    void flipFlopCapturesUnknownData(LogicValue data) {
+        Clock clk = new Clock(sim, false);
+        SimpleSignal in = new SimpleSignal(sim, data);
+        FlipFlop ff = new FlipFlop(sim, clk, new Bus(in), true);
+        clk.tick();
+        assertEquals(data, ff.getOutputBus().getSignal(0).getValue());
     }
 
 }

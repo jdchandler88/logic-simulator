@@ -2,6 +2,7 @@ package com.darchan.elements.impl;
 
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.iface.ISignalChangeListener;
+import com.darchan.elements.iface.LogicValue;
 
 public abstract class AbstractSignalDecorator implements ISignal {
 
@@ -14,6 +15,11 @@ public abstract class AbstractSignalDecorator implements ISignal {
 	@Override
 	public final boolean isOn() {
 		return this.wrapped.isOn();
+	}
+
+	@Override
+	public final LogicValue getValue() {
+		return this.wrapped.getValue();
 	}
 
 	@Override

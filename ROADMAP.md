@@ -55,7 +55,9 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       `BusSelector8By8Bit` return `null` ranges; `Register`/`RegisterFile` never validate).
       (Logic units are validated by `LogicSignal`'s constructor via `ILogicUnit.validateInputBus`;
       the empty `Cpu` stub was removed — the CPU will be the Phase 2 behavioral core.)
-- [ ] Tri-state / high-Z signals and bus resolution (needed for a shared data bus).
+- [x] Tri-state / high-Z signals and bus resolution (needed for a shared data bus).
+      (`LogicValue` 0/1/Z/X, multi-driver resolved `Wire`, `TriStateBuffer`; `isOn()` reads Z/X
+      as false. Deferred: X-propagation through gates — `ILogicUnit` is still boolean.)
 - [ ] Fix `RegisterFile`: docs say `[15:0]` data and F in the high bits; code wires
       F/B/D/H to bits 8–15, A/C/E/L to bits 0–7, puts F on output `[7:0]`, and declares
       an 8-bit output width for a 16-bit bus. Gated clocks via latch lines should

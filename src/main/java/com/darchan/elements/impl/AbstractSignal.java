@@ -4,13 +4,15 @@ import java.util.Arrays;
 
 import com.darchan.elements.iface.ISignal;
 import com.darchan.elements.iface.ISignalChangeListener;
+import com.darchan.elements.iface.LogicValue;
 import com.darchan.sim.Schedulable;
 import com.darchan.sim.Simulator;
 
 /**
  * Base class for signals (nets) whose value is driven during simulation. Writes made with {@link #setState(boolean)}
- * are scheduled on the owning {@link Simulator} and only become visible, and notify listeners, in the next delta
- * cycle.
+ * or {@link #scheduleValue(LogicValue)} are scheduled on the owning {@link Simulator} and only become visible, and
+ * notify listeners, in the next delta cycle. Listeners are notified on every change of the {@link LogicValue},
+ * including changes between 0, Z and X.
  */
 public abstract class AbstractSignal implements ISignal, Schedulable {
 
@@ -27,27 +29,35 @@ public abstract class AbstractSignal implements ISignal, Schedulable {
 	/**
 	 * current (committed) value
 	 */
-	protected boolean state;
+	private LogicValue value;
 
 	/**
 	 * value most recently written; committed in the next delta cycle
 	 */
-	private boolean pendingState;
+	private LogicValue pendingValue;
 
 	/**
 	 * value before the last committed event
 	 */
-	private boolean previousState;
+	private LogicValue previousValue;
 
 	private boolean commitScheduled;
 
 	protected AbstractSignal(Simulator sim, boolean initialState) {
+		this(sim, LogicValue.of(initialState));
+	}
+
+	protected AbstractSignal(Simulator sim, LogicValue initialValue) {
 		if (sim == null) {
 			throw new IllegalArgumentException("simulator must not be null");
 		}
+		if (initialValue == null) {
+			throw new IllegalArgumentException("initial value must not be null");
+		}
 		this.sim = sim;
-		this.state = initialState;
-		this.pendingState = initialState;
+		this.value = initialValue;
+		this.pendingValue = initialValue;
+		this.previousValue = initialValue;
 	}
 
 	/**
@@ -55,7 +65,17 @@ public abstract class AbstractSignal implements ISignal, Schedulable {
 	 * before then, the last write wins.
 	 */
 	protected final void setState(boolean newState) {
-		this.pendingState = newState;
+		scheduleValue(LogicValue.of(newState));
+	}
+
+	/**
+	 * Schedules a new four-valued level for this signal; see {@link #setState(boolean)}.
+	 */
+	protected final void scheduleValue(LogicValue newValue) {
+		if (newValue == null) {
+			throw new IllegalArgumentException("value must not be null");
+		}
+		this.pendingValue = newValue;
 		if (!this.commitScheduled) {
 			this.commitScheduled = true;
 			this.sim.scheduleCommit(this);
@@ -65,11 +85,11 @@ public abstract class AbstractSignal implements ISignal, Schedulable {
 	@Override
 	public final boolean commit() {
 		this.commitScheduled = false;
-		if (this.pendingState == this.state) {
+		if (this.pendingValue == this.value) {
 			return false;
 		}
-		this.previousState = this.state;
-		this.state = this.pendingState;
+		this.previousValue = this.value;
+		this.value = this.pendingValue;
 		return true;
 	}
 
@@ -77,13 +97,18 @@ public abstract class AbstractSignal implements ISignal, Schedulable {
 	public final void fireEvent() {
 		ISignalChangeListener[] snapshot = this.listeners;
 		for (ISignalChangeListener listener : snapshot) {
-			listener.signalChanged(this.previousState, this.state);
+			listener.valueChanged(this.previousValue, this.value);
 		}
 	}
 
 	@Override
 	public boolean isOn() {
-		return this.state;
+		return this.value.isOn();
+	}
+
+	@Override
+	public LogicValue getValue() {
+		return this.value;
 	}
 
 	public Simulator getSimulator() {

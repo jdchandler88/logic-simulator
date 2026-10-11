@@ -4,6 +4,7 @@ import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.iface.IRange;
 import com.darchan.elements.impl.Clock;
+import com.darchan.elements.impl.ConstantSignal;
 import com.darchan.elements.impl.comp.cpu.intel8080.RegisterFile;
 import com.darchan.sim.Simulator;
 import com.darchan.testutil.Buses;
@@ -37,6 +38,8 @@ class ComponentWidthTest {
                         new Spec((sim, bus) -> new Register(sim, new Clock(sim, false), bus, false), 8, 0, 1))),
                 Arguments.of(Named.of("BusSelector8By8Bit",
                         new Spec((sim, bus) -> new BusSelector8By8Bit(sim, bus), 72, 64, 71, 73))),
+                Arguments.of(Named.of("TriStateBuffer",
+                        new Spec((sim, bus) -> new TriStateBuffer(sim, bus, ConstantSignal.ON), 8, 0))),
                 Arguments.of(Named.of("RegisterFile",
                         new Spec((sim, bus) -> new RegisterFile(sim, bus), 24, 16, 23, 25)))
         );

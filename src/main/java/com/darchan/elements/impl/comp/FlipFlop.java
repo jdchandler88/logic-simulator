@@ -84,7 +84,8 @@ public class FlipFlop implements IComponent {
 
     /**
      * implementation of signal change listener that propagates input to output ONLY WHEN the
-     * input clock goes from low->high
+     * input clock goes from low->high. A rising edge is any change to 1 from a value that is not 1 (0, Z or X).
+     * The sampled value is copied as-is, so Z or X data is captured as Z or X.
      */
     private class PosEdgeClockListener implements ISignalChangeListener {
 
@@ -93,8 +94,8 @@ public class FlipFlop implements IComponent {
             // only act on pos-edge clock
             if (!oldValue && newValue) {
                 //latch the input value to the output
-                boolean inputValue = FlipFlop.this.inputBus.getSignals().get(0).isOn();
-                FlipFlop.this.outputSignal.setOn(inputValue);
+                LogicValue inputValue = FlipFlop.this.inputBus.getSignals().get(0).getValue();
+                FlipFlop.this.outputSignal.setValue(inputValue);
             }
         }
     }

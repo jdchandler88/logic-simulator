@@ -2,6 +2,7 @@ package com.darchan.elements.impl.comp;
 
 import com.darchan.elements.iface.IBus;
 import com.darchan.elements.iface.ISignal;
+import com.darchan.elements.iface.LogicValue;
 import com.darchan.elements.impl.Bus;
 import com.darchan.elements.impl.SimpleSignal;
 import com.darchan.sim.Simulator;
@@ -40,6 +41,18 @@ class BusSelector8By8BitTest {
         BusSelector8By8Bit mux = new BusSelector8By8Bit(sim, inputBus);
         sim.settle();
         assertEquals(collectValuesFromBus(expected), collectValuesFromBus(mux.getOutputBus()));
+    }
+
+    @Test
+    void outputFloatsWhenNothingIsSelected() {
+        IBus inputBus = Buses.simpleBus(sim, 72, 0);
+        BusSelector8By8Bit mux = new BusSelector8By8Bit(sim, inputBus);
+        sim.settle();
+        assertTrue(mux.getOutputBus().getSignals().stream().allMatch(s -> s.getValue() == LogicValue.Z));
+
+        Buses.drive(inputBus.slice(new com.darchan.elements.impl.SimpleRange(64, 71)), 1);
+        sim.settle();
+        assertTrue(mux.getOutputBus().getSignals().stream().allMatch(s -> s.getValue() == LogicValue.ZERO));
     }
 
     @Test
