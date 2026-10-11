@@ -65,8 +65,12 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       (Now: one clock, shared 8-bit data-in `[7:0]`, per-register write enables `[15:8]`,
       64-bit output with slot order L,H,E,D,C,B,F,A so pairs HL/DE/BC/PSW are 16-bit slices.
       Write enable is a gate mux in front of each flip-flop's D input.)
-- [ ] Build an 8-bit ripple-carry adder and ALU from gates; test against the
+- [x] Build an 8-bit ripple-carry adder and ALU from gates; test against the
       behavioral ALU for all 256×256×carry inputs.
+      (`HalfAdder`, `FullAdder`, `RippleCarryAdder`, 8080 `Alu` with S Z AC P CY. The golden
+      model is `Alu8080Reference` in the test sources for now — move it into the Phase 2
+      behavioral core (`com.darchan.emu`) and point the gate test at it. Exhaustive run of all
+      8 ops × 256 × 256 × CY takes ~2.5 s.)
 
 ## Phase 2 – Behavioral Intel 8080
 - [ ] Registers, flags (S Z AC P CY), SP/PC, `MemoryBus`, `IN`/`OUT` port interface.

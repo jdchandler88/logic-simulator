@@ -1,6 +1,15 @@
 # logic-simulator
 Simple app for simulating binary logic
 
+## Building blocks
+
+Gates (`AndGate`, `OrGate`, `XorGate`, `NandGate`, `NorGate`, `InverterLogicUnit`, wired
+with `LogicSignal` or the `Gates` shorthand), `FlipFlop`/`Register` (optionally with a
+write enable), `TriStateBuffer`, `BusSelector8By8Bit`, `HalfAdder`/`FullAdder`/
+`RippleCarryAdder`, and Intel 8080 blocks: `RegisterFile` and `Alu`. Every component
+documents its input/output bus layout in its javadoc and rejects a wrongly-sized input
+bus at construction (`UnexpectedBusWidthException`).
+
 ## Simulation semantics
 
 The gate-level library (`com.darchan.elements`) is an event-driven simulator with

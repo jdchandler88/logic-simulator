@@ -5,6 +5,10 @@ import com.darchan.elements.iface.IComponent;
 import com.darchan.elements.iface.IRange;
 import com.darchan.elements.impl.Clock;
 import com.darchan.elements.impl.ConstantSignal;
+import com.darchan.elements.impl.comp.arith.FullAdder;
+import com.darchan.elements.impl.comp.arith.HalfAdder;
+import com.darchan.elements.impl.comp.arith.RippleCarryAdder;
+import com.darchan.elements.impl.comp.cpu.intel8080.Alu;
 import com.darchan.elements.impl.comp.cpu.intel8080.RegisterFile;
 import com.darchan.sim.Simulator;
 import com.darchan.testutil.Buses;
@@ -40,6 +44,11 @@ class ComponentWidthTest {
                         new Spec((sim, bus) -> new BusSelector8By8Bit(sim, bus), 72, 64, 71, 73))),
                 Arguments.of(Named.of("TriStateBuffer",
                         new Spec((sim, bus) -> new TriStateBuffer(sim, bus, ConstantSignal.ON), 8, 0))),
+                Arguments.of(Named.of("HalfAdder", new Spec((sim, bus) -> new HalfAdder(sim, bus), 2, 1, 3))),
+                Arguments.of(Named.of("FullAdder", new Spec((sim, bus) -> new FullAdder(sim, bus), 3, 2, 4))),
+                Arguments.of(Named.of("RippleCarryAdder",
+                        new Spec((sim, bus) -> new RippleCarryAdder(sim, 8, bus), 17, 15, 16, 18))),
+                Arguments.of(Named.of("Alu", new Spec((sim, bus) -> new Alu(sim, bus), 20, 19, 21))),
                 Arguments.of(Named.of("RegisterFile",
                         new Spec((sim, bus) -> new RegisterFile(sim, new Clock(sim, false), bus), 16, 0, 15, 17, 24)))
         );
