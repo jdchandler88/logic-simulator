@@ -1,5 +1,7 @@
 package com.darchan.physical.sim;
 
+import java.util.Locale;
+
 /**
  * Activity counters of a {@link Simulator} since it was created or {@link Simulator#resetStats() reset}. A
  * <em>run</em> is one {@link Simulator#settle()} or {@link Simulator#runUntil(long)} call (so one
@@ -33,9 +35,9 @@ public record SimulatorStats(long runs, long deltaCycles, long minDeltasPerRun, 
 
     /** a few lines of text */
     public String report() {
-        return String.format("simulator: %d run(s) (settle/runUntil), %d time step(s)%n"
-                        + "  delta cycles: %d total, per run min %d / mean %.1f / max %d%n"
-                        + "  events:       %d total, per run min %d / mean %.1f / max %d%n"
+        return String.format(Locale.ROOT, "simulator: %d run(s) (settle/runUntil), %d time step(s)\n"
+                        + "  delta cycles: %d total, per run min %d / mean %.1f / max %d\n"
+                        + "  events:       %d total, per run min %d / mean %.1f / max %d\n"
                         + "  updates:      %d (%d without a value change)",
                 runs, timeSteps, deltaCycles, minDeltasPerRun, meanDeltasPerRun(), maxDeltasPerRun,
                 events, minEventsPerRun, meanEventsPerRun(), maxEventsPerRun, updates, updates - events);

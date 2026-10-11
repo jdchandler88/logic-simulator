@@ -96,9 +96,21 @@ the high nibble), no parity flag, no IN/OUT, and a CB-prefixed bit-op table.
       (`Snapshot`/`SnapshotDiff`/`SnapshotJson`/`HexDump`, `diag.trace` (`TraceFormatter`, `TraceRingBuffer`,
       `TextTraceWriter`), `diag.run` (`DebugTarget`, `Debugger`, `Watchpoint`). Implemented by the 8080 so far;
       the gate-level layer has not implemented `DebugTarget` yet.)
-- [ ] Lockstep comparison: two live models, recorded golden trace logs, and saved snapshot files; stop on first divergence with a field diff plus recent trace.
-- [ ] VCD waveform output for the physical layer (GTKWave/Surfer) plus simulator stats (deltas per settle, events per tick).
-- [ ] Interactive CLI debugger (REPL): step, continue, break/watch, regs, mem, trace on/off, dump, save/load snapshot.
+- [x] Lockstep comparison: two live models, recorded golden trace logs, and saved snapshot files; stop on first divergence with a field diff plus recent trace.
+      (`diag.compare`: `Lockstep` (every N steps or N cycles, ignore set, `compareOnly` across machines, memory
+      regions), `GoldenTrace` (record/compare, line number + `^` markers + named differing columns + context;
+      `run-com --golden`; 650-line TST8080 golden trace in test resources), `SnapshotCheckpoints` (at instruction,
+      cycle or k-th PC hit). Fault-injection tests catch a corrupted read/write at the exact instruction. The gate
+      level became a `DebugTarget` via `ProbeSet` + `ClockedTarget` (one step = one clock), and `com.darchan.cosim`
+      runs the gate-level `AluDatapath` in lockstep with `Cpu8080`. Not done: automatic bisection of a coarse
+      (cycle-window) divergence down to the instruction; re-run with step granularity instead.)
+- [x] VCD waveform output for the physical layer (GTKWave/Surfer) plus simulator stats (deltas per settle, events per tick).
+      (`VcdWriter`: probes → scopes from dotted names, vectors, z/x; time mapping `SETTLE` (default, one tick per
+      settle/Clock.tick), `DELTA` (one tick per delta cycle) or `SIM_TIME`. `Simulator.stats()`: runs, deltas and
+      events per settle min/mean/max/total, wasted updates, time steps; `SimulationObserver` hooks. `vcd-demo`.)
+- [x] Interactive CLI debugger (REPL): step, continue, break/watch, regs, mem, trace on/off, dump, save/load snapshot.
+      (`diag.repl.DebuggerRepl` over a CPU-agnostic `ReplTarget` (8080: `ReplTarget8080`); `App debug FILE.COM` or
+      `debug --raw FILE --org ADDR`; also next-cycles, until, io watch, dis, history, diff; Ctrl-C interrupts a run.)
 
 ## Phase 3 – Space Invaders (fun 8080 milestone)
 - [ ] Memory map: ROM 0x0000–0x1FFF, RAM 0x2000–0x23FF, VRAM 0x2400–0x3FFF.

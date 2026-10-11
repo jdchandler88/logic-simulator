@@ -77,7 +77,7 @@ public record Divergence(long step, long comparison, long lastMatchingStep, Side
     }
 
     private static void side(StringBuilder sb, String role, SideState s) {
-        sb.append(String.format("%n  %s %-14s instruction %d, cycle %d, PC=%04X", role, "\"" + s.name() + "\":",
+        sb.append(String.format("\n  %s %-14s instruction %d, cycle %d, PC=%04X", role, "\"" + s.name() + "\":",
                 s.instructions(), s.cycles(), s.pc()));
     }
 

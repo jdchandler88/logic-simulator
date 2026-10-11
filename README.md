@@ -6,7 +6,8 @@ Simple app for simulating binary logic
 Gates (`AndGate`, `OrGate`, `XorGate`, `NandGate`, `NorGate`, `InverterLogicUnit`, wired
 with `LogicSignal` or the `Gates` shorthand), `FlipFlop`/`Register` (optionally with a
 write enable), `TriStateBuffer`, `BusSelector8By8Bit`, `HalfAdder`/`FullAdder`/
-`RippleCarryAdder`, and Intel 8080 blocks: `RegisterFile` and `Alu`. Every component
+`RippleCarryAdder`, `Counter`, and Intel 8080 blocks: `RegisterFile`, `Alu` and `AluDatapath` (register file +
+ALU + multiplexers + flags register executing MOV/MVI/ALU instructions one per clock). Every component
 documents its input/output bus layout in its javadoc and rejects a wrongly-sized input
 bus at construction (`UnexpectedBusWidthException`).
 
@@ -71,8 +72,8 @@ diagnostics 8080PRE, TST8080, CPUTEST and 8080EXM with cycle counts identical to
 (`./gradlew build` runs the first three; the ~24-billion-cycle 8080EXM is tagged `slow` and runs with
 `./gradlew slowTest`).
 
-The CPU-agnostic diagnostics live in `com.darchan.diag` (the 8080 implements them; the SM83 and the gate-level
-layer are meant to):
+The CPU-agnostic diagnostics live in `com.darchan.diag` (implemented by the 8080 and, through probes and
+`ClockedTarget`, by gate-level circuits; the SM83 will implement them too):
 
 - `Snapshot` — ordered named `Field`s (name, width, value, display format) plus optional `MemoryRegion`s;
   `Snapshottable` (`snapshot()` / `restore()`); `SnapshotDiff` (field-by-field and byte-by-byte report);
@@ -86,6 +87,9 @@ layer are meant to):
   I/O ports, dumps on stop / every N cycles / on demand, and an `ExecutionFailure` carrying recent trace +
   registers + memory dumps if the model throws. Watchpoints come from bus decorators
   (`ObservedMemoryBus`/`ObservedIoBus`), so the CPU's fast path is untouched without a debugger.
+- `diag.compare` — lockstep comparison of two live models (`Lockstep`), of a live run against a recorded trace
+  file (`GoldenTrace`) and against saved snapshot files at checkpoints (`SnapshotCheckpoints`); see below.
+- `diag.repl` — `DebuggerRepl`, the interactive command-line debugger, over any `ReplTarget`.
 - Ordinary log messages use `java.lang.System.Logger`.
 
 ### Trace format
@@ -156,13 +160,231 @@ cpu.restore(before);                                         // registers, flags
 before.region("ram").ifPresent(ram::restore);                // and memory
 ```
 
-### How the next pieces plug in
+### Lockstep comparison
 
-- **Lockstep** (live vs live, vs golden trace logs, vs snapshot files): drive two `DebugTarget`s with
-  `Debugger.step()`, compare `snapshot()`s with `SnapshotDiff` (ignoring fields such as `CYCLES` if needed), or
-  compare `TraceFormatter` lines against a recorded log; on divergence print the diff plus each side's
-  `TraceRingBuffer.dump()`.
-- **VCD** for the gate-level layer: a gate-level machine implements `DebugTarget`/`Snapshottable` with signal
-  values as `Field`s; a VCD writer is another listener next to the trace sinks.
-- **REPL**: a thin command loop over `Debugger` (step/continue/break/watch/dump/hexDump), `Snapshot` and
-  `SnapshotJson`, and `Disassembler8080.listing`.
+Three ways to find the first point where a model goes wrong, all stopping at the first divergence with a
+report that says where, what differs, and what the model(s) executed just before.
+
+**Live against live** (`Lockstep`): step a trusted *reference* and a *candidate* side by side and compare
+snapshots after every instruction, every N instructions, or at the first instruction boundary after every N
+cycles (`Granularity`). Fields can be ignored, reduced to a common set for different machines
+(`compareOnly`), and memory regions of both sides included.
+
+```java
+CpmMachine golden = CpmMachine.load(rom), candidate = CpmMachine.load(rom);
+LockstepResult r = Lockstep.builder("reference", golden.debugger(), "candidate", candidate.debugger())
+        .granularity(Granularity.everyStep())                 // or everySteps(n), everyCycles(n)
+        .ignore("CYCLES")                                     // if timings legitimately differ
+        .compareMemory("ram", golden.ram()::peek, candidate.ram()::peek, 0x0000, 0x0800)
+        .build()
+        .runUntil(golden::exited, 10_000_000);
+if (r.diverged()) System.out.println(r.report());
+```
+
+A deliberately faulty candidate (its memory bus flips bit 0 of the byte read by instruction 437 of TST8080)
+gives:
+
+```
+LOCKSTEP DIVERGENCE after step 438 (comparison #438, last match after step 437)
+  reference "reference":   instruction 438, cycle 3139, PC=050B
+  candidate "faulty":      instruction 438, cycle 3139, PC=050B
+--- state diff (expected = reference, actual = candidate) ---
+1 field(s) and 0 memory byte(s) differ (expected "reference after step 438" vs actual "faulty after step 438")
+  A           expected=FF  actual=FE
+--- reference "reference": last 16 instruction(s), '>' = executed last ---
+  ...
+  000000003122 000000000436 0507: AF        XRA A          A=FF F=56 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-ZAP-
+> 000000003126 000000000437 0508: 3A BF 06  LDA 06BFH      A=00 F=46 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-Z-P-
+--- candidate "faulty": last 16 instruction(s), '>' = executed last ---
+  ...
+```
+
+With cycle granularity the divergence lies within the last window; re-run with `everyStep()` to pin it down.
+
+**Against a golden trace file** (`GoldenTrace`). Record a trace once from a model you trust, keep the file (it is
+plain trace text, so it diffs well in version control and could come from another emulator), and compare any
+later run against it line by line:
+
+```bash
+# record (or GoldenTrace.record(debugger, path, maxCycles) in code)
+build/install/logic-simulator/bin/logic-simulator run-com TST8080.COM --trace tst8080.trace
+# compare later; exit code 1 and a report on the first mismatch
+build/install/logic-simulator/bin/logic-simulator run-com TST8080.COM --golden tst8080.trace
+build/install/logic-simulator/bin/logic-simulator run-com X.COM --golden other-emulator.trace --ignore-columns cycle
+```
+
+```java
+GoldenTraceResult r = GoldenTrace.of(Path.of("tst8080.trace")).compare(machine.debugger(), 1_000_000);
+```
+
+`#` lines and blank lines in the file are skipped; `ignoreColumns` takes column names (`cycle`, `instruction`,
+`pc`, `bytes`, `disassembly`, register names, `SZAPC`). The repository keeps a 650-line golden trace of TST8080
+(`src/test/resources/golden/TST8080.trace`, recorded from this core after it passed all four CP/M diagnostics
+with reference-exact cycle counts). A mismatch report:
+
+```
+GOLDEN TRACE MISMATCH at line 440 of TST8080.trace (instruction 438)
+  expected: 000000003139 000000000438 050B: FE FF     CPI 0FFH       A=FF F=46 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-Z-P-
+  actual:   000000003139 000000000438 050B: FE FF     CPI 0FFH       A=FE F=46 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-Z-P-
+                                                                        ^
+  differing columns: A: expected FF, actual FE
+--- context: 8 matching line(s) before ---
+  ...
+  000000003126 000000000437 0508: 3A BF 06  LDA 06BFH      A=00 F=46 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-Z-P-
+--- the golden trace continues with ---
+  000000003146 000000000439 050D: C4 A0 06  CNZ 06A0H      A=FF F=56 B=12 C=FF D=12 E=FF H=12 L=FF SP=07BD SZAPC=-ZAP-
+  ...
+```
+
+A line shows the state *before* its instruction, so the culprit is the last context line (here `LDA 06BFH`).
+
+**Against saved snapshot files** (`SnapshotCheckpoints`): named checkpoints (after N instructions, at cycle N,
+or the k-th time the PC reaches an address), one `SnapshotJson` file each. Record them once, verify later:
+
+```java
+SnapshotCheckpoints cps = SnapshotCheckpoints.in(Path.of("checkpoints"))
+        .add(Checkpoint.atInstruction("i300", 300))
+        .add(Checkpoint.atCycle("c3000", 3000))
+        .add(Checkpoint.atPc("exit", 0x0000))
+        .snapshot(() -> m.cpu().snapshot().withRegion("ram", m.ram()::peek, 0, 0x0800));
+cps.record(m.debugger(), 1_000_000);                         // writes checkpoints/i300.json, ...
+CheckpointReport r = cps.verify(other.debugger(), 1_000_000);  // later / another build
+System.out.println(r.report());
+// checkpoints: 1 of 3 passed; run ended: CONDITION (stopped at the first mismatch) at cycle 3009, PC=06AD
+//   MATCH       i300 @ instruction 300  (instruction 300, cycle 2122, PC=0411)
+//   MISMATCH    c3000 @ cycle 3000  (instruction 408, cycle 3009, PC=06AD): 11 field(s) and 11 memory byte(s) differ
+//   NOT_REACHED exit @ PC=0000: not run: an earlier checkpoint mismatched
+// --- c3000 @ cycle 3000 ---  (the SnapshotDiff and the last instructions follow)
+```
+
+### Gate level as a debug target, and co-simulation with the 8080
+
+`com.darchan.physical.probe` exposes gate-level state to the diagnostics layer. A `ProbeSet` registers named
+probes (dot-separated hierarchical names) on buses or signals of one `Simulator` and reads them as
+`ProbeValue`s (`value()` reads Z/X as 0; `bits()` gives `0 1 z x` per bit). In snapshots every probe is a HEX
+field; when bits are Z or X, extra fields `NAME.Z` / `NAME.X` hold their masks, so a floating or contended bus
+shows up in a diff instead of silently reading as 0. `ClockedTarget` makes a clocked circuit a `DebugTarget`:
+**one step is one clock cycle** (the stimulus drives the inputs, the circuit settles, the clock rises and falls),
+so `Debugger`, `Lockstep`, `SnapshotCheckpoints` and traces work on it unchanged.
+
+```java
+Simulator sim = new Simulator();
+Clock clk = new Clock(sim, false);
+Counter counter = new Counter(sim, clk, 4);
+sim.settle();
+ProbeSet probes = new ProbeSet(sim);
+probes.add("count", counter.getOutputBus());
+ClockedTarget target = new ClockedTarget("counter4", clk, probes);
+target.setProgramCounter(() -> (int) probes.value("count"));  // optional: lets breakpoints use the count
+Debugger dbg = new Debugger(target, null);
+dbg.addBreakpoint(5);
+dbg.run(1000);                                                 // BREAKPOINT after 5 clock cycles
+```
+
+`com.darchan.cosim` is the only production package allowed to use both layers (enforced by `ArchitectureTest`).
+`AluDatapathCosim` runs one program of 8080 register instructions (MOV, MVI, ADD..CMP r, ADI..CPI) on the
+gate-level `AluDatapath` (decoded by a small control unit, one instruction per clock) and on the behavioral
+`Cpu8080`, and compares A F B C D E H L after every instruction:
+
+```java
+AluDatapathCosim cosim = new AluDatapathCosim(program);                  // or (program, stuckAt(3, false))
+LockstepResult r = cosim.lockstep().run(cosim.instructionCount());
+```
+
+A random 1500-instruction program agrees on both layers; with a stuck-at-0 fault on bit 3 of the ALU's operand
+B the lockstep stops at the first instruction that needs that bit (`ADI 08H`: A expected 10, actual 08), and both
+sides' traces look alike because the gate-level trace uses the control unit's PC and the 8080 disassembler.
+
+### Waveforms (VCD) and simulator statistics
+
+`VcdWriter` (`com.darchan.physical.wave`) records chosen probes to a Value Change Dump. Dotted probe names
+become scopes (`alu.result` is `result` in scope `top.alu`), buses are vectors, Z/X bits are written as `z`/`x`.
+VCD has one time axis but the simulator has simulated time *and* delta cycles, so the time mapping is a choice
+(see the `VcdWriter` javadoc for the trade-offs):
+
+| `Timing` | one VCD tick per | shows | use for |
+|---|---|---|---|
+| `SETTLE` (default) | `settle()`/`runUntil()` call, i.e. per `Clock.tick()` | settled values | zero-delay synchronous designs: clean cycle-level waves |
+| `DELTA` | delta cycle | every intermediate value, glitches, carry ripple | debugging combinational logic and races (axis not physical) |
+| `SIM_TIME` | simulated time unit | value at the end of each time step | circuits with transport delays driven by `runUntil` |
+
+```java
+try (VcdWriter vcd = VcdWriter.builder(probes).timing(VcdWriter.Timing.SETTLE).timescale("1ns")
+        .topScope("counter4").open(Path.of("counter.vcd"))) {
+    for (int i = 0; i < 40; i++) clk.tick();
+}
+System.out.println(sim.stats());   // or sim.toString()
+// simulator: 40 run(s) (settle/runUntil), 0 time step(s)
+//   delta cycles: ... total, per run min 1 / mean ... / max ...
+//   events:       ... total, per run min 1 / mean ... / max ...
+//   updates:      ... (... without a value change)
+```
+
+From the command line, `vcd-demo` writes a 4-bit counter (clock, count, next-state logic, individual bits):
+
+```bash
+build/install/logic-simulator/bin/logic-simulator vcd-demo counter.vcd --cycles 20 [--timing delta]
+gtkwave counter.vcd        # GTKWave: drag signals from the SST tree into the wave pane
+surfer counter.vcd         # Surfer (https://surfer-project.org), also runs in a browser: open the file there
+```
+
+`Simulator.stats()` (always on, cheap) counts runs, delta cycles and events (nets that changed) per
+settle/runUntil — min/mean/max/total — plus updates that did not change a value and time steps;
+`resetStats()` zeroes them.
+
+### Interactive debugger
+
+```
+./gradlew installDist
+build/install/logic-simulator/bin/logic-simulator debug src/test/resources/cpm/TST8080.COM
+build/install/logic-simulator/bin/logic-simulator debug --raw prog.bin --org 0x200   # raw binary at 0200
+```
+
+Commands: `step [n]`, `next-cycles <n>`, `cont [max-cycles]`, `until cycle|instr <n>`, `break <addr>`,
+`watch <r|w|rw|x> <addr[-addr]>`, `io <in|out|inout> <port>`, `breaks`, `delete <id|all>`, `regs`,
+`mem <addr> [len]`, `dis [addr] [n]`, `history [n]`, `dump`, `trace on [file]` / `trace off`,
+`save|load|diff <file.json>` (registers + all memory), `help`, `quit`. Addresses and ports are hex (`0100`,
+`0x100`, `100H`), counts decimal. Every stop shows the reason, the next instruction and the registers. Ctrl-C
+stops a running command; Ctrl-D or `quit` leaves. The REPL reads from any `Reader` and writes to any
+`PrintStream`, so sessions are scripted in tests (`CpmReplTest`).
+
+```
+i8080 debugger. Type 'help' for commands.
+-> 0100: C3 B2 01  JMP 01B2H
+   PC=0100 SP=0000 A=00 F=02 B=00 C=00 D=00 E=00 H=00 L=00 INTE=0 HALT=0 EI_PENDING=0 CYCLES=0 INSTRUCTIONS=0
+dbg> break 5
+#2 break 0005 (BDOS call)
+dbg> cont
+[BREAKPOINT] breakpoint at 0005 (BDOS call) at cycle 86, instruction 8
+-> 0005: D3 01     OUT 01H
+   PC=0005 SP=07B7 A=00 F=02 B=00 C=09 D=01 E=03 H=00 L=00 INTE=0 HALT=0 EI_PENDING=0 CYCLES=86 INSTRUCTIONS=8
+dbg> watch w 06BF
+#3 watch [WRITE] 06BF
+dbg> cont
+MICROCOSM ASSOCIATES 8080/8085 CPU DIAGNOSTIC
+ VERSION 1.0  (C) 1980
+[WATCHPOINT] watch [WRITE] 06BF: WRITE 06BF value 44 at cycle 2235, instruction 318
+-> 042F: 06 00     MVI B,00H
+   PC=042F SP=07BD A=00 F=46 B=44 C=45 D=46 E=47 H=06 L=BF INTE=0 HALT=0 EI_PENDING=0 CYCLES=2235 INSTRUCTIONS=318
+dbg> history 2
+000000002221 000000000316 042C: 2E BF     MVI L,0BFH     A=00 F=46 B=44 C=45 D=46 E=47 H=06 L=4F SP=07BD SZAPC=-Z-P-
+000000002228 000000000317 042E: 70        MOV M,B        A=00 F=46 B=44 C=45 D=46 E=47 H=06 L=BF SP=07BD SZAPC=-Z-P-
+dbg> mem 06B0 32
+06B0: 01 C3 00 00 21 7A 01 CD  4B 01 C3 00 00 BF 06 44  |....!z..K......D|
+06C0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+dbg> save s.json
+saved 15 field(s) and 65536 byte(s) of memory to s.json
+dbg> cont
+[WATCHPOINT] watch [WRITE] 06BF: WRITE 06BF value 45 at cycle 2278, instruction 324
+-> 0439: 0E 00     MVI C,00H
+   PC=0439 SP=07BD A=44 F=56 B=44 C=45 D=46 E=47 H=06 L=BF INTE=0 HALT=0 EI_PENDING=0 CYCLES=2278 INSTRUCTIONS=324
+dbg> diff s.json
+5 field(s) and 1 memory byte(s) differ (expected "cycle 2235" vs actual "now")
+  PC          expected=042F  actual=0439
+  A           expected=00  actual=44
+  F           expected=46  actual=56
+  CYCLES      expected=2235  actual=2278
+  INSTRUCTIONS expected=318  actual=324
+  ram[06BF]   expected=44  actual=45
+dbg> quit
+```
