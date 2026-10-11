@@ -148,7 +148,15 @@ final class Json {
                         if (pos + 4 > text.length()) {
                             throw error("truncated \\u escape");
                         }
-                        sb.append((char) Integer.parseInt(text.substring(pos, pos + 4), 16));
+                        int code = 0;
+                        for (int i = 0; i < 4; i++) {
+                            int digit = hexDigit(text.charAt(pos + i));
+                            if (digit < 0) {
+                                throw error("\\u needs 4 hex digits: \\u" + text.substring(pos, pos + 4));
+                            }
+                            code = code << 4 | digit;
+                        }
+                        sb.append((char) code);
                         pos += 4;
                     }
                     default -> throw error("bad escape \\" + e);
@@ -159,6 +167,20 @@ final class Json {
                 sb.append(c);
             }
         }
+    }
+
+    /** the value of an ASCII hex digit (JSON allows only 0-9 a-f A-F), or -1 */
+    private static int hexDigit(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - 'a' + 10;
+        }
+        if (c >= 'A' && c <= 'F') {
+            return c - 'A' + 10;
+        }
+        return -1;
     }
 
     private Long number() {

@@ -187,4 +187,56 @@ class CpmReplTest {
         assertTrue(text.startsWith("[interrupted] at cycle "), text);
         assertFalse(machine.exited());
     }
+
+    /** a session on a tiny program (no ROM needed): 0100: MVI A,41; NOP; ...; JMP 0000 */
+    private String tinySession(java.io.Reader script) {
+        machine = new CpmMachine(new byte[]{0x3E, 0x41, 0x00, 0x00, (byte) 0xC3, 0x00, 0x00});
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bytes, true, StandardCharsets.UTF_8);
+        try {
+            new DebuggerRepl(machine.replTarget(), script, out).run();
+        } catch (RuntimeException e) {
+            out.println("SESSION ENDED BY " + e);
+        }
+        return bytes.toString(StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void aMalformedSnapshotFileDoesNotEndTheSession() throws IOException {
+        Path bad = dir.resolve("bad.json");
+        Files.writeString(bad, "{\"format\":\"darchan-snapshot\",\"version\":1,\"machine\":\"i8080\",\"label\":\"\","
+                + "\"fields\":[],\"memory\":[{\"name\":\"ram\",\"start\":0,\"length\":-1,\"hex\":[]}]}");
+        Path escape = dir.resolve("escape.json");
+        Files.writeString(escape, "{\"format\":\"darchan-snapshot\",\"version\":1,\"machine\":\"i8080\","
+                + "\"label\":\"\\u-041\",\"fields\":[]}");
+        String out = tinySession(new StringReader("load " + bad + "\ndiff " + escape + "\nstep\nquit\n"));
+        assertFalse(out.contains("SESSION ENDED"), out);
+        assertTrue(out.contains("error: ram.length must be in 0.."), out);
+        assertTrue(out.contains("error: JSON error"), out);
+        assertEquals(1, machine.cpu().instructionCount(), "the step after the errors ran");
+    }
+
+    @Test
+    void anyReaderWorksAndTheTraceFileIsClosedWhenInputFails() throws IOException {
+        Path file = dir.resolve("t.trace");
+        java.io.Reader failing = new java.io.Reader() {
+            private final StringReader script = new StringReader("trace on " + file + "\nstep 2\n");
+
+            @Override
+            public int read(char[] buf, int off, int len) throws IOException {
+                int n = script.read(buf, off, len);
+                if (n < 0) {
+                    throw new IOException("terminal went away");
+                }
+                return n;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        String out = tinySession(failing);
+        assertTrue(out.contains("SESSION ENDED BY java.io.UncheckedIOException"), out);
+        assertEquals(3, Files.readAllLines(file).size(), "header + 2 instructions, flushed and closed: " + out);
+    }
 }

@@ -2,6 +2,7 @@ package com.darchan.behavioral.i8080;
 
 import com.darchan.behavioral.bus.IoBus;
 import com.darchan.behavioral.bus.Ram;
+import com.darchan.diag.Field;
 import com.darchan.diag.Snapshot;
 import com.darchan.diag.SnapshotDiff;
 import com.darchan.diag.SnapshotJson;
@@ -257,5 +258,31 @@ class Debug8080Test {
         rep = SnapshotCheckpoints.in(dir).add(Checkpoint.atPc("never", 0x0002)).record(idleDbg, 100);
         assertEquals(CheckpointResult.Status.NOT_REACHED, rep.results().get(0).status(),
                 "halted for good: no instruction ever executes at 0002");
+    }
+
+    @Test
+    void restoreRejectsOutOfRangeRegistersAndLeavesTheCpuUnchanged() {
+        loadProgram();
+        Snapshot good = cpu.snapshot();
+        for (String[] bad : new String[][]{{"A", "12", "100"}, {"L", "16", "1FF"}, {"PC", "32", "10000"},
+                {"SP", "20", "FFFFF"}}) {
+            Snapshot s = replaced(good, bad[0], Integer.parseInt(bad[1]), Long.parseLong(bad[2], 16));
+            cpu.setA(0x12);
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> cpu.restore(s));
+            assertTrue(e.getMessage().contains(bad[0] + " = "), e.getMessage());
+            assertEquals(0x12, cpu.a(), "nothing restored");
+            assertEquals(0x100, cpu.pc());
+        }
+        Snapshot fits = replaced(good, "A", 16, 0xFF); // wider field, value in range: accepted
+        cpu.restore(fits);
+        assertEquals(0xFF, cpu.a());
+    }
+
+    private static Snapshot replaced(Snapshot s, String name, int width, long value) {
+        Snapshot.Builder b = Snapshot.builder(s.machine()).label("edited");
+        for (Field f : s.fields()) {
+            b.field(f.name().equals(name) ? Field.hex(name, width, value) : f);
+        }
+        return b.build();
     }
 }

@@ -599,26 +599,59 @@ public final class Cpu8080 implements DebugTarget {
                 .build();
     }
 
+    /**
+     * Restores a snapshot taken by {@link #snapshot()} (or loaded from JSON). Values are not masked: a register
+     * that does not fit its width (8-bit registers above FF, PC or SP above FFFF) or a negative counter is rejected
+     * with {@link IllegalArgumentException}, and the CPU is then left unchanged.
+     */
     @Override
     public void restore(Snapshot s) {
         if (!MACHINE.equals(s.machine())) {
             throw new IllegalArgumentException("not an " + MACHINE + " snapshot: " + s.machine());
         }
-        pc = (int) s.value("PC");
-        sp = (int) s.value("SP");
-        a = (int) s.value("A");
-        setF((int) s.value("F"));
-        b = (int) s.value("B");
-        c = (int) s.value("C");
-        d = (int) s.value("D");
-        e = (int) s.value("E");
-        h = (int) s.value("H");
-        l = (int) s.value("L");
-        inte = s.value("INTE") != 0;
-        halted = s.value("HALT") != 0;
-        eiPending = s.value("EI_PENDING") != 0;
-        cycles = s.value("CYCLES");
-        instructions = s.value("INSTRUCTIONS");
+        // validate everything before changing anything, so a bad snapshot leaves the CPU untouched
+        int newPc = checked(s, "PC", 0xFFFF);
+        int newSp = checked(s, "SP", 0xFFFF);
+        int newA = checked(s, "A", 0xFF);
+        int newF = checked(s, "F", 0xFF);
+        int newB = checked(s, "B", 0xFF);
+        int newC = checked(s, "C", 0xFF);
+        int newD = checked(s, "D", 0xFF);
+        int newE = checked(s, "E", 0xFF);
+        int newH = checked(s, "H", 0xFF);
+        int newL = checked(s, "L", 0xFF);
+        long newCycles = s.value("CYCLES");
+        long newInstructions = s.value("INSTRUCTIONS");
+        if (newCycles < 0 || newInstructions < 0) {
+            throw new IllegalArgumentException("negative CYCLES or INSTRUCTIONS in snapshot " + s.label());
+        }
+        boolean newInte = s.value("INTE") != 0;
+        boolean newHalted = s.value("HALT") != 0;
+        boolean newEiPending = s.value("EI_PENDING") != 0;
+        pc = newPc;
+        sp = newSp;
+        a = newA;
+        setF(newF);
+        b = newB;
+        c = newC;
+        d = newD;
+        e = newE;
+        h = newH;
+        l = newL;
+        inte = newInte;
+        halted = newHalted;
+        eiPending = newEiPending;
+        cycles = newCycles;
+        instructions = newInstructions;
+    }
+
+    private static int checked(Snapshot s, String name, int max) {
+        long v = s.value(name);
+        if (v < 0 || v > max) {
+            throw new IllegalArgumentException(name + " = " + Long.toHexString(v).toUpperCase() + " is out of range 0.."
+                    + Integer.toHexString(max).toUpperCase() + " in snapshot " + s.label());
+        }
+        return (int) v;
     }
 
     // ---- buses -----------------------------------------------------------------------------------------------

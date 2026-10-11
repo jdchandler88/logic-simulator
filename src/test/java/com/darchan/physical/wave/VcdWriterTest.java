@@ -166,4 +166,28 @@ class VcdWriterTest {
             assertTrue(seen.add(id), id);
         }
     }
+    @Test
+    void aBadProbeNameNeitherCreatesNorLeaksTheFile(@TempDir Path dir) throws IOException {
+        Path fds = Path.of("/proc/self/fd");
+        long before = Files.isDirectory(fds) ? countEntries(fds) : -1;
+        for (int i = 0; i < 50; i++) {
+            Path f = dir.resolve("w" + i + ".vcd");
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                    () -> VcdWriter.builder(probes).probes("nope").open(f));
+            assertTrue(e.getMessage().contains("no probe nope"), e.getMessage());
+            assertFalse(Files.exists(f), "validated before the file is created");
+        }
+        if (before >= 0) {
+            assertTrue(countEntries(fds) < before + 50, "no descriptor leaked per failed open");
+        }
+        assertThrows(IllegalArgumentException.class,
+                () -> VcdWriter.builder(new ProbeSet(new Simulator())).open(dir.resolve("empty.vcd")));
+        assertFalse(Files.exists(dir.resolve("empty.vcd")));
+    }
+
+    private static long countEntries(Path dir) throws IOException {
+        try (var s = Files.list(dir)) {
+            return s.count();
+        }
+    }
 }

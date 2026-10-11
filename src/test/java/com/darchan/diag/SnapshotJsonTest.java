@@ -74,4 +74,46 @@ class SnapshotJsonTest {
         Object o = Json.parse(" { \"a\" : [ 1 , -2 , true , null , \"\\u0041\\t\" ] } ");
         assertEquals(java.util.Map.of("a", java.util.Arrays.asList(1L, -2L, true, null, "A\t")), o);
     }
+    private static String withRegion(String start, String length, String hex) {
+        return "{\"format\":\"darchan-snapshot\",\"version\":1,\"machine\":\"m\",\"label\":\"\",\"fields\":[],"
+                + "\"memory\":[{\"name\":\"ram\",\"start\":" + start + ",\"length\":" + length + ",\"hex\":[" + hex
+                + "]}]}";
+    }
+
+    private static String withField(String width, String value) {
+        return "{\"format\":\"darchan-snapshot\",\"version\":1,\"machine\":\"m\",\"label\":\"\",\"fields\":["
+                + "{\"name\":\"A\",\"width\":" + width + ",\"format\":\"HEX\",\"value\":" + value + "}]}";
+    }
+
+    private static void rejected(String json, String messagePart) {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SnapshotJson.fromJson(json));
+        assertTrue(e.getMessage().contains(messagePart), e.getMessage());
+    }
+
+    @Test
+    void outOfRangeNumbersAreRejectedWithAClearMessage() {
+        rejected(withRegion("0", "-1", ""), "ram.length must be in 0..");
+        rejected(withRegion("-5", "0", ""), "ram.start must be in 0..");
+        rejected(withRegion("4294967296", "0", ""), "ram.start must be in 0..");
+        rejected(withRegion("0", "4294967297", "\"00\""), "ram.length must be in 0..");
+        rejected(withRegion("2147483647", "2", "\"0000\""), "ram.length must be in 0..");
+        rejected(withRegion("0", "2", "\"00\""), "expected 4 for 2 bytes");
+        rejected(withRegion("0", "1", "\"0G\""), "bad hex data");
+        rejected(withField("-8", "\"01\""), "A.width must be in 1..64");
+        rejected(withField("4294967304", "\"01\""), "A.width must be in 1..64");
+        rejected(withField("8", "\"+1\""), "A.value must be 1 to 16 hex digits");
+        rejected(withField("8", "\"-1\""), "A.value must be 1 to 16 hex digits");
+        assertEquals(1, SnapshotJson.fromJson(withRegion("0", "1", "\"7F\"")).region("ram").orElseThrow().length());
+    }
+
+    @Test
+    void unicodeEscapesNeedExactlyFourHexDigits() {
+        assertEquals("A", Json.parse("\"\\u0041\""));
+        assertEquals("\u00e9", Json.parse("\"\\u00E9\""));
+        for (String bad : new String[]{"\\u-041", "\\u+041", "\\u 041", "\\u004", "\\u00G1", "\\u\uFF10\uFF10\uFF14\uFF11"}) {
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                    () -> Json.parse("\"" + bad + "\""), bad);
+            assertTrue(e.getMessage().contains("\\u"), e.getMessage());
+        }
+    }
 }

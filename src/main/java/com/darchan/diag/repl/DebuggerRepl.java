@@ -19,6 +19,7 @@ import com.darchan.diag.trace.TraceRingBuffer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -32,7 +33,7 @@ import java.util.Set;
 
 /**
  * An interactive command-line debugger over any {@link ReplTarget}. Input and output are injected
- * ({@link BufferedReader} / {@link PrintStream}), so sessions can be scripted and tested; {@code project.App debug}
+ * ({@link Reader} / {@link PrintStream}), so sessions can be scripted and tested; {@code project.App debug}
  * connects it to the console.
  *
  * <p>Addresses and I/O ports are hexadecimal, written {@code 0100}, {@code 0x100} or {@code 100H}. Counts are
@@ -95,11 +96,18 @@ public final class DebuggerRepl {
     private TraceListener traceListener;
     private TextTraceWriter traceFile;
 
-    public DebuggerRepl(ReplTarget machine, BufferedReader in, PrintStream out) {
+    /**
+     * @param machine the machine to debug
+     * @param in      where commands come from, one per line (any {@link Reader}; wrapped in a
+     *                {@link BufferedReader} unless it already is one)
+     * @param out     where output goes
+     */
+    public DebuggerRepl(ReplTarget machine, Reader in, PrintStream out) {
         this.machine = Objects.requireNonNull(machine);
         this.debugger = machine.debugger();
         this.target = debugger.target();
-        this.in = Objects.requireNonNull(in);
+        Objects.requireNonNull(in);
+        this.in = in instanceof BufferedReader b ? b : new BufferedReader(in);
         this.out = Objects.requireNonNull(out);
         this.addressDigits = (machine.addressBits() + 3) / 4;
         for (int pc : debugger.breakpoints()) {
@@ -120,28 +128,35 @@ public final class DebuggerRepl {
         return running;
     }
 
-    /** Reads and executes commands until {@code quit} or end of input. */
+    /**
+     * Reads and executes commands until {@code quit} or end of input. A command that fails prints
+     * {@code error: ...} and the session goes on; a trace file opened with {@code trace on FILE} is closed however
+     * the session ends.
+     */
     public void run() {
-        out.println(machine.name() + " debugger. Type 'help' for commands.");
-        showCurrent();
-        while (true) {
-            out.print(PROMPT);
-            out.flush();
-            String line;
-            try {
-                line = in.readLine();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+        try {
+            out.println(machine.name() + " debugger. Type 'help' for commands.");
+            showCurrent();
+            while (true) {
+                out.print(PROMPT);
+                out.flush();
+                String line;
+                try {
+                    line = in.readLine();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                if (line == null) {
+                    out.println();
+                    break;
+                }
+                if (!execute(line)) {
+                    break;
+                }
             }
-            if (line == null) {
-                out.println();
-                break;
-            }
-            if (!execute(line)) {
-                break;
-            }
+        } finally {
+            closeTraceFile();
         }
-        closeTraceFile();
     }
 
     /**
@@ -187,8 +202,9 @@ public final class DebuggerRepl {
         } catch (ExecutionFailure e) {
             out.println("the machine threw an exception: " + e.getCause());
             out.println(e.report());
-        } catch (IllegalArgumentException | IllegalStateException | UncheckedIOException e) {
-            out.println("error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            // one bad command (a malformed snapshot file, a bad argument...) never ends the session
+            out.println("error: " + (e.getMessage() != null ? e.getMessage() : e.toString()));
         } finally {
             running = false;
         }

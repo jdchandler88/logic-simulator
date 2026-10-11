@@ -80,21 +80,10 @@ public final class VcdWriter implements AutoCloseable {
     private boolean closed;
     private long changesWritten;
 
-    private VcdWriter(Builder b, Writer out) {
+    private VcdWriter(Builder b, List<Probe> chosen, Writer out) {
         this.sim = b.probeSet.simulator();
         this.out = out;
         this.timing = b.timing;
-        List<Probe> chosen = new ArrayList<>();
-        if (b.names.isEmpty()) {
-            chosen.addAll(b.probeSet.probes());
-        } else {
-            for (String n : b.names) {
-                chosen.add(b.probeSet.get(n));
-            }
-        }
-        if (chosen.isEmpty()) {
-            throw new IllegalArgumentException("no probes to record");
-        }
         this.probes = List.copyOf(chosen);
         int n = probes.size();
         this.ids = new String[n];
@@ -382,17 +371,54 @@ public final class VcdWriter implements AutoCloseable {
             return this;
         }
 
+        /**
+         * Creates {@code file} and starts recording. The probe selection is validated first, so a bad probe name
+         * throws {@link IllegalArgumentException} without creating the file; if writing the header fails, the file
+         * is closed before the exception propagates.
+         */
         public VcdWriter open(Path file) {
+            List<Probe> chosen = chosenProbes();
+            Writer writer;
             try {
-                return new VcdWriter(this, Files.newBufferedWriter(file, StandardCharsets.US_ASCII));
+                writer = Files.newBufferedWriter(file, StandardCharsets.US_ASCII);
             } catch (IOException e) {
                 throw new UncheckedIOException("cannot open " + file, e);
             }
+            try {
+                return new VcdWriter(this, chosen, writer);
+            } catch (RuntimeException e) {
+                try {
+                    writer.close();
+                } catch (IOException suppressed) {
+                    e.addSuppressed(suppressed);
+                }
+                throw e;
+            }
         }
 
-        /** writes to {@code writer}; closing the VCD writer closes it */
+        /**
+         * writes to {@code writer}; closing the VCD writer closes it (a bad probe selection throws before anything
+         * is written, and the writer is then left open for the caller to close)
+         */
         public VcdWriter to(Writer writer) {
-            return new VcdWriter(this, writer instanceof BufferedWriter ? writer : new BufferedWriter(writer));
+            List<Probe> chosen = chosenProbes();
+            return new VcdWriter(this, chosen, writer instanceof BufferedWriter ? writer : new BufferedWriter(writer));
+        }
+
+        /** the probes to record, validated: all of them, or the named ones (unknown names throw) */
+        private List<Probe> chosenProbes() {
+            List<Probe> chosen = new ArrayList<>();
+            if (names.isEmpty()) {
+                chosen.addAll(probeSet.probes());
+            } else {
+                for (String n : names) {
+                    chosen.add(probeSet.get(n));
+                }
+            }
+            if (chosen.isEmpty()) {
+                throw new IllegalArgumentException("no probes to record");
+            }
+            return chosen;
         }
     }
 }

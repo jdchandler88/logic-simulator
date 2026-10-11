@@ -100,11 +100,11 @@ public final class SnapshotJson {
         for (Object o : asList(root.get("fields"), "fields")) {
             Map<String, Object> f = asObject(o, "field");
             String name = asString(f.get("name"), "field name");
-            int width = (int) asLong(f.get("width"), name + ".width");
+            int width = intIn(f.get("width"), name + ".width", 1, 64);
             Field.Format format = Field.Format.valueOf(asString(f.get("format"), name + ".format"));
             Object v = f.get("value");
             long value = switch (format) {
-                case HEX -> Long.parseUnsignedLong(asString(v, name + ".value"), 16);
+                case HEX -> hexValue(asString(v, name + ".value"), name + ".value");
                 case DEC -> asLong(v, name + ".value");
                 case BOOL -> {
                     if (!(v instanceof Boolean bool)) {
@@ -120,13 +120,22 @@ public final class SnapshotJson {
             for (Object o : asList(memory, "memory")) {
                 Map<String, Object> r = asObject(o, "region");
                 String name = asString(r.get("name"), "region name");
-                int start = (int) asLong(r.get("start"), name + ".start");
-                int length = (int) asLong(r.get("length"), name + ".length");
-                StringBuilder hex = new StringBuilder(length * 2);
+                int start = intIn(r.get("start"), name + ".start", 0, Integer.MAX_VALUE);
+                int length = intIn(r.get("length"), name + ".length", 0, Integer.MAX_VALUE - start);
+                StringBuilder hex = new StringBuilder();
                 for (Object line : asList(r.get("hex"), name + ".hex")) {
                     hex.append(asString(line, name + ".hex"));
                 }
-                byte[] bytes = HEX.parseHex(hex);
+                if (hex.length() != 2L * length) {
+                    throw new IllegalArgumentException("region " + name + " has " + hex.length() + " hex digits, expected "
+                            + 2L * length + " for " + length + " bytes");
+                }
+                byte[] bytes;
+                try {
+                    bytes = HEX.parseHex(hex);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("region " + name + ": bad hex data: " + e.getMessage(), e);
+                }
                 if (bytes.length != length) {
                     throw new IllegalArgumentException("region " + name + " has " + bytes.length + " bytes, expected " + length);
                 }
@@ -173,6 +182,23 @@ public final class SnapshotJson {
             return s;
         }
         throw new IllegalArgumentException(what + " must be a string");
+    }
+
+    /** an integer in {@code [min, max]}; anything else is an {@link IllegalArgumentException} naming the value */
+    private static int intIn(Object o, String what, int min, int max) {
+        long v = asLong(o, what);
+        if (v < min || v > max) {
+            throw new IllegalArgumentException(what + " must be in " + min + ".." + max + ": " + v);
+        }
+        return (int) v;
+    }
+
+    /** 1 to 16 hex digits, nothing else (no sign, no prefix) */
+    private static long hexValue(String text, String what) {
+        if (!text.matches("[0-9A-Fa-f]{1,16}")) {
+            throw new IllegalArgumentException(what + " must be 1 to 16 hex digits: \"" + text + "\"");
+        }
+        return Long.parseUnsignedLong(text, 16);
     }
 
     private static long asLong(Object o, String what) {
