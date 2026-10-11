@@ -5,14 +5,18 @@ import com.darchan.physical.signal.*;
 import com.darchan.physical.signal.Bus;
 import com.darchan.physical.signal.SimpleRange;
 import com.darchan.physical.sim.Simulator;
+import com.darchan.physical.sim.StateElement;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class representing N-length flip-flop. This can be used as a register
+ *
+ * <p>A register is one {@link StateElement} of its width (its flip-flops are not registered separately), named as
+ * given or automatically {@code reg<n>}; bit {@code i} is the flip-flop on input/output bit {@code i}.
  */
-public class Register implements IComponent {
+public class Register implements IComponent, StateElement {
 
     /**
      * allowable bus width. should be at least 2-wide. otherwise, use a flip-flop
@@ -33,6 +37,11 @@ public class Register implements IComponent {
      * output bus
      */
     private final IBus outputBus;
+
+    /**
+     * storage-element name
+     */
+    private final String name;
 
     /**
      * collection of flipflops that compose the register
@@ -60,7 +69,25 @@ public class Register implements IComponent {
      * @param initialValue initial value for each flip-flop
      */
     public Register(Simulator sim, ISignal clk, IBus inputBus, ISignal writeEnable, boolean initialValue) {
+        this(sim, clk, inputBus, writeEnable, initialValue, null);
+    }
+
+    /**
+     * Create a named register (see {@link StateElement} for names).
+     * @param sim simulator
+     * @param clk input clock
+     * @param inputBus input bus
+     * @param writeEnable write enable shared by all bits; {@code null} to load on every rising edge
+     * @param initialValue initial value for each flip-flop
+     * @param name storage-element name; {@code null} for an automatic {@code reg<n>}
+     */
+    public Register(Simulator sim, ISignal clk, IBus inputBus, ISignal writeEnable, boolean initialValue,
+                    String name) {
         Validation.validateInputWidth(ALLOWABLE_BUS_WIDTH, inputBus);
+        if (inputBus.getSignals().size() > 64) {
+            throw new IllegalArgumentException("a register has at most 64 bits: " + inputBus.getSignals().size());
+        }
+        this.name = name != null ? name : sim.uniqueName("reg");
         this.clk = clk;
         this.inputBus = inputBus;
         //create 'register' of flip flops. direct each input signal on this component's bus to each flipflop
@@ -68,12 +95,34 @@ public class Register implements IComponent {
         this.flipFlops = new ArrayList<>();
         List<ISignal> outputSignals = new ArrayList<>();
         for (int i=0; i<this.inputBus.getSignals().size(); i++) {
-            FlipFlop ff = new FlipFlop(sim, clk, new Bus(inputBus.getSignals().get(i)), writeEnable, initialValue);
+            FlipFlop ff = new FlipFlop(sim, clk, new Bus(inputBus.getSignals().get(i)), writeEnable, initialValue,
+                    this.name + "_" + i, false);
             flipFlops.add(ff);
             outputSignals.add(ff.getOutputBus().getSignals().get(0));
         }
         //create output bus from flipflops
         this.outputBus = new Bus(outputSignals.toArray(new ISignal[0]));
+        sim.register(this);
+    }
+
+    @Override
+    public String name() {
+        return this.name;
+    }
+
+    @Override
+    public int width() {
+        return this.flipFlops.size();
+    }
+
+    @Override
+    public LogicValue get(int bit) {
+        return this.flipFlops.get(bit).get(0);
+    }
+
+    @Override
+    public void force(int bit, LogicValue value) {
+        this.flipFlops.get(bit).force(0, value);
     }
 
     @Override

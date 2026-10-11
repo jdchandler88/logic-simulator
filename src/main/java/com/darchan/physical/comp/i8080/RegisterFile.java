@@ -32,6 +32,9 @@ import com.darchan.physical.validation.Validation;
  * {@code [31:16] = DE}, {@code [47:32] = BC}, {@code [63:48] = PSW} (A high, flags low, as PUSH PSW stores them).
  * The output can feed {@link com.darchan.physical.comp.BusSelector8By8Bit}'s data input directly, so select
  * bit i reads slot i.
+ *
+ * <p>Each register is a storage element named {@code <name>.<register>} (e.g. {@code regfile0.A}), see
+ * {@link com.darchan.physical.sim.StateElement}.
  */
 public class RegisterFile implements IComponent {
 
@@ -84,7 +87,19 @@ public class RegisterFile implements IComponent {
      * @param inputBus data in and write enables, see the class documentation
      */
     public RegisterFile(Simulator sim, ISignal clk, IBus inputBus) {
+        this(sim, clk, inputBus, null);
+    }
+
+    /**
+     * @param sim simulator
+     * @param clk clock shared by all registers
+     * @param inputBus data in and write enables, see the class documentation
+     * @param name prefix of the registers' storage-element names ({@code <name>.A} ...); {@code null} for an
+     *             automatic {@code regfile<n>}
+     */
+    public RegisterFile(Simulator sim, ISignal clk, IBus inputBus, String name) {
         Validation.validateInputWidth(ALLOWED_INPUT_BUS_WIDTH, inputBus);
+        String prefix = name != null ? name : sim.uniqueName("regfile");
         this.clk = clk;
         this.inputBus = inputBus;
 
@@ -93,7 +108,7 @@ public class RegisterFile implements IComponent {
         for (Reg reg : Reg.values()) {
             int slot = reg.slot();
             ISignal writeEnable = inputBus.getSignal(WRITE_ENABLES.getMin() + slot);
-            this.registers[slot] = new Register(sim, clk, dataIn, writeEnable, false);
+            this.registers[slot] = new Register(sim, clk, dataIn, writeEnable, false, prefix + "." + reg.name());
             for (int bit = 0; bit < 8; bit++) {
                 outputSignals[8 * slot + bit] = this.registers[slot].getOutputBus().getSignal(bit);
             }

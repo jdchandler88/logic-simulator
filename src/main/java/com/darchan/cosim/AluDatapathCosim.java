@@ -7,6 +7,7 @@ import com.darchan.behavioral.i8080.Debug8080;
 import com.darchan.behavioral.i8080.Disassembler8080;
 import com.darchan.diag.compare.Granularity;
 import com.darchan.diag.compare.Lockstep;
+import com.darchan.diag.compare.StateSaver;
 import com.darchan.diag.run.Debugger;
 import com.darchan.diag.trace.RegisterSpec;
 import com.darchan.physical.comp.i8080.AluDatapath;
@@ -88,7 +89,7 @@ public final class AluDatapathCosim {
             in[i] = new SimpleSignal(sim, false);
         }
         controls = new Bus(in);
-        datapath = new AluDatapath(sim, clock, controls, operandBTap);
+        datapath = new AluDatapath(sim, clock, controls, operandBTap, "dp");
         sim.settle();
 
         for (String r : COMPARED) {
@@ -100,6 +101,9 @@ public final class AluDatapathCosim {
         probes.add("regs.dataIn", datapath.getDataIn());
 
         gate = new ClockedTarget(MACHINE, clock, probes);
+        // the control unit's state: its PC (Java) and the control lines it drives, so a restore puts them back
+        gate.addState("ctl.pc", 16, () -> pc, v -> pc = (int) v);
+        gate.addInputs("ctl", controls);
         gate.setStimulus(cycle -> decodeAndDrive());
         gate.setProgramCounter(() -> pc);
         gate.setCyclesPerStep(() -> states(byteAt(pc)));
@@ -241,21 +245,32 @@ public final class AluDatapathCosim {
 
     /**
      * A lockstep of the behavioral CPU (reference) against the gate-level datapath (candidate) comparing at
-     * {@code granularity}. A coarse divergence is narrowed to the first diverging instruction by replaying a fresh
-     * co-simulation of the same program and fault (the control unit's stimulus depends only on the program, so the
-     * replay is deterministic).
+     * {@code granularity}. A coarse divergence is narrowed to the first diverging instruction by restoring both
+     * sides (the CPU with all of RAM, the gate level with its storage elements and control unit) and re-running the
+     * window; if that fails, by replaying a fresh co-simulation of the same program and fault. Both are
+     * deterministic: the control unit's stimulus depends only on the program and its PC.
      */
     public Lockstep lockstep(Granularity granularity) {
         return lockstepBuilder(granularity)
+                .restoreWith(StateSaver.of(cpu).withMemory("ram", ram::peek, ram::restore, 0, Ram.SIZE),
+                        StateSaver.of(gate))
                 .replayWith(() -> new AluDatapathCosim(program, operandBTap).lockstepBuilder(granularity))
                 .build();
     }
 
-    /** the lockstep configuration without narrowing, to customise */
+    /**
+     * The lockstep configuration without a state saver for the CPU or a replay factory (so a coarse divergence is
+     * not narrowed unless they are added), to customise.
+     */
     public Lockstep.Builder lockstepBuilder(Granularity granularity) {
         return Lockstep.builder("behavioral i8080", cpuDebugger, "gate-level datapath", gateDebugger)
                 .granularity(granularity)
                 .compareOnly(COMPARED.toArray(new String[0]));
+    }
+
+    /** the control unit's PC: the address of the next instruction the gate level executes */
+    public int programCounter() {
+        return pc;
     }
 
     /** number of instructions in the program */

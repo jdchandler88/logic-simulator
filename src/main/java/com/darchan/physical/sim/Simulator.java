@@ -2,8 +2,14 @@ package com.darchan.physical.sim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Event-driven simulation context with VHDL/Verilog-style delta cycles.
@@ -28,8 +34,14 @@ import java.util.TreeMap;
  * <p>A zero-delay loop that never stabilises would run forever, so {@link #settle()} gives up with an
  * {@link OscillationException} after {@link #getMaxDeltaCycles()} delta cycles. The simulator is single-threaded
  * and not re-entrant: listeners must not call {@link #settle()} or {@link #runUntil(long)}.
+ *
+ * <p>The simulator also keeps the registry of the circuit's storage elements ({@link #stateElements()}): every
+ * flip-flop, register and counter registers itself at construction, so the complete state of a circuit can be
+ * captured and restored (see {@link StateElement}).
  */
 public final class Simulator {
+
+    private static final Pattern NAME = Pattern.compile("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*");
 
     /**
      * Default limit on delta cycles per {@link #settle()} call (and per time step in {@link #runUntil(long)}).
@@ -65,6 +77,11 @@ public final class Simulator {
     private boolean running;
 
     private SimulationObserver[] observers = new SimulationObserver[0];
+
+    private final List<StateElement> stateElements = new ArrayList<>();
+    private final Set<String> elementNames = new HashSet<>();
+    /** names of registered state elements and names handed out by {@link #uniqueName}, and all their scopes */
+    private final Set<String> names = new HashSet<>();
 
     //statistics
     private long statRuns;
@@ -127,6 +144,63 @@ public final class Simulator {
 
     public void removeObserver(SimulationObserver observer) {
         observers = Arrays.stream(observers).filter(o -> o != observer).toArray(SimulationObserver[]::new);
+    }
+
+    // ---- storage elements ----------------------------------------------------------------------------------
+
+    /**
+     * Registers a storage element (called by storage components at construction).
+     *
+     * @throws IllegalArgumentException if its name is malformed or already used in this simulator
+     */
+    public void register(StateElement element) {
+        String name = element.name();
+        checkName(name);
+        if (elementNames.contains(name)) {
+            throw new IllegalArgumentException("a storage element called " + name + " already exists");
+        }
+        if (element.width() < 1 || element.width() > 64) {
+            throw new IllegalArgumentException("a storage element has 1..64 bits: " + name + " has " + element.width());
+        }
+        elementNames.add(name);
+        claim(name);
+        stateElements.add(element);
+    }
+
+    /** every registered storage element, in construction order */
+    public List<StateElement> stateElements() {
+        return Collections.unmodifiableList(stateElements);
+    }
+
+    /**
+     * A name {@code prefix + n} not used yet in this simulator, with the smallest such {@code n} from 0; the name is
+     * reserved. Components built without a name use it ({@code uniqueName("reg")} gives {@code reg0}, then
+     * {@code reg1} ...), so names depend only on construction order.
+     */
+    public String uniqueName(String prefix) {
+        checkName(prefix);
+        for (int n = 0; ; n++) {
+            String candidate = prefix + n;
+            if (!names.contains(candidate)) {
+                claim(candidate);
+                return candidate;
+            }
+        }
+    }
+
+    /** records {@code name} and each of its enclosing scopes ({@code a} and {@code a.b} for {@code a.b.c}) */
+    private void claim(String name) {
+        names.add(name);
+        for (int dot = name.indexOf('.'); dot >= 0; dot = name.indexOf('.', dot + 1)) {
+            names.add(name.substring(0, dot));
+        }
+    }
+
+    private static void checkName(String name) {
+        Objects.requireNonNull(name, "name");
+        if (!NAME.matcher(name).matches()) {
+            throw new IllegalArgumentException("names are dot-separated [A-Za-z0-9_] segments: '" + name + "'");
+        }
     }
 
     /**

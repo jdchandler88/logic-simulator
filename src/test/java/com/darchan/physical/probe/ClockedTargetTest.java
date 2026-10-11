@@ -49,16 +49,20 @@ class ClockedTargetTest {
     }
 
     @Test
-    void snapshotsHoldProbesAndTheCycleCount() {
+    void snapshotsHoldProbesStorageAndCounters() {
         target.step();
         target.step();
         Snapshot s = target.snapshot();
         assertEquals("counter4", s.machine());
-        assertEquals(List.of("count", "next", "CYCLES"), s.fieldNames());
+        assertEquals(List.of("count", "next", "state.counter0", "CYCLES", "INSTRUCTIONS"), s.fieldNames());
         assertEquals(2, s.value("count"));
         assertEquals(3, s.value("next"));
+        assertEquals(2, s.value("state.counter0"));
         assertEquals(2, s.value("CYCLES"));
-        assertThrows(UnsupportedOperationException.class, () -> target.restore(s));
+        assertEquals(2, s.value("INSTRUCTIONS"));
+        target.step();
+        target.restore(s);
+        assertEquals(s, target.snapshot());
     }
 
     @Test

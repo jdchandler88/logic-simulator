@@ -60,6 +60,9 @@ public class AluDatapath implements IComponent {
     public static final IRange FLAGS_WE = new SimpleRange(29, 29);
 
     private static final IRange ALLOWED_INPUT_BUS_WIDTH = new SimpleRange(30, 30);
+
+    /** storage-element names of the flag flip-flops, by bit (null for the constant bits) */
+    private static final String[] FLAG_NAMES = {"CY", null, "P", null, "AC", null, "Z", "S"};
     private static final IRange ALLOWED_OUTPUT_BUS_WIDTH = new SimpleRange(64, 64);
 
     private final IBus inputBus;
@@ -71,16 +74,31 @@ public class AluDatapath implements IComponent {
     private final IBus flags;
 
     public AluDatapath(Simulator sim, ISignal clk, IBus inputBus) {
-        this(sim, clk, inputBus, UnaryOperator.identity());
+        this(sim, clk, inputBus, UnaryOperator.identity(), null);
+    }
+
+    /**
+     * @param name prefix of the storage-element names; {@code null} for an automatic {@code datapath<n>}
+     */
+    public AluDatapath(Simulator sim, ISignal clk, IBus inputBus, String name) {
+        this(sim, clk, inputBus, UnaryOperator.identity(), name);
+    }
+
+    public AluDatapath(Simulator sim, ISignal clk, IBus inputBus, UnaryOperator<IBus> operandBTap) {
+        this(sim, clk, inputBus, operandBTap, null);
     }
 
     /**
      * @param operandBTap replaces the 8-bit operand-B bus (e.g. with one bit tied to a constant); identity for a
      *                    fault-free datapath
+     * @param name        prefix of the storage-element names: the register file is {@code <name>.regs}
+     *                    ({@code <name>.regs.A} ...), the flag flip-flops {@code <name>.flags.CY}, {@code .P},
+     *                    {@code .AC}, {@code .Z}, {@code .S}; {@code null} for an automatic {@code datapath<n>}
      */
-    public AluDatapath(Simulator sim, ISignal clk, IBus inputBus, UnaryOperator<IBus> operandBTap) {
+    public AluDatapath(Simulator sim, ISignal clk, IBus inputBus, UnaryOperator<IBus> operandBTap, String name) {
         Validation.validateInputWidth(ALLOWED_INPUT_BUS_WIDTH, inputBus);
         Objects.requireNonNull(operandBTap);
+        String prefix = name != null ? name : sim.uniqueName("datapath");
         this.inputBus = inputBus;
         IBus imm = inputBus.slice(IMM);
         ISignal useImm = inputBus.getSignal(USE_IMM.getMin());
@@ -98,7 +116,7 @@ public class AluDatapath implements IComponent {
             rfIn[i] = dataInWires[i];
             rfIn[8 + i] = i == RegisterFile.Reg.F.slot() ? ConstantSignal.OFF : inputBus.getSignal(WE.getMin() + i);
         }
-        this.registerFile = new RegisterFile(sim, clk, new Bus(rfIn));
+        this.registerFile = new RegisterFile(sim, clk, new Bus(rfIn), prefix + ".regs");
 
         // source selector: 64 data bits + 8 one-hot select bits
         ISignal[] selIn = new ISignal[72];
@@ -129,7 +147,8 @@ public class AluDatapath implements IComponent {
             flagOut[bit] = switch (bit) {
                 case 1 -> ConstantSignal.ON;
                 case 3, 5 -> ConstantSignal.OFF;
-                default -> new FlipFlop(sim, clk, new Bus(flagIn[bit]), flagsWe, false).getOutputBus().getSignal(0);
+                default -> new FlipFlop(sim, clk, new Bus(flagIn[bit]), flagsWe, false,
+                        prefix + ".flags." + FLAG_NAMES[bit]).getOutputBus().getSignal(0);
             };
         }
         this.flags = new Bus(flagOut);

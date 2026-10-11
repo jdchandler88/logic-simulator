@@ -3,12 +3,16 @@ package com.darchan.cosim;
 import com.darchan.diag.compare.Divergence;
 import com.darchan.diag.compare.Granularity;
 import com.darchan.diag.compare.LockstepResult;
+import com.darchan.diag.Snapshot;
 import com.darchan.diag.compare.Narrowing;
+import com.darchan.physical.probe.ClockedTarget;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -144,6 +148,42 @@ class AluDatapathCosimTest {
                 "the gate level charges each instruction the 8080's cycle count");
     }
 
+    @Test
+    void theGateLevelSideRoundTripsThroughASnapshot() {
+        AluDatapathCosim cosim = new AluDatapathCosim(randomProgram(42, 300));
+        ClockedTarget gate = cosim.gateLevel();
+        for (int i = 0; i < 120; i++) {
+            gate.step();
+        }
+        Snapshot at120 = gate.snapshot();
+        assertEquals(cosim.programCounter(), at120.value("tb.ctl.pc"), "the control unit's PC is in the snapshot");
+        List<Snapshot> first = new ArrayList<>();
+        for (int i = 0; i < 80; i++) {
+            gate.step();
+            first.add(gate.snapshot());
+        }
+        gate.restore(at120);
+        assertEquals(at120, gate.snapshot());
+        List<Snapshot> second = new ArrayList<>();
+        for (int i = 0; i < 80; i++) {
+            gate.step();
+            second.add(gate.snapshot());
+        }
+        assertEquals(first, second);
+    }
+
+    @Test
+    void aCoarseDivergenceIsNarrowedByReplayToo() {
+        AluDatapathCosim cosim = new AluDatapathCosim(programWithOneBit3Operand(), AluDatapathCosim.stuckAt(3, false));
+        Granularity g = Granularity.everySteps(50);
+        byte[] program = programWithOneBit3Operand();
+        Narrowing n = cosim.lockstepBuilder(g)
+                .replayWith(() -> new AluDatapathCosim(program, AluDatapathCosim.stuckAt(3, false)).lockstepBuilder(g))
+                .build().run(cosim.instructionCount()).divergence().narrowing();
+        assertEquals(Narrowing.Method.REPLAY, n.method(), n::toString);
+        assertEquals(FAULTY_INSTRUCTION + 1, n.step());
+    }
+
     @ParameterizedTest
     @MethodSource("coarse")
     void aCoarseDivergenceIsNarrowedToTheFaultyInstruction(Granularity granularity) {
@@ -156,6 +196,7 @@ class AluDatapathCosimTest {
         assertTrue(d.step() > FAULTY_INSTRUCTION + 1, "the coarse comparison sees it later: " + d.report());
         Narrowing n = d.narrowing();
         assertEquals(Narrowing.Status.NARROWED, n.status(), d::report);
+        assertEquals(Narrowing.Method.RESTORE, n.method(), "both layers can be restored: " + d.report());
         assertEquals(FAULTY_INSTRUCTION + 1, n.step(), d::report);
         assertEquals("A", n.diff().fieldDifferences().get(0).name(), d::report);
         assertTrue(n.candidate().lastInstruction().orElseThrow().contains("C6 08     ADI 08H"), d::report);

@@ -15,13 +15,18 @@ import java.util.Objects;
 public record Probe(String name, List<ISignal> signals) {
 
     public Probe {
-        Objects.requireNonNull(name, "name");
-        if (!name.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*")) {
-            throw new IllegalArgumentException("probe names are dot-separated [A-Za-z0-9_] segments: '" + name + "'");
-        }
+        checkName(name);
         signals = List.copyOf(signals);
         if (signals.isEmpty() || signals.size() > 64) {
             throw new IllegalArgumentException("a probe has 1..64 signals: " + name + " has " + signals.size());
+        }
+    }
+
+    /** @throws IllegalArgumentException unless {@code name} is dot-separated {@code [A-Za-z0-9_]} segments */
+    static void checkName(String name) {
+        Objects.requireNonNull(name, "name");
+        if (!name.matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*")) {
+            throw new IllegalArgumentException("probe names are dot-separated [A-Za-z0-9_] segments: '" + name + "'");
         }
     }
 
